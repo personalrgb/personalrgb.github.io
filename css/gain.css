@@ -1,0 +1,484 @@
+:root { --bg: #ffffff; }
+* { box-sizing: border-box; font-family: inherit; font-weight: inherit; }
+
+/* 스크롤은 되지만 스크롤바는 안 보이게(결과 화면처럼 내용이 길어 스크롤이 필요한 곳에 사용). */
+.no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* 구형 Edge/IE */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  overflow: hidden;
+  font-family: 'Space Mono', 'EB Garamond', 'Bitcount Grid Double', 'Jost', 'Geist Pixel', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 300;
+}
+
+.scene {
+  position: fixed;
+  top: var(--rest-top, 50%);
+  left: 50%;
+  transform: translate(-50%, -50%) scale(var(--rs, 1));
+  width: 900px;
+  height: 900px;
+  perspective: 2000px;
+  pointer-events: none;
+}
+
+/* 데스크톱(가로가 세로보다 넓은 화면)에서는 모빌을 살짝 아래로 낮춘다. */
+@media (min-aspect-ratio: 1/1) {
+  .scene {
+    --rest-top: 53%;
+  }
+}
+
+/* 확대→축소와 "제자리로 내려가기"(top)를 하나의 애니메이션으로 묶어 동시에 재생되게 한다.
+   GPU에서 독립적으로 재생되는 CSS @keyframes라 메인 스레드 작업(회전 등)과도 무관하다. */
+@keyframes introZoom {
+  from {
+    top: 46%;
+    transform: translate(-50%, -50%) scale(var(--rs, 1)) scale(2.4);
+  }
+  to {
+    top: var(--rest-top, 50%);
+    transform: translate(-50%, -50%) scale(var(--rs, 1)) scale(1);
+  }
+}
+
+/* 인트로에는 톤 버튼 텍스트가 아직 안 보이는 상태이므로, 버튼 자리를 비워두지 않고
+   화면 정중앙(약간 더 위)에서 시작해 제자리로 내려온다. */
+.scene.intro {
+  animation: introZoom 1.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.tilt {
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(0deg);
+  position: relative;
+}
+
+.stage {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  cursor: grab;
+  pointer-events: auto;
+}
+.stage:active { cursor: grabbing; }
+
+.pivot {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+}
+
+.arm {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  transform-style: preserve-3d;
+  /* 화면 크기가 바뀔 때 개체 위치가 뚝뚝 끊기지 않고 부드럽게 이어지도록. */
+  transition: transform 0.25s ease-out;
+}
+
+.card {
+  position: absolute;
+  transform: rotateY(180deg);
+  transform-style: preserve-3d;
+
+  transition: filter 0.15s linear, opacity 0.15s linear, transform 0.2s ease;
+  overflow: hidden;
+}
+
+.card:hover {
+  /* 옆으로 갸웃(rotateZ)이 아니라 세로축을 기준으로 좌우로 도리도리 돌아가게 rotateY를 더한다. */
+  transform: rotateY(calc(180deg + var(--hover-twist, 8deg)));
+}
+
+.card-front {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.card-back {
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  border-radius: inherit;
+  overflow: hidden;
+  transform: rotateY(180deg) translateZ(6px);
+  backface-visibility: hidden;
+}
+
+.card-side-left {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  left: -6px;
+  background: inherit;
+  transform-origin: right;
+  transform: rotateY(-90deg);
+}
+
+.card-side-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 6px;
+  right: -6px;
+  background: inherit;
+  transform-origin: left;
+  transform: rotateY(90deg);
+}
+
+.card-side-top {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  top: -6px;
+  background: inherit;
+  transform-origin: bottom;
+  transform: rotateX(90deg);
+}
+
+.card-side-bottom {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 6px;
+  bottom: -6px;
+  background: inherit;
+  transform-origin: top;
+  transform: rotateX(-90deg);
+}
+
+.card-side-top,
+.card-side-bottom,
+.card-side-left,
+.card-side-right {
+  display: none;
+}
+
+.controls {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 14px;
+}
+.controls button {
+  background: none;
+  border: none;
+  color: #333;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.hint {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgb(0, 0, 0);
+  font-size: 12px;
+}
+
+.stage.animating .pivot {
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.stage.animating .card {
+  transition: filter 1.2s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* .card 자체(transform-style: preserve-3d)에 걸면 일부 브라우저(특히 태블릿)에서
+   overflow: hidden 클리핑이 무시돼 발광이 카드 모양 밖 사각형으로 새어 나간다.
+   preserve-3d가 없는 평평한 .card-front/.card-back에 각각 걸어 확실히 클리핑되게 한다. */
+.card.lit .card-front::after,
+.card.lit .card-back::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 160%;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.241);
+  transform: translate(-50%, -50%) rotate(-35deg);
+  border-radius: 6px;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
+.tone-buttons {
+  position: fixed;
+  top: 36px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(2px, 0.6vw, 10px);
+  z-index: 10;
+  /* left/right를 고정폭으로 둬서 화면 크기와 무관하게 항상 좌우 16px 여백이 보장된다. */
+  /* 인트로(확대→축소) 동안 겹치지 않도록 숨겨뒀다가 script.js에서 끝나면 opacity:1로 되돌린다. */
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.tone-buttons button {
+  background: transparent;
+  border: none;
+  color: #111111;
+  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.6vw, 16px);
+  border-radius: 999px;
+  /* vw 계수를 낮춰 휴대폰 너비 전반에서 실제로 최솟값(8px) 근처를 쓰도록 한다. */
+  font-size: clamp(8px, 2vw, 13px);
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+/* 작은 화면(휴대폰)에서는 톤 버튼을 위로 살짝 올린다(글자 크기는 clamp가 처리). */
+@media (max-width: 480px) {
+  .tone-buttons {
+    top: 16px;
+  }
+  .back-button {
+    top: 16px !important;
+    left: 16px !important;
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+  }
+  /* 모바일에서는 아이콘 대신 "Tutorial" 텍스트 버튼으로 대체하고(script.js),
+     상단 톤 버튼 줄과 겹치지 않도록 하단 중앙으로 옮긴다. */
+  .tutorial-button {
+    top: auto !important;
+    right: auto !important;
+    bottom: 24px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    /* 상단 톤 버튼 글자와 같은 크기(clamp)를 그대로 쓴다. */
+    font-size: clamp(8px, 2vw, 13px) !important;
+    padding: 6px 12px !important;
+    letter-spacing: 0.02em;
+  }
+  .tutorial-back {
+    top: 16px !important;
+    left: 16px !important;
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+  }
+}
+
+.tutorial-button {
+  position: fixed;
+  top: 28px;
+  right: 28px;
+  z-index: 1002;
+  background: transparent;
+  border: none;
+  color: #111111;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 톤 버튼 텍스트와 마찬가지로 인트로(확대→축소) 동안 숨겨뒀다가, 인트로가
+     끝나는 시점에 자연스럽게 나타나게 한다. */
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+.tutorial-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  cursor: pointer;
+}
+
+.tutorial-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.tutorial-shortcut {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.tutorial-hint {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.tutorial-slide {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  max-width: 640px;
+}
+
+.tutorial-slide.active {
+  display: flex;
+}
+
+.tutorial-eyebrow {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.tutorial-heading {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.tutorial-body {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+
+.tutorial-back {
+  position: fixed;
+  top: 28px;
+  left: 28px;
+  z-index: 2001;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* 팔레트에서 색을 확정할 때마다 우측 상단 팔레트 아이콘이 벨이 울리듯 짧게 흔들린다. */
+@keyframes paletteIconBell {
+  0%, 100% { transform: rotate(0deg); }
+  15% { transform: rotate(-18deg); }
+  35% { transform: rotate(14deg); }
+  55% { transform: rotate(-10deg); }
+  75% { transform: rotate(6deg); }
+  90% { transform: rotate(-3deg); }
+}
+
+.bell {
+  animation: paletteIconBell 0.6s ease;
+  transform-origin: 50% 15%;
+}
+
+/* 아이콘 뒤에 깔리는 넓고 연한 발광. box-shadow 대신 실제 원(blur된 원)을 써서
+   각지거나 이상한 모양 없이 매끈하게 퍼지도록 한다. */
+.icon-glow {
+  position: absolute;
+  width: 210px;
+  height: 210px;
+  border-radius: 50%;
+  background: var(--glow-color, rgba(255, 255, 255, 0.55));
+  filter: blur(34px);
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+  /* position:absolute인 이 엘리먼트는 음수 z-index를 줘야 일반 흐름 요소인
+     아이콘(SVG)보다 뒤에 그려진다. DOM 순서만으로는 위치가 있는 요소가
+     항상 나중에(위에) 칠해지기 때문. */
+  z-index: -1;
+}
+
+@keyframes iconGlowPulse {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+  40% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+
+.icon-glow.pulse {
+  animation: iconGlowPulse 0.9s ease;
+}
+
+/* 종합 단계 색 구름: 원 배치 한 주기를 좌우로 이어붙여 두고, -50%(둘째 주기가 보이는
+   지점)에서 0(첫 주기가 보이는 지점)으로 되돌아가듯 흘려서 왼쪽→오른쪽으로 흐르게
+   한다. 두 주기가 완전히 같은 그림이라 이 구간을 반복해도 이음매 없이 이어진다. */
+@keyframes synthesisDrift {
+  from { transform: translateX(-50%); }
+  to { transform: translateX(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .synthesis-track { animation: none !important; }
+}
+
+/* 팔레트 아이콘을 눌러 확정 색 화면으로 들어갈 때, 아이콘 자리에서 빛이 확 퍼지듯
+   커지면서 투명해지고 그 뒤로 다음 화면이 드러나는 전환 효과. */
+.palette-transition-glow {
+  position: fixed;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.75) 45%, rgba(255, 255, 255, 0) 72%);
+  transform: translate(-50%, -50%) scale(0.6);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3000;
+  /* 밝은(파스텔) 배경 위에서도 그냥 흰 원으로 뭉개지지 않고 "빛이 밝아진다"는
+     느낌이 나도록 항상 밝게만 더해지는 screen 블렌드를 쓴다. */
+  mix-blend-mode: screen;
+}
+
+@keyframes paletteTransitionBurst {
+  0% { opacity: 0.95; transform: translate(-50%, -50%) scale(0.6); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(48); }
+}
+
+.palette-transition-glow.burst {
+  animation: paletteTransitionBurst 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
