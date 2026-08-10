@@ -511,6 +511,29 @@ if (isLikelyMobile) {
   updateResponsiveScale();
 }
 
+// 홈 화면 좌측 하단 "사업자 정보" 토글. 누르면 펼쳐지고 다시 누르면 접힌다.
+const siteFooterEl = document.getElementById('siteFooter');
+const siteFooterToggle = document.getElementById('siteFooterToggle');
+const siteFooterDetails = document.getElementById('siteFooterDetails');
+if (siteFooterToggle && siteFooterDetails) {
+  siteFooterToggle.addEventListener('click', () => {
+    siteFooterDetails.classList.toggle('expanded');
+  });
+}
+
+// updateBg()가 매 프레임 body 배경색을 바꾸므로, 그 배경의 밝기를 계산해
+// 어두우면 흰색, 밝으면 검정색 글씨가 되도록 실시간으로 맞춘다.
+function updateSiteFooterContrast(bgColor) {
+  if (!siteFooterEl) return;
+  const m = bgColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/);
+  if (!m) return;
+  const r = parseFloat(m[1]);
+  const g = parseFloat(m[2]);
+  const b = parseFloat(m[3]);
+  const luminance = (r * 299 + g * 587 + b * 114) / 1000;
+  siteFooterEl.style.color = luminance < 128 ? '#ffffff' : '#111111';
+}
+
 // 실전 모드에서 체크 표시로 "확정"한 색들의 목록. 세션 동안 계속 쌓인다.
 const confirmedColors = [];
 
@@ -2731,9 +2754,152 @@ letterRevealFlash.style.opacity = '0';
 letterRevealFlash.style.pointerEvents = 'none';
 document.body.appendChild(letterRevealFlash);
 
+// ---- 결제 화면 ----
+// 봉투를 눌러도 편지를 바로 열지 않고, 먼저 결제창을 띄운다. 결제가 서버에서
+// 검증된 뒤에만(아래 openLetterAfterPayment) 편지 화면으로 넘어간다.
+// TODO: 아래 두 값은 포트원(PortOne) 대시보드에서 발급받은 실제 storeId/channelKey로
+// 교체해야 결제창이 정상적으로 뜬다(테스트 연동 값도 이 자리에 넣으면 된다).
+// 검증은 절대 프론트에서 끝내지 않는다 — netlify/functions/verify-payment.js가
+// 포트원 서버에 실제 결제 상태/금액을 재확인한 뒤에만 편지를 연다.
+const PORTONE_STORE_ID = 'REPLACE_WITH_PORTONE_STORE_ID';
+const PORTONE_CHANNEL_KEY = 'REPLACE_WITH_PORTONE_CHANNEL_KEY';
+const PAYMENT_AMOUNT = 1000;
+const PAYMENT_ORDER_NAME = '퍼스널 RGB 진단 결과지';
+
+const paymentOverlay = document.createElement('div');
+paymentOverlay.className = 'payment-overlay';
+
+const paymentCard = document.createElement('div');
+paymentCard.className = 'payment-card';
+
+const paymentTitle = document.createElement('p');
+paymentTitle.className = 'payment-title';
+paymentTitle.textContent = PAYMENT_ORDER_NAME;
+
+// 결과지 안에 실제로 뭐가 들어있는지(편지 화면의 renderLetterCardText가
+// 만드는 카테고리와 동일) 결제 전에 미리 보여준다.
+const paymentDescription = document.createElement('p');
+paymentDescription.className = 'payment-description';
+paymentDescription.textContent = '의상 · 메이크업 · 헤어 · 주얼리 · 네일, 5가지 카테고리로 완성되는 나만의 컬러 가이드를 편지로 받아보세요.';
+
+const paymentPayButton = document.createElement('button');
+paymentPayButton.type = 'button';
+paymentPayButton.className = 'payment-pay-button';
+paymentPayButton.textContent = `${PAYMENT_AMOUNT.toLocaleString()}원 결제하기`;
+
+const paymentError = document.createElement('p');
+paymentError.className = 'payment-error';
+
+// 결제 카드 좌측 상단 안쪽에 놓는 Back 버튼(카드 기준 절대 위치).
+const paymentBackButton = document.createElement('button');
+paymentBackButton.type = 'button';
+paymentBackButton.className = 'payment-back-button';
+paymentBackButton.textContent = '← Back';
+paymentBackButton.style.position = 'absolute';
+paymentBackButton.style.top = '14px';
+paymentBackButton.style.left = '16px';
+paymentBackButton.style.zIndex = '2';
+paymentBackButton.style.background = 'transparent';
+paymentBackButton.style.border = 'none';
+paymentBackButton.style.color = '#999999';
+paymentBackButton.style.padding = '4px 6px';
+paymentBackButton.style.fontSize = '12px';
+paymentBackButton.style.fontWeight = '300';
+paymentBackButton.style.cursor = 'pointer';
+
+paymentCard.appendChild(paymentBackButton);
+paymentCard.appendChild(paymentTitle);
+paymentCard.appendChild(paymentDescription);
+paymentCard.appendChild(paymentPayButton);
+paymentCard.appendChild(paymentError);
+paymentOverlay.appendChild(paymentCard);
+document.body.appendChild(paymentOverlay);
+
+function showPaymentScreen() {
+  paymentError.style.display = 'none';
+  paymentPayButton.disabled = false;
+  paymentPayButton.textContent = `${PAYMENT_AMOUNT.toLocaleString()}원 결제하기`;
+  paymentOverlay.style.opacity = '1';
+  paymentOverlay.style.pointerEvents = 'auto';
+}
+
+function hidePaymentScreen() {
+  paymentOverlay.style.opacity = '0';
+  paymentOverlay.style.pointerEvents = 'none';
+}
+
+paymentBackButton.addEventListener('click', (e) => {
+  e.stopPropagation();
+  hidePaymentScreen();
+});
+
+// 카드 바깥(어두운 배경)을 눌러도 닫히게 한다.
+paymentOverlay.addEventListener('click', (e) => {
+  if (e.target === paymentOverlay) hidePaymentScreen();
+});
+
+async function verifyPaymentOnServer(paymentId) {
+  const res = await fetch('/.netlify/functions/verify-payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paymentId }),
+  });
+  if (!res.ok) return false;
+  const data = await res.json();
+  return !!data.ok;
+}
+
+paymentPayButton.addEventListener('click', async (e) => {
+  e.stopPropagation();
+  if (typeof PortOne === 'undefined') {
+    paymentError.textContent = '결제 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
+    paymentError.style.display = 'block';
+    return;
+  }
+  paymentError.style.display = 'none';
+  paymentPayButton.disabled = true;
+  paymentPayButton.textContent = '결제 진행 중...';
+  const paymentId = `personalrgb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  try {
+    const response = await PortOne.requestPayment({
+      storeId: PORTONE_STORE_ID,
+      channelKey: PORTONE_CHANNEL_KEY,
+      paymentId,
+      orderName: PAYMENT_ORDER_NAME,
+      totalAmount: PAYMENT_AMOUNT,
+      currency: 'CURRENCY_KRW',
+      payMethod: 'CARD',
+    });
+    if (response.code) {
+      paymentError.textContent = response.message || '결제가 취소되었습니다.';
+      paymentError.style.display = 'block';
+      return;
+    }
+    const verified = await verifyPaymentOnServer(response.paymentId || paymentId);
+    if (!verified) {
+      paymentError.textContent = '결제 확인에 실패했습니다. 다시 시도해주세요.';
+      paymentError.style.display = 'block';
+      return;
+    }
+    hidePaymentScreen();
+    openLetterAfterPayment();
+  } catch (err) {
+    paymentError.textContent = '결제 중 오류가 발생했습니다.';
+    paymentError.style.display = 'block';
+  } finally {
+    paymentPayButton.disabled = false;
+    paymentPayButton.textContent = `${PAYMENT_AMOUNT.toLocaleString()}원 결제하기`;
+  }
+});
+
 stageHintEnvelope.addEventListener('click', (e) => {
   if (pendingFinalSeason === null) return;
   e.stopPropagation();
+  showPaymentScreen();
+});
+
+// 결제가 서버에서 검증된 뒤에만 호출된다 — 편지가 삐져나온 확대 화면을 연다.
+function openLetterAfterPayment() {
   stageHintOverlay.style.opacity = '0';
   stageHintOverlay.style.pointerEvents = 'none';
   // letterRevealOverlay는 배경이 투명해서(색 구름이 비쳐 보이게), 종합 단계에
@@ -2791,7 +2957,7 @@ stageHintEnvelope.addEventListener('click', (e) => {
   requestAnimationFrame(() => {
     letterRevealFlash.style.opacity = '0';
   });
-});
+}
 
 stageHintContent.appendChild(stageHintHeading);
 stageHintContent.appendChild(stageHintBody);
@@ -3789,11 +3955,14 @@ function updateBg() {
 
   if (curSection === -1 || nextSection === -1) return;
 
+  let bgColor;
   if (curSection === nextSection) {
-    document.body.style.background = lerpColor(sections[curSection].color, sections[curSection].color, 0);
+    bgColor = lerpColor(sections[curSection].color, sections[curSection].color, 0);
   } else {
-    document.body.style.background = lerpColor(sections[curSection].color, sections[nextSection].color, t);
+    bgColor = lerpColor(sections[curSection].color, sections[nextSection].color, t);
   }
+  document.body.style.background = bgColor;
+  updateSiteFooterContrast(bgColor);
 
   // 톤 버튼은 goToTone()이 각 구간의 "가운데 카드"를 정면으로 가져오므로,
   // 그 가운데 카드 인덱스를 기준으로 삼아야 frontValue가 정수(=완전 중앙)로 떨어진다.

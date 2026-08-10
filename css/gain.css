@@ -723,7 +723,7 @@ body {
 
 .letter-reveal .lr-body {
   left: 5.78%;
-  top: 110%;
+  top: 68.56%;
   width: 88.4%;
   height: 70.44%;
   z-index: 2;
@@ -813,12 +813,15 @@ body {
   }
 }
 
-/* 편지 화면 하단 중앙, "컬러 팔레트 보기" 바로 아래 자리로 옮긴 "End" 버튼. */
+/* 데스크탑에서는 "End"를 화면 우측 상단(다른 화면들의 top-right 버튼과 같은
+   자리)에 둔다. 모바일에서는 아래 미디어쿼리가 하단 중앙 스택으로 되돌린다. */
 .lr-end-button {
-  position: absolute;
-  left: 50%;
-  bottom: calc(28px + env(safe-area-inset-bottom));
-  transform: translateX(-50%);
+  position: fixed;
+  top: calc(28px + env(safe-area-inset-top));
+  right: calc(28px + env(safe-area-inset-right));
+  left: auto;
+  bottom: auto;
+  transform: none;
   z-index: 10;
   background: transparent;
   border: none;
@@ -828,13 +831,14 @@ body {
   cursor: pointer;
 }
 
-/* "컬러 팔레트 보기" 버튼. 편지 화면(letterRevealOverlay) 하단, End 버튼 바로
-   위에 화면 기준으로 고정돼 있다 — 편지지 스크롤 레이어와 쌓임 순서가 절대 안
-   꼬이도록, 일부러 스크롤되는 영역 밖에 둔 것이다. */
+/* "컬러 팔레트 보기" 버튼. 편지 화면(letterRevealOverlay) 하단 중앙에 화면
+   기준으로 고정돼 있다 — 편지지 스크롤 레이어와 쌓임 순서가 절대 안 꼬이도록,
+   일부러 스크롤되는 영역 밖에 둔 것이다. 데스크탑에서는 End가 우측 상단으로
+   빠지므로 혼자 남아 조금 더 아래로 내려온다. */
 .lr-palette-button {
   position: absolute;
   left: 50%;
-  bottom: calc(56px + env(safe-area-inset-bottom));
+  bottom: calc(30px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 10;
   background: transparent;
@@ -844,6 +848,20 @@ body {
   font-size: 13px;
   letter-spacing: 0.02em;
   cursor: pointer;
+}
+
+@media (max-width: 480px) {
+  .lr-end-button {
+    position: absolute;
+    top: auto;
+    right: auto;
+    left: 50%;
+    bottom: calc(28px + env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+  }
+  .lr-palette-button {
+    bottom: calc(56px + env(safe-area-inset-bottom));
+  }
 }
 
 /* "컬러 팔레트 보기"는 새 화면을 그리지 않고, 앱에 이미 있는 "확정한 색 보기"
@@ -1006,4 +1024,134 @@ body {
 
 .palette-transition-glow.burst {
   animation: paletteTransitionBurst 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+
+.site-footer {
+  position: fixed;
+  left: calc(14px + env(safe-area-inset-left));
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 500;
+  color: #111111;
+  transition: color 0.4s ease;
+}
+
+.site-footer-toggle {
+  display: block;
+  background: none;
+  border: none;
+  padding: 4px 2px;
+  margin: 0;
+  font-family: inherit;
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  color: inherit;
+  opacity: 0.5;
+  cursor: pointer;
+}
+
+.site-footer-details {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: max-height 0.3s ease, opacity 0.25s ease, transform 0.3s ease;
+  font-size: 9px;
+  line-height: 1.7;
+  color: inherit;
+}
+
+.site-footer-details.expanded {
+  max-height: 80px;
+  opacity: 0.8;
+  transform: translateY(0);
+}
+
+.site-footer .nowrap {
+  white-space: nowrap;
+}
+
+.site-footer a {
+  color: inherit;
+  text-decoration: underline;
+}
+
+/* 모바일에서는 화면 하단 중앙에 "Tutorial" 버튼이 따로 있어서, 펼쳐진 사업자
+   정보가 옆으로 넓게 퍼지면 그 버튼과 겹친다. 폭을 좁혀 왼쪽에만 머물게 하고,
+   대신 줄바꿈으로 세로가 늘어나는 만큼 max-height도 넉넉히 늘려준다. */
+@media (max-width: 480px) {
+  .site-footer-details {
+    max-width: 128px;
+  }
+  .site-footer-details.expanded {
+    max-height: 150px;
+  }
+}
+
+/* 봉투를 눌렀을 때 편지를 열기 전에 먼저 뜨는 결제 화면. */
+.payment-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(20, 16, 14, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+.payment-card {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  background: #fffdfb;
+  border-radius: 22px;
+  padding: 56px 44px 44px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.payment-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #171412;
+  margin: 0 0 22px;
+}
+
+.payment-description {
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #666666;
+  margin: 0 0 32px;
+}
+
+.payment-pay-button {
+  display: block;
+  width: 100%;
+  padding: 17px;
+  border: none;
+  border-radius: 999px;
+  background: #171412;
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.payment-pay-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.payment-error {
+  display: none;
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: #c0392b;
 }
