@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 240" fill="none">
+  <!-- 쿨톤 Bad: 창백함, 입술 푸르스름, 다크서클, 붉은 반점 -->
+  <ellipse cx="100" cy="120" rx="62" ry="76" fill="#e9e6ea" stroke="#2b2b2b" stroke-width="3"/>
+  <ellipse cx="42" cy="120" rx="10" ry="16" fill="#e9e6ea" stroke="#2b2b2b" stroke-width="3"/>
+  <ellipse cx="158" cy="120" rx="10" ry="16" fill="#e9e6ea" stroke="#2b2b2b" stroke-width="3"/>
+  <path d="M50 62 Q100 30 150 62 Q150 44 100 40 Q50 44 50 62 Z" fill="#3a3128"/>
+  <!-- 눈썹: 처짐 -->
+  <path d="M64 102 Q78 108 92 104" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <path d="M108 104 Q122 108 136 102" stroke="#2b2b2b" stroke-width="4" stroke-linecap="round" fill="none"/>
+  <!-- 눈 -->
+  <ellipse cx="78" cy="120" rx="5" ry="5.5" fill="#2b2b2b"/>
+  <ellipse cx="122" cy="120" rx="5" ry="5.5" fill="#2b2b2b"/>
+  <!-- 다크서클 -->
+  <path d="M68 132 Q78 141 88 132" stroke="#8a8fae" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.75"/>
+  <path d="M112 132 Q122 141 132 132" stroke="#8a8fae" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.75"/>
+  <!-- 붉은 반점 -->
+  <circle cx="60" cy="145" r="3.2" fill="#c96a6a" opacity="0.6"/>
+  <circle cx="140" cy="148" r="3" fill="#c96a6a" opacity="0.6"/>
+  <circle cx="132" cy="130" r="2.4" fill="#c96a6a" opacity="0.5"/>
+  <!-- 코 -->
+  <path d="M100 118 L96 148 Q100 152 104 148" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <!-- 푸르스름한 입술, 처진 입 -->
+  <path d="M78 168 Q100 159 122 168" stroke="#7b87a8" stroke-width="5" stroke-linecap="round" fill="none"/>
+</svg>
