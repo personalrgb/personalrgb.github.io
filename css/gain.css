@@ -1,5 +1,8 @@
 :root { --bg: #ffffff; }
-* { box-sizing: border-box; font-family: inherit; font-weight: inherit; }
+/* 한글 단어(어절) 중간이 잘리지 않고 띄어쓰기 단위로만 줄바꿈되게 한다.
+   그래도 한 단어가 너무 길어 줄에 안 들어가는 경우(긴 URL 등)에는
+   overflow-wrap이 안전망으로 그 단어만 잘라 넘친다. */
+* { box-sizing: border-box; font-family: inherit; font-weight: inherit; word-break: keep-all; overflow-wrap: break-word; }
 
 /* 스크롤은 되지만 스크롤바는 안 보이게(결과 화면처럼 내용이 길어 스크롤이 필요한 곳에 사용). */
 .no-scrollbar {
@@ -235,7 +238,10 @@ body {
 
 .tone-buttons {
   position: fixed;
-  top: 36px;
+  /* 노치/다이나믹 아일랜드나 상태 표시줄(시간·배터리·와이파이)이 있는 기기(주로
+     앱으로 감쌌을 때)에서 그 영역과 겹치지 않도록 안전 영역만큼 더 띄운다.
+     일반 브라우저에서는 safe-area-inset-top이 0이라 기존과 동일하다. */
+  top: calc(36px + env(safe-area-inset-top));
   left: 16px;
   right: 16px;
   display: flex;
@@ -265,20 +271,41 @@ body {
 /* 작은 화면(휴대폰)에서는 톤 버튼을 위로 살짝 올린다(글자 크기는 clamp가 처리). */
 @media (max-width: 480px) {
   .tone-buttons {
-    top: 16px;
+    top: calc(16px + env(safe-area-inset-top));
   }
   .back-button {
-    top: 16px !important;
+    top: calc(16px + env(safe-area-inset-top)) !important;
     left: 16px !important;
     font-size: 11px !important;
     padding: 6px 12px !important;
+  }
+  /* back-button은 모바일에서 top/패딩이 줄어들어 세로 중심이 위로 올라가므로,
+     우측 팔레트 아이콘도 같은 세로 중심에 오도록 top을 맞추고, 좌우 여백도
+     back-button의 left: 16px과 대칭이 되도록 같은 값으로 맞춘다. */
+  .palette-view-button {
+    top: calc(14px + env(safe-area-inset-top)) !important;
+    right: 16px !important;
+  }
+  /* "Next Step" 버튼(확정한 색 화면 우측 상단, 팔레트 아이콘과 같은 자리를 쓴다)도
+     같은 세로 중심·여백에 맞추고, 글자 크기도 back-button의 11px과 맞춘다. */
+  .stage-advance-button {
+    top: calc(14px + env(safe-area-inset-top)) !important;
+    right: 16px !important;
+    font-size: 11px !important;
+  }
+  /* 모바일에서는 팔레트 바로 위 안내 문구를 조금 더 위로 띄운다(팔레트 확장
+     화살표의 위쪽 끝이 164px 지점에 있으므로 그보다 확실히 위로). */
+  .palette-drag-hint {
+    bottom: 210px !important;
   }
   /* 모바일에서는 아이콘 대신 "Tutorial" 텍스트 버튼으로 대체하고(script.js),
      상단 톤 버튼 줄과 겹치지 않도록 하단 중앙으로 옮긴다. */
   .tutorial-button {
     top: auto !important;
     right: auto !important;
-    bottom: 24px !important;
+    /* 홈 인디케이터가 있는 기기에서 겹치지 않도록 안전 영역만큼 더 띄우되,
+       기본 여백은 줄여서 전체적으로 너무 떠 보이지 않게 한다. */
+    bottom: calc(8px + env(safe-area-inset-bottom)) !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
     /* 상단 톤 버튼 글자와 같은 크기(clamp)를 그대로 쓴다. */
@@ -287,8 +314,14 @@ body {
     letter-spacing: 0.02em;
   }
   .tutorial-back {
-    top: 16px !important;
+    top: calc(16px + env(safe-area-inset-top)) !important;
     left: 16px !important;
+    font-size: 11px !important;
+    padding: 6px 12px !important;
+  }
+  .tutorial-next {
+    top: calc(16px + env(safe-area-inset-top)) !important;
+    right: 16px !important;
     font-size: 11px !important;
     padding: 6px 12px !important;
   }
@@ -296,8 +329,9 @@ body {
 
 .tutorial-button {
   position: fixed;
-  top: 28px;
-  right: 28px;
+  /* 상단 톤 버튼 줄과 높이를 맞춘다. */
+  top: calc(36px + env(safe-area-inset-top));
+  right: calc(28px + env(safe-area-inset-right));
   z-index: 1002;
   background: transparent;
   border: none;
@@ -357,7 +391,7 @@ body {
   display: none;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 24px;
   max-width: 640px;
 }
 
@@ -368,10 +402,19 @@ body {
 .tutorial-eyebrow {
   margin: 0;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.65);
+}
+
+/* 단계 카드 화면(STAGE_HINTS)과 마찬가지로, "단계 N · ..." 문구는 튜토리얼
+   슬라이드 안에서도 가운데 정렬된 본문과 분리해 화면 맨 아래로 떨어뜨린다. */
+.tutorial-overlay .tutorial-eyebrow {
+  position: absolute;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
 }
 
 .tutorial-heading {
@@ -388,11 +431,460 @@ body {
   color: rgba(255, 255, 255, 0.92);
 }
 
+/* 단계 1 안내처럼 여러 조건을 나열할 때 쓰는 불릿 리스트. */
+.tutorial-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+}
+
+.tutorial-list li {
+  position: relative;
+  padding-left: 1.1em;
+  font-size: 15px;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.tutorial-list li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+/* 명도/언더톤/채도 단계 안내에서 쓰는 Good/Bad 뒤집기 카드 두 장. */
+.hint-cards {
+  display: none;
+  width: 100%;
+  max-width: 92vw;
+  box-sizing: border-box;
+  gap: 32px;
+  flex-wrap: wrap;
+  align-items: stretch;
+  justify-content: center;
+  margin-top: 4px;
+  perspective: 1400px;
+}
+
+/* 카드가 공중에 둥실둥실 떠 있는 것처럼 위아래로 오르내리며 살짝 회전하는
+   모션을 계속 반복한다. 두 카드가 똑같이 움직이면 부자연스러우니 두 번째
+   카드는 음수 딜레이로 주기를 어긋나게 시작한다. */
+@keyframes hintCardFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-4px) rotate(-0.5deg); }
+  75% { transform: translateY(3px) rotate(0.4deg); }
+}
+
+.hint-card {
+  width: 340px;
+  cursor: pointer;
+  animation: hintCardFloat 9s ease-in-out infinite;
+  /* .hint-card 자체에도 뜨는 모션(transform)을 주기 때문에, 이 요소가 자체 3D
+     컨텍스트를 만들어 자식(.hint-card-inner)의 뒤집기 원근감을 깨뜨리지 않도록
+     preserve-3d로 부모의 perspective를 그대로 이어받게 한다. */
+  transform-style: preserve-3d;
+}
+
+.hint-card:nth-child(2n) {
+  animation-duration: 10s;
+  animation-delay: -5s;
+}
+
+.hint-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 460px;
+  transform-style: preserve-3d;
+  transform: rotateY(0deg);
+}
+
+/* Good/Bad를 눌러 뒤집을 때, 살짝 작아졌다가 원래 크기로 돌아오면서 뒤집히는
+   느낌을 준다(단순 회전이 아니라 중간에 눌렸다 튀어나오는 느낌). */
+@keyframes hintCardFlipToBack {
+  0% { transform: scale(1) rotateY(0deg); }
+  50% { transform: scale(0.9) rotateY(90deg); }
+  100% { transform: scale(1) rotateY(180deg); }
+}
+
+@keyframes hintCardFlipToFront {
+  0% { transform: scale(1) rotateY(180deg); }
+  50% { transform: scale(0.9) rotateY(90deg); }
+  100% { transform: scale(1) rotateY(0deg); }
+}
+
+.hint-card-inner.flip-to-back {
+  animation: hintCardFlipToBack 0.6s cubic-bezier(0.4, 0.15, 0.2, 1) forwards;
+}
+
+.hint-card-inner.flip-to-front {
+  animation: hintCardFlipToFront 0.6s cubic-bezier(0.4, 0.15, 0.2, 1) forwards;
+}
+
+.hint-card-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  padding: 28px 22px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  text-align: center;
+}
+
+.hint-card-back {
+  transform: rotateY(180deg);
+}
+
+.hint-card-label {
+  align-self: center;
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #171717;
+}
+
+.hint-card-illustration {
+  width: 176px;
+  height: 176px;
+  object-fit: contain;
+}
+
+.hint-card-toggle {
+  display: flex;
+  gap: 14px;
+}
+
+.hint-toggle-btn {
+  border: none;
+  background: none;
+  padding: 2px;
+  font-family: inherit;
+  font-size: 13px;
+  color: rgba(23, 23, 23, 0.35);
+  cursor: pointer;
+}
+
+.hint-toggle-btn.active {
+  color: #171717;
+  font-weight: 700;
+}
+
+.hint-card-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+  color: rgba(23, 23, 23, 0.78);
+}
+
+/* 모바일 전용: 카드 두 장을 뒤집는 대신, Good/Bad 얼굴 4장을 카드 더미로 겹쳐두고
+   맨 앞 카드만 드래그해서 넘기면 뒤에 살짝 기울어져 있던 카드가 앞으로 올라오는
+   셔플형 카드 스택. 스택 전체는 제자리에 고정되어 있고 카드만 앞뒤로 넘어간다. */
+.hint-card-stack {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  margin: 0 auto;
+}
+
+.hint-stack-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(320px, 78vw);
+  min-height: 460px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 18px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
+  text-align: center;
+  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease;
+  touch-action: pan-y;
+}
+
+.hint-stack-badge {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 999px;
+}
+
+.hint-stack-badge.good {
+  background: rgba(58, 160, 96, 0.15);
+  color: #1f7a3f;
+}
+
+.hint-stack-badge.bad {
+  background: rgba(203, 62, 62, 0.15);
+  color: #a3222b;
+}
+
+/* 단계 6(결과 안내) 화면 중앙에 놓는 봉투 그래픽. 카드/폼폼/스티커/팔찌가 이미
+   하나로 합성된 단일 이미지(envelope.png)를 그대로 보여준다. */
+.result-envelope {
+  width: 100%;
+  max-width: 675px;
+  margin: 8px auto 0;
+}
+
+.result-envelope img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* 봉투 클릭 시 뜨는 "편지 확대" 화면. 플랩(lr-flap)/몸통(lr-body)/편지지 기준점
+   (lr-paper-anchor, 안에 lr-paper)을 절대 위치로 겹쳐놓는다. 아래 left/top/
+   width/height(%)를 직접 바꾸면 각 레이어의 위치·크기가 바뀐다. 쌓임 순서
+   (뒤→앞)는 편지지 → 몸통 → 플랩. */
+.letter-reveal {
+  position: relative;
+  width: 100%;
+  max-width: 1404px;
+  aspect-ratio: 1189 / 1129;
+}
+
+.letter-reveal img {
+  position: absolute;
+  object-fit: contain;
+  pointer-events: none;
+  -webkit-user-drag: none;
+}
+
+/* 편지지 "기준점"(lr-paper-anchor). 예전 lr-card와 같은 안전한 자리(30%~136.28%,
+   다른 버튼과 안 겹치고 화면 밖으로 안 밀려나는 자리)에 고정돼 있지만, overflow를
+   자르지 않는다(visible) — 그래서 안의 lr-paper가 이보다 위로 솟아올라도 잘리지
+   않고 계속 보인다. */
+.letter-reveal .lr-paper-anchor {
+  left: 10.48%;
+  top: 30%;
+  width: 79.06%;
+  height: 106.28%;
+  z-index: 1;
+  position: absolute;
+}
+
+/* 편지지 본체. 기준점의 top에 붙어 아래로 늘어난다(텍스트 길이만큼). 배경 이미지를
+   이 요소의 전체 높이에 꽉 채워 늘려서 반복 타일 없이 "종이 한 장"처럼 보이게 한다.
+   translateY는 script.js가 스크롤 값을 그대로 옮겨 적용한다 — 그래서 스크롤하면
+   이 편지지 자체가 화면에서 실제로 위로 이동한다. */
+.letter-reveal .lr-paper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  min-height: 100%;
+  /* background-size:100% 100%로 이미지를 텍스트 길이만큼(수천 px) 늘려 그리면
+     GPU가 매 프레임 그 큰 텍스처를 다시 리샘플링해야 해서 무겁다. 고정 크기
+     타일을 세로로 반복하는 방식이 훨씬 가볍다(그냥 같은 작은 텍스처를 복사). */
+  background-image: url('../envelope-letter-card.png');
+  background-repeat: repeat-y;
+  background-size: 100% 640px;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.22);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/* 안 보이는 스크롤 입력 전용 레이어. lr-paper-anchor와 같은 자리를 덮고 있다가,
+   휠/트랙패드/터치 스크롤을 네이티브로 받아서(브라우저가 가장 안정적으로 처리하는
+   방식) 그 scrollTop을 위 lr-paper의 translateY로 그대로 옮긴다. */
+.letter-reveal .lr-scroll-capture {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+  opacity: 0;
+}
+
+.letter-reveal .lr-scroll-spacer {
+  width: 1px;
+}
+
+.letter-reveal .lr-body {
+  left: 5.78%;
+  top: 110%;
+  width: 88.4%;
+  height: 70.44%;
+  z-index: 2;
+  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.25));
+}
+
+.letter-reveal .lr-flap {
+  left: 6.11%;
+  top: 42%;
+  width: 87.9%;
+  height: 37.22%;
+  z-index: 0;
+}
+
+/* 모바일에서는 편지 봉투(몸통+플랩)를 조금 더 크게, 훨씬 더 아래로 내린다.
+   lr-body와 lr-flap을 같은 폭(+25%p)만큼 같이 내려서 봉투 몸통과 플랩의 상대
+   위치(겹치는 부분)가 유지되게 한다. */
+@media (max-width: 480px) {
+  .letter-reveal .lr-body {
+    left: 0.48%;
+    top: 135%;
+    width: 99%;
+    height: 78.9%;
+  }
+  .letter-reveal .lr-flap {
+    left: 0.81%;
+    top: 114.44%;
+    width: 98.5%;
+    height: 41.7%;
+  }
+}
+
+/* 편지지 위에 적히는 결과 텍스트(뷰티팁 내용). lr-paper 안의 일반 문서 흐름으로
+   들어가, 내용이 길어지면 lr-paper 자체의 높이가 늘어나고(= 스크롤 범위가 늘어남).
+   아래쪽 여백을 크게 둔 이유: lr-body(봉투 몸통)가 이 창의 아래쪽 일부를 항상
+   덮고 있어서, 그 정도 여유가 없으면 맨 마지막 줄이 끝까지 스크롤해도 봉투에
+   가려진 채로 남는다. */
+.letter-reveal .lr-text {
+  box-sizing: border-box;
+  padding: 13% 13% 25%;
+  text-align: left;
+}
+
+.lr-text-title {
+  margin: 0 0 20px;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(17, 17, 17, 0.9);
+}
+
+.lr-text-section {
+  margin: 0 0 22px;
+}
+
+/* 결과(뷰티팁) 화면과 같은 방식으로, 첫 섹션을 뺀 나머지 항목 사이를 얇은 선으로 구분한다. */
+.lr-text-section + .lr-text-section {
+  border-top: 1px solid rgba(17, 17, 17, 0.14);
+  padding-top: 20px;
+}
+
+.lr-text-label {
+  margin: 0 0 6px;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgba(17, 17, 17, 0.85);
+}
+
+.lr-text-body {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(17, 17, 17, 0.75);
+}
+
+/* 모바일에서는 편지지 안 텍스트를 전체적으로 조금 작게 줄인다. */
+@media (max-width: 480px) {
+  .lr-text-title {
+    font-size: 21px;
+  }
+  .lr-text-label {
+    font-size: 14px;
+  }
+  .lr-text-body {
+    font-size: 12.5px;
+  }
+}
+
+/* 편지 화면 하단 중앙, "컬러 팔레트 보기" 바로 아래 자리로 옮긴 "End" 버튼. */
+.lr-end-button {
+  position: absolute;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 10;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  color: #111111;
+  cursor: pointer;
+}
+
+/* "컬러 팔레트 보기" 버튼. 편지 화면(letterRevealOverlay) 하단, End 버튼 바로
+   위에 화면 기준으로 고정돼 있다 — 편지지 스크롤 레이어와 쌓임 순서가 절대 안
+   꼬이도록, 일부러 스크롤되는 영역 밖에 둔 것이다. */
+.lr-palette-button {
+  position: absolute;
+  left: 50%;
+  bottom: calc(56px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 10;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #111111;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+/* "컬러 팔레트 보기"는 새 화면을 그리지 않고, 앱에 이미 있는 "확정한 색 보기"
+   화면(colorOverlay/paletteBar/paletteToneTabs/backButton)을 그대로
+   재사용한다 — 그 화면들 CSS는 이 파일 다른 곳에 이미 있다. */
+
+/* 화면이 열리는 순간, 편지가 화면 아래에서 회전하며 떠올라 정위치에 안착한다. */
+@keyframes envelopeDropIn {
+  from {
+    transform: translateY(60%) rotate(-18deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+.result-envelope.envelope-enter {
+  animation: envelopeDropIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 
 .tutorial-back {
   position: fixed;
-  top: 28px;
-  left: 28px;
+  top: calc(28px + env(safe-area-inset-top));
+  left: calc(28px + env(safe-area-inset-left));
+  z-index: 2001;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.tutorial-next {
+  position: fixed;
+  top: calc(28px + env(safe-area-inset-top));
+  right: calc(28px + env(safe-area-inset-right));
   z-index: 2001;
   background: transparent;
   border: none;
@@ -443,6 +935,39 @@ body {
 
 .icon-glow.pulse {
   animation: iconGlowPulse 0.9s ease;
+}
+
+/* 팔레트/색 확인 힌트가 뜰 때 각각 하단 중앙 팔레트 스와치와 우측 상단 팔레트
+   아이콘을 은은하게 발광시켜 시선을 끈다. icon-glow(짧게 반짝하고 마는 keyframe
+   pulse)와 달리, 이 발광들은 힌트 문구와 같은 타이밍에 나타나고(짧게) 사라지도록
+   (느리게) opacity 트랜지션으로 직접 켜고 끈다 — 문구가 사라지는 속도에 맞춘다. */
+.palette-center-glow,
+.palette-icon-hint-glow {
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  filter: blur(20px);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 999;
+  transition: opacity 0.35s ease;
+}
+
+.palette-center-glow {
+  position: fixed;
+  bottom: 36px;
+  left: 50%;
+  width: 90px;
+  height: 90px;
+  transform: translate(-50%, 0);
+}
+
+.palette-icon-hint-glow {
+  position: fixed;
+  top: calc(44px + env(safe-area-inset-top));
+  right: calc(36px + env(safe-area-inset-right));
+  width: 90px;
+  height: 90px;
+  transform: translate(50%, -50%);
 }
 
 /* 종합 단계 색 구름: 원 배치 한 주기를 좌우로 이어붙여 두고, -50%(둘째 주기가 보이는
