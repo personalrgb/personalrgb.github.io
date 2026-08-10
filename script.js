@@ -1312,7 +1312,7 @@ const STAGE_HINTS = {
         label: 'Warm',
         good: '피부에 노란빛 혈색이 자연스럽게 돌아 생기 있어 보이고, 다크서클이 브라운톤으로 묻히며, 피부 결도 매끈하게 정돈됩니다.',
         bad: '피부가 누렇게 뜨고 안색이 탁해지며, 치아까지 상대적으로 누레 보입니다.',
-        goodImage: 'face-warm-good.png',
+        goodImage: 'face-warm-good.svg',
         badImage: 'face-warm-bad.svg',
       },
       {
