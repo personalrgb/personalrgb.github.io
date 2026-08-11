@@ -139,7 +139,7 @@ setTimeout(() => {
   introActive = false;
   braking = true;
   if (toneButtonsEl) toneButtonsEl.style.opacity = '1';
-  if (tutorialButtonEl) tutorialButtonEl.style.opacity = '1';
+  if (tutorialButtonEl) setHomeIconsOpacity('1');
 }, 1500);
 
 const stage = document.getElementById('stage');
@@ -509,6 +509,30 @@ if (isLikelyMobile) {
   // 아이콘(작은 정사각형)에서 텍스트(더 넓은 버튼)로 바뀌면 버튼의 실제 세로
   // 위치/크기가 달라지므로, 모빌 세로 중앙 정렬을 다시 계산한다.
   updateResponsiveScale();
+}
+
+// 홈 화면 우측 상단, 튜토리얼 아이콘 바로 밑의 "결제하기" 버튼. 봉투를 눌렀을 때와
+// 완전히 같은 결제 화면(showPaymentScreen, 아래에서 정의됨 — 함수 선언이라 호이스팅됨)을
+// 그대로 띄운다. 튜토리얼 아이콘과 항상 같이 나타나고 같이 숨어야 하므로, 둘의
+// opacity/pointerEvents를 한 번에 맞춰주는 setHomeIconsOpacity를 통해서만 제어한다.
+const homePaymentButton = document.createElement('button');
+homePaymentButton.type = 'button';
+homePaymentButton.className = 'home-payment-button';
+homePaymentButton.textContent = '결제하기';
+homePaymentButton.setAttribute('aria-label', '퍼스널 RGB 결과지 결제하기');
+homePaymentButton.style.opacity = '0';
+homePaymentButton.style.pointerEvents = 'none';
+homePaymentButton.addEventListener('click', (e) => {
+  e.stopPropagation();
+  showPaymentScreen();
+});
+document.body.appendChild(homePaymentButton);
+
+function setHomeIconsOpacity(value) {
+  tutorialButtonEl.style.opacity = value;
+  tutorialButtonEl.style.pointerEvents = value === '1' ? 'auto' : 'none';
+  homePaymentButton.style.opacity = value;
+  homePaymentButton.style.pointerEvents = value === '1' ? 'auto' : 'none';
 }
 
 // 홈 화면 좌측 하단 "사업자 정보" 토글. 누르면 펼쳐지고 다시 누르면 접힌다.
@@ -2189,8 +2213,7 @@ endButton.addEventListener('click', () => {
   practiceStage = 'tone';
   isShowingBeautyTips = false;
   stageNavStack = [];
-  tutorialButtonEl.style.opacity = '1';
-  tutorialButtonEl.style.pointerEvents = 'auto';
+  setHomeIconsOpacity('1');
 });
 
 // 튜토리얼 오버레이와 같은 방식(명도를 낮추고 블러)으로 화면 전체를 덮은 뒤 그 위에 문구를 띄운다.
@@ -2886,7 +2909,11 @@ paymentPayButton.addEventListener('click', async (e) => {
       return;
     }
     hidePaymentScreen();
-    openLetterAfterPayment();
+    // 홈 화면의 "결제하기" 버튼처럼 진단을 아직 안 끝낸 상태(pendingFinalSeason
+    // 없음)에서 결제한 경우, 열어줄 편지가 없으니 결제 화면만 닫고 끝낸다.
+    if (pendingFinalSeason !== null) {
+      openLetterAfterPayment();
+    }
   } catch (err) {
     paymentError.textContent = '결제 중 오류가 발생했습니다.';
     paymentError.style.display = 'block';
@@ -3001,8 +3028,7 @@ stageHintBackButton.addEventListener('click', (e) => {
     tutorialIndex = tutorialSlides.length - 1;
     renderTutorialSlide();
     tutorialOverlay.classList.add('active');
-    tutorialButtonEl.style.opacity = '0';
-    tutorialButtonEl.style.pointerEvents = 'none';
+    setHomeIconsOpacity('0');
   }
 });
 stageHintOverlay.appendChild(stageHintBackButton);
@@ -3478,8 +3504,7 @@ function showColorOverlay(color, x, y) {
   // 튜토리얼을 거친 실전 모드(enterPracticeMode)에서만 보인다.
 
   // 첫 화면(메인 모빌)을 벗어났으니 튜토리얼 아이콘은 숨긴다.
-  tutorialButtonEl.style.opacity = '0';
-  tutorialButtonEl.style.pointerEvents = 'none';
+  setHomeIconsOpacity('0');
 
   maybeShowCornerDragHint(color, false);
 }
@@ -3523,8 +3548,7 @@ function showColorOverlayFade(color) {
   paletteExpandArrow.style.opacity = '1';
   paletteExpandArrow.style.pointerEvents = 'auto';
 
-  tutorialButtonEl.style.opacity = '0';
-  tutorialButtonEl.style.pointerEvents = 'none';
+  setHomeIconsOpacity('0');
 
   maybeShowCornerDragHint(color, true);
 }
@@ -3570,8 +3594,7 @@ function hideColorOverlay() {
   closePaletteGrid();
 
   // 첫 화면(메인 모빌)으로 돌아왔으니 튜토리얼 아이콘과 상단 계절 탭을 다시 보여준다.
-  tutorialButtonEl.style.opacity = '1';
-  tutorialButtonEl.style.pointerEvents = 'auto';
+  setHomeIconsOpacity('1');
   toneButtonsEl.style.opacity = '1';
   toneButtonsEl.style.pointerEvents = 'auto';
 }
@@ -4265,8 +4288,7 @@ function openTutorial() {
   isTutorialOpen = true;
   // 튜토리얼 아이콘은 첫 화면(메인 모빌)에서만 보여야 하므로, 튜토리얼을 여는
   // 순간부터는 숨긴다(안 그러면 반투명한 오버레이 뒤로 비쳐 보인다).
-  tutorialButtonEl.style.opacity = '0';
-  tutorialButtonEl.style.pointerEvents = 'none';
+  setHomeIconsOpacity('0');
 }
 
 function closeTutorial() {
@@ -4316,8 +4338,7 @@ function rewindTutorial() {
   } else {
     closeTutorial();
     // 튜토리얼을 취소하고 첫 화면으로 돌아왔으니 아이콘을 다시 보여준다.
-    tutorialButtonEl.style.opacity = '1';
-    tutorialButtonEl.style.pointerEvents = 'auto';
+    setHomeIconsOpacity('1');
   }
 }
 
@@ -4376,7 +4397,6 @@ tutorialOverlay.addEventListener('touchend', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeTutorial();
-    tutorialButtonEl.style.opacity = '1';
-    tutorialButtonEl.style.pointerEvents = 'auto';
+    setHomeIconsOpacity('1');
   }
 });
