@@ -1358,9 +1358,6 @@ let pendingPracticeEntryPoint = null;
 // 종합 단계에서 "Select"를 누르면 결과 문구가 뜨는데, 그 문구를 닫을 때(배경 클릭)
 // 다음 단계로 넘어가는 대신 결과 모빌 화면을 보여줘야 하므로 별도로 기억해둔다.
 let pendingFinalSeason = null;
-// 메이크업 팁(결과) 화면을 보고 있는 동안만 true. "← Back"이 여기서는 종료가 아니라
-// 종합(색 구름) 화면으로 되돌아가게 하는 데 쓴다.
-let isShowingBeautyTips = false;
 
 // 단계 안내 카드 ↔ 색 화면을 오간 순서를 그대로 쌓아뒀다가, Back을 누르면 하나씩
 // 꺼내서 정확히 바로 이전 화면으로 돌아가게 한다. 항목은 { type: 'hint'|'color', stage }.
@@ -2037,166 +2034,9 @@ const SEASON16_TIPS = [
   },
 ];
 
-// 결과 화면: 계절/타입 이름 + 분야별(의상/메이크업/헤어/주얼리/네일) 상세 팁을 보여준다.
-// 내용이 길어 화면 하나에 다 안 들어가므로 스크롤 가능한 카드로 구성한다.
-const beautyTipsPanel = document.createElement('div');
-beautyTipsPanel.className = 'no-scrollbar';
-beautyTipsPanel.style.position = 'fixed';
-beautyTipsPanel.style.top = '50%';
-beautyTipsPanel.style.left = '50%';
-beautyTipsPanel.style.transform = 'translate(-50%, -50%)';
-beautyTipsPanel.style.zIndex = '1002';
-beautyTipsPanel.style.display = 'flex';
-beautyTipsPanel.style.flexDirection = 'column';
-beautyTipsPanel.style.alignItems = 'center';
-beautyTipsPanel.style.gap = '10px';
-beautyTipsPanel.style.width = 'min(640px, 92vw)';
-beautyTipsPanel.style.maxHeight = '82vh';
-beautyTipsPanel.style.overflowY = 'auto';
-beautyTipsPanel.style.textAlign = 'center';
-beautyTipsPanel.style.padding = '24px';
-beautyTipsPanel.style.opacity = '0';
-beautyTipsPanel.style.pointerEvents = 'none';
-beautyTipsPanel.style.transition = 'opacity 0.4s ease';
-document.body.appendChild(beautyTipsPanel);
-
-const beautyTipsEyebrow = document.createElement('p');
-beautyTipsEyebrow.className = 'tutorial-eyebrow';
-const beautyTipsHeading = document.createElement('h3');
-beautyTipsHeading.className = 'tutorial-heading';
-beautyTipsHeading.textContent = '어울리는 스타일 가이드';
-// 의상/메이크업/헤어/주얼리/네일 섹션이 들어갈 자리. 짧은 안내 문구와 달리 내용이
-// 많아 가운데 정렬 대신 왼쪽 정렬로 읽기 쉽게 구성한다.
-const beautyTipsSections = document.createElement('div');
-beautyTipsSections.style.display = 'flex';
-beautyTipsSections.style.flexDirection = 'column';
-beautyTipsSections.style.gap = '16px';
-beautyTipsSections.style.width = '100%';
-beautyTipsSections.style.textAlign = 'left';
-// 타이틀과 본문(의상/메이크업/…) 사이만 따로 더 띄운다(패널 전체 gap보다 넓게).
-beautyTipsSections.style.marginTop = '18px';
-// 이 화면은 (블러 오버레이 없이) 옅은 계절 톤 배경 위에 바로 얹히므로, 흰 글씨 대신
-// 어두운 글씨로 덮어써야 잘 읽힌다.
-beautyTipsEyebrow.style.color = 'rgba(17, 17, 17, 0.65)';
-beautyTipsHeading.style.color = '#111111';
-beautyTipsPanel.appendChild(beautyTipsEyebrow);
-beautyTipsPanel.appendChild(beautyTipsHeading);
-beautyTipsPanel.appendChild(beautyTipsSections);
-
-// 섹션 하나(제목 + 본문 한 단락)를 만들어 붙인다.
-function appendTipSection(label, bodyText) {
-  const wrap = document.createElement('div');
-  const title = document.createElement('p');
-  title.textContent = label;
-  title.style.margin = '0 0 6px';
-  title.style.fontSize = '13px';
-  title.style.fontWeight = '700';
-  title.style.letterSpacing = '0.02em';
-  title.style.color = 'rgba(17, 17, 17, 0.9)';
-  const body = document.createElement('p');
-  body.className = 'tutorial-body';
-  body.textContent = bodyText;
-  body.style.margin = '0';
-  body.style.letterSpacing = '0';
-  body.style.color = 'rgba(17, 17, 17, 0.78)';
-  wrap.appendChild(title);
-  wrap.appendChild(body);
-  beautyTipsSections.appendChild(wrap);
-  return wrap;
-}
-
-// 메이크업은 베이스/아이브로우/아이섀도/치크/립 다섯 항목으로 세분화해 보여준다.
-function appendMakeupSection(items) {
-  const wrap = document.createElement('div');
-  const title = document.createElement('p');
-  title.textContent = '메이크업';
-  title.style.margin = '0 0 6px';
-  title.style.fontSize = '13px';
-  title.style.fontWeight = '700';
-  title.style.letterSpacing = '0.02em';
-  title.style.color = 'rgba(17, 17, 17, 0.9)';
-  wrap.appendChild(title);
-
-  const list = document.createElement('div');
-  list.style.display = 'flex';
-  list.style.flexDirection = 'column';
-  list.style.gap = '8px';
-  items.forEach(([subLabel, text]) => {
-    const p = document.createElement('p');
-    p.className = 'tutorial-body';
-    p.style.margin = '0';
-    p.style.letterSpacing = '0';
-    p.style.color = 'rgba(17, 17, 17, 0.78)';
-    const strong = document.createElement('strong');
-    strong.textContent = `${subLabel} :`;
-    strong.style.color = 'rgba(17, 17, 17, 0.95)';
-    strong.style.letterSpacing = '-0.02em';
-    p.appendChild(strong);
-    p.appendChild(document.createTextNode(` ${text}`));
-    list.appendChild(p);
-  });
-  wrap.appendChild(list);
-  beautyTipsSections.appendChild(wrap);
-}
-
-function renderBeautyTipSections(tip) {
-  beautyTipsSections.innerHTML = '';
-  appendTipSection('의상', tip.outfit);
-  appendMakeupSection(tip.makeup);
-  appendTipSection('헤어', tip.hair);
-  appendTipSection('주얼리', tip.jewelry);
-  appendTipSection('네일', tip.nail);
-  // 카테고리끼리 구분되도록 첫 섹션을 뺀 나머지 위에 얇은 선을 긋는다.
-  Array.from(beautyTipsSections.children).forEach((section, i) => {
-    if (i === 0) return;
-    section.style.borderTop = '1px solid rgba(17, 17, 17, 0.14)';
-    section.style.paddingTop = '16px';
-  });
-}
-
-// 색 구름과 나머지 실전 UI를 모두 걷어내고, 결정된 16타입 톤 배경 위에 분야별 팁을 보여준다.
-function showBeautyTips(seasonIndex) {
-  isShowingBeautyTips = true;
-  applyBackgroundTone(paleFamilyColor(SEASON16_GROUPS[seasonIndex].colors));
-  synthesisBackdrop.style.opacity = '0';
-  synthesisBackdrop.style.pointerEvents = 'none';
-  stageAdvanceButton.style.opacity = '0';
-  stageAdvanceButton.style.pointerEvents = 'none';
-  paletteToneTabs.style.opacity = '0';
-  paletteToneTabs.style.pointerEvents = 'none';
-  closePaletteGrid();
-
-  beautyTipsEyebrow.textContent = `${SEASON16_GROUPS[seasonIndex].name} 타입`;
-  renderBeautyTipSections(SEASON16_TIPS[seasonIndex]);
-  beautyTipsPanel.style.opacity = '1';
-  beautyTipsPanel.style.pointerEvents = 'auto';
-
-  // "← Back"은 그대로 남겨둬서, 결과를 나가지 않고 종합(색 구름) 화면으로 되돌아갈 수 있게 한다.
-  endButton.style.opacity = '1';
-  endButton.style.pointerEvents = 'auto';
-}
-
-// 팁 화면에서 뒤로가기를 누르면 종료하지 않고 방금 보던 종합(색 구름) 화면으로 되돌린다.
-function returnToSynthesisFromTips() {
-  isShowingBeautyTips = false;
-  beautyTipsPanel.style.opacity = '0';
-  beautyTipsPanel.style.pointerEvents = 'none';
-  endButton.style.opacity = '0';
-  endButton.style.pointerEvents = 'none';
-
-  synthesisBackdrop.style.opacity = '1';
-  paletteToneTabs.style.opacity = '1';
-  paletteToneTabs.style.pointerEvents = 'auto';
-  stageAdvanceButton.style.opacity = '1';
-  stageAdvanceButton.style.pointerEvents = 'auto';
-}
-
 endButton.addEventListener('click', () => {
   endButton.style.opacity = '0';
   endButton.style.pointerEvents = 'none';
-  beautyTipsPanel.style.opacity = '0';
-  beautyTipsPanel.style.pointerEvents = 'none';
-  // 팁 화면에서는 "← Back"을 계속 켜뒀으니, 첫 화면으로 나갈 땐 같이 꺼줘야 한다.
   backButton.style.opacity = '0';
   backButton.style.pointerEvents = 'none';
 
@@ -2211,7 +2051,6 @@ endButton.addEventListener('click', () => {
 
   isPracticeMode = false;
   practiceStage = 'tone';
-  isShowingBeautyTips = false;
   stageNavStack = [];
   setHomeIconsOpacity('1');
 });
@@ -3081,14 +2920,9 @@ stageAdvanceButton.addEventListener('click', (e) => {
 // 안내 문구가 떠 있을 때 확정하고 다음 화면으로 넘어간다. 배경을 눌러도, Next 버튼을
 // 눌러도 똑같이 이 함수가 실행된다.
 function confirmStageHint() {
-  if (pendingFinalSeason !== null) {
-    const seasonIndex = pendingFinalSeason;
-    pendingFinalSeason = null;
-    stageHintOverlay.style.opacity = '0';
-    stageHintOverlay.style.pointerEvents = 'none';
-    showBeautyTips(seasonIndex);
-    return;
-  }
+  // 봉투가 떠 있는 동안(pendingFinalSeason가 설정된 상태)에는 배경 클릭 등
+  // 다른 경로로는 아무 것도 하지 않는다 — 봉투를 직접 눌러야만 결제 화면으로 넘어간다.
+  if (pendingFinalSeason !== null) return;
 
   if (!pendingStageIntro) return;
   const stage = pendingStageIntro;
@@ -3584,11 +3418,8 @@ function hideColorOverlay() {
   synthesisBackdrop.style.pointerEvents = 'none';
   endButton.style.opacity = '0';
   endButton.style.pointerEvents = 'none';
-  beautyTipsPanel.style.opacity = '0';
-  beautyTipsPanel.style.pointerEvents = 'none';
   pendingStageIntro = null;
   pendingFinalSeason = null;
-  isShowingBeautyTips = false;
   practiceStage = 'tone';
   stageNavStack = [];
   closePaletteGrid();
@@ -3604,8 +3435,6 @@ function hideColorOverlay() {
 backButton.addEventListener('click', () => {
   if (letterPaletteReturnActive) {
     exitSeasonPaletteToLetter();
-  } else if (isShowingBeautyTips) {
-    returnToSynthesisFromTips();
   } else if (currentPaletteMode.startsWith('confirmed')) {
     restorePreviousPaletteView();
   } else if (isPracticeMode && stageNavStack.length > 0) {
