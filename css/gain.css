@@ -712,8 +712,10 @@ body {
   min-height: 100%;
   /* background-size:100% 100%로 이미지를 텍스트 길이만큼(수천 px) 늘려 그리면
      GPU가 매 프레임 그 큰 텍스처를 다시 리샘플링해야 해서 무겁다. 고정 크기
-     타일을 세로로 반복하는 방식이 훨씬 가볍다(그냥 같은 작은 텍스처를 복사). */
-  background-image: url('../envelope-letter-card.png');
+     타일을 세로로 반복하는 방식이 훨씬 가볍다(그냥 같은 작은 텍스처를 복사).
+     background-image는 CSS에 안 넣고 script.js가 필요한 시점에 인라인으로 지연
+     할당한다 — CSS에 있으면 이 클래스를 쓰는 엘리먼트가 생성되는 즉시(첫 화면
+     로딩 시점) 브라우저가 미리 받아버린다. */
   background-repeat: repeat-y;
   background-size: 100% 640px;
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.22);

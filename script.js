@@ -241,6 +241,11 @@ function createCard(color, w, h, borderRadius, hoverTwistDeg) {
 // 개체를 하나씩 stage에 바로 붙이면 200개만큼 레이아웃/리플로우가 반복돼 저사양 기기(특히
 // 모바일)에서 초기 로딩이 무거워진다. DocumentFragment에 모아뒀다가 한 번에 붙인다.
 const objectsFragment = document.createDocumentFragment();
+// applyLayout()이 매 프레임(최대 60fps) 실행되는데, 그때마다 stage.querySelectorAll('.pivot')로
+// 200개를 DOM에서 다시 찾고 pivot마다 querySelector('.card')까지 또 하면 초당 수천 번의
+// DOM 탐색이 반복돼 저사양 기기에서 렉의 큰 원인이 된다. 카드 목록은 생성된 뒤 바뀌지
+// 않으므로, 여기 한 번만 캐싱해두고 매 프레임은 이 배열만 순회한다.
+const pivotCardPairs = [];
 
 function addObject(baseAngle, radius, yOffset, card, section, seedBase) {
   const pivot = document.createElement('div');
@@ -257,6 +262,7 @@ function addObject(baseAngle, radius, yOffset, card, section, seedBase) {
   arm.appendChild(card);
   pivot.appendChild(arm);
   objectsFragment.appendChild(pivot);
+  pivotCardPairs.push({ pivot, card });
 }
 
 // 화면 크기가 바뀔 때마다(리사이즈/회전) 개체들의 반지름·높이 퍼짐을 현재 화면 비율에 맞게
@@ -2341,8 +2347,12 @@ const stageHintEnvelope = document.createElement('div');
 stageHintEnvelope.className = 'result-envelope';
 stageHintEnvelope.style.display = 'none';
 stageHintEnvelope.style.cursor = 'pointer';
+// src는 여기서 바로 안 넣는다 — <img>는 src가 설정되는 순간 화면에 보이든 말든
+// 즉시 네트워크로 받아오기 시작하는데, 이 봉투 이미지(1MB 가까이 됨)는 실제로
+// 진단을 끝까지 마쳐야만 보이는 화면이라 첫 화면 로딩과는 아무 상관이 없다.
+// 그래서 실제로 이 화면에 처음 도달하는 시점(아래 stageAdvanceButton의 종합
+// 단계 분기)에 가서야 src를 지연 할당한다.
 const stageHintEnvelopeImg = document.createElement('img');
-stageHintEnvelopeImg.src = 'envelope.png';
 stageHintEnvelopeImg.alt = '';
 stageHintEnvelope.appendChild(stageHintEnvelopeImg);
 
@@ -2363,16 +2373,27 @@ letterRevealOverlay.style.transition = 'opacity 0.4s ease';
 // 직접(%) 조절할 수 있게 한다. 편지지는 아래에서 별도로(드래그 가능한 lr-paper로) 만든다.
 const letterRevealStage = document.createElement('div');
 letterRevealStage.className = 'letter-reveal';
-[
+// 여기서도 src를 바로 안 넣는다 — 결제까지 끝내야 보이는 화면인데 이미지 두 장이
+// 합쳐서 1MB가 넘어서, 첫 화면부터 미리 받아두면 로딩만 무거워질 뿐 아무 이득이
+// 없다. 실제로 결제가 끝나 이 화면을 여는 시점(openLetterAfterPayment)에 지연 할당한다.
+const LETTER_REVEAL_IMAGE_SOURCES = [
   ['lr-body', 'envelope-letter-body.png'],
   ['lr-flap', 'envelope-letter-flap.png'],
-].forEach(([cls, src]) => {
+];
+const letterRevealImages = LETTER_REVEAL_IMAGE_SOURCES.map(([cls]) => {
   const img = document.createElement('img');
   img.className = cls;
-  img.src = src;
   img.alt = '';
   letterRevealStage.appendChild(img);
+  return img;
 });
+function loadLetterRevealImagesOnce() {
+  if (letterRevealImages[0].src) return; // 이미 한 번 로드했으면 다시 요청하지 않는다.
+  letterRevealImages.forEach((img, i) => {
+    img.src = LETTER_REVEAL_IMAGE_SOURCES[i][1];
+  });
+  letterPaper.style.backgroundImage = "url('envelope-letter-card.png')";
+}
 
 // lr-paper-anchor는 예전 lr-card와 똑같은 자리(화면 안, 다른 버튼과도 안 겹치는
 // 자리)에 고정된 "기준점"일 뿐이고 overflow를 자르지 않는다. 그 안의 lr-paper(편지지
@@ -2770,6 +2791,7 @@ stageHintEnvelope.addEventListener('click', (e) => {
 
 // 결제가 서버에서 검증된 뒤에만 호출된다 — 편지가 삐져나온 확대 화면을 연다.
 function openLetterAfterPayment() {
+  loadLetterRevealImagesOnce();
   stageHintOverlay.style.opacity = '0';
   stageHintOverlay.style.pointerEvents = 'none';
   // letterRevealOverlay는 배경이 투명해서(색 구름이 비쳐 보이게), 종합 단계에
@@ -2901,6 +2923,7 @@ stageAdvanceButton.addEventListener('click', (e) => {
 
     });
     stageHintNextButton.style.display = 'none';
+    if (!stageHintEnvelopeImg.src) stageHintEnvelopeImg.src = 'envelope.png';
     stageHintEnvelope.style.display = 'block';
     // 재진입 시에도 매번 다시 재생되도록, 애니메이션 클래스를 뗐다가(리플로우로
     // 강제 리셋) 다시 붙인다.
@@ -3857,7 +3880,7 @@ function applyLayout() {
   const nearestSection = Math.round(frontValueNow) % TONE_FAMILY_COUNT;
   const sectionIsLocked = Math.abs(frontValueNow - Math.round(frontValueNow)) < SECTION_LOCK_THRESHOLD;
 
-  stage.querySelectorAll('.pivot').forEach((pivot) => {
+  pivotCardPairs.forEach(({ pivot, card }) => {
     const angle = parseFloat(pivot.dataset.baseAngle) + rotationOffset;
     pivot.style.transform = `rotateY(${angle}deg)`;
 
@@ -3872,7 +3895,6 @@ function applyLayout() {
     let saturation = introActive ? 1 : 1 - t * (1 - MIN_DEPTH_SATURATION);
     let brightness = introActive ? 1 : 1 - t * (1 - MIN_DEPTH_BRIGHTNESS);
 
-    const card = pivot.querySelector('.card');
     if (card) {
       // 한 계열이 딱 정중앙에 왔을 때는 그 계열이 아닌 개체는 채도를 완전히 0으로.
       // 단, 원래 색이 어두우면 회색조가 너무 새까매져 눈에 띄므로 명도가 90% 밑으로 떨어지지 않게 보정한다.
