@@ -2796,7 +2796,11 @@ paymentPayButton.addEventListener('click', async (e) => {
 stageHintEnvelope.addEventListener('click', (e) => {
   if (pendingFinalSeason === null) return;
   e.stopPropagation();
-  showPaymentScreen();
+  // TODO: 포트원 실 연동 정보(PORTONE_STORE_ID/CHANNEL_KEY)가 아직 placeholder라
+  // 결제 버튼을 눌러도 무조건 에러가 난다. 실 연동 값이 준비될 때까지 임시로
+  // 결제 화면을 건너뛰고 바로 편지를 연다. 나중에 되돌리려면 아래 줄을
+  // showPaymentScreen()으로만 바꾸면 된다.
+  openLetterAfterPayment();
 });
 
 // 결제가 서버에서 검증된 뒤에만 호출된다 — 편지가 삐져나온 확대 화면을 연다.
