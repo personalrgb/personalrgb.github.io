@@ -530,6 +530,8 @@ homePaymentButton.style.opacity = '0';
 homePaymentButton.style.pointerEvents = 'none';
 homePaymentButton.addEventListener('click', (e) => {
   e.stopPropagation();
+  paymentOpenedFromHome = true;
+  pendingFinalSeason = 0; // 미리보기: 봄 페일
   showPaymentScreen();
 });
 document.body.appendChild(homePaymentButton);
@@ -1374,6 +1376,11 @@ let pendingPracticeEntryPoint = null;
 // 종합 단계에서 "Select"를 누르면 결과 문구가 뜨는데, 그 문구를 닫을 때(배경 클릭)
 // 다음 단계로 넘어가는 대신 결과 모빌 화면을 보여줘야 하므로 별도로 기억해둔다.
 let pendingFinalSeason = null;
+// 홈 화면의 "결제하기"는 진단을 거치지 않은 상태에서 결제 화면을 미리 보여주는
+// 용도라, 진짜 진단 결과(pendingFinalSeason)가 아니라 미리보기용으로 그 값을
+// 잠깐 빌려 쓴다. 결제 없이(Back/배경 클릭) 닫으면 원래대로 null로 되돌려서,
+// 이후 실제 진단 플로우(Select 버튼 등)를 막지 않게 한다.
+let paymentOpenedFromHome = false;
 
 // 단계 안내 카드 ↔ 색 화면을 오간 순서를 그대로 쌓아뒀다가, Back을 누르면 하나씩
 // 꺼내서 정확히 바로 이전 화면으로 돌아가게 한다. 항목은 { type: 'hint'|'color', stage }.
@@ -2725,14 +2732,25 @@ function hidePaymentScreen() {
   paymentOverlay.style.pointerEvents = 'none';
 }
 
+// 결제하지 않고(Back/배경 클릭) 닫을 때 쓴다. 홈에서 미리보기용으로 빌려 쓴
+// pendingFinalSeason=0을 원래 상태(null)로 되돌려, 이후 실제 진단 플로우를
+// 막지 않게 한다.
+function closePaymentWithoutPaying() {
+  hidePaymentScreen();
+  if (paymentOpenedFromHome) {
+    pendingFinalSeason = null;
+    paymentOpenedFromHome = false;
+  }
+}
+
 paymentBackButton.addEventListener('click', (e) => {
   e.stopPropagation();
-  hidePaymentScreen();
+  closePaymentWithoutPaying();
 });
 
 // 카드 바깥(어두운 배경)을 눌러도 닫히게 한다.
 paymentOverlay.addEventListener('click', (e) => {
-  if (e.target === paymentOverlay) hidePaymentScreen();
+  if (e.target === paymentOverlay) closePaymentWithoutPaying();
 });
 
 async function verifyPaymentOnServer(paymentId) {
@@ -2754,6 +2772,7 @@ paymentPayButton.addEventListener('click', async (e) => {
   // 나중에 되돌리려면 이 if 블록만 지우면 된다.
   if (true) {
     hidePaymentScreen();
+    paymentOpenedFromHome = false;
     if (pendingFinalSeason !== null) {
       openLetterAfterPayment();
     }
@@ -2790,8 +2809,9 @@ paymentPayButton.addEventListener('click', async (e) => {
       return;
     }
     hidePaymentScreen();
-    // 홈 화면의 "결제하기" 버튼처럼 진단을 아직 안 끝낸 상태(pendingFinalSeason
-    // 없음)에서 결제한 경우, 열어줄 편지가 없으니 결제 화면만 닫고 끝낸다.
+    // 홈 화면의 "결제하기"는 pendingFinalSeason을 미리보기용(봄 페일=0)으로
+    // 미리 채워두므로, 실제 진단 여부와 무관하게 여기서 항상 편지를 연다.
+    paymentOpenedFromHome = false;
     if (pendingFinalSeason !== null) {
       openLetterAfterPayment();
     }
@@ -2807,6 +2827,7 @@ paymentPayButton.addEventListener('click', async (e) => {
 stageHintEnvelope.addEventListener('click', (e) => {
   if (pendingFinalSeason === null) return;
   e.stopPropagation();
+  paymentOpenedFromHome = false;
   showPaymentScreen();
 });
 
