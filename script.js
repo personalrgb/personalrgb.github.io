@@ -517,28 +517,9 @@ if (isLikelyMobile) {
   updateResponsiveScale();
 }
 
-// 홈 화면 우측 상단, 튜토리얼 아이콘 바로 밑의 "결제하기" 버튼. 봉투를 눌렀을 때와
-// 완전히 같은 결제 화면(showPaymentScreen, 아래에서 정의됨 — 함수 선언이라 호이스팅됨)을
-// 그대로 띄운다. 튜토리얼 아이콘과 항상 같이 나타나고 같이 숨어야 하므로, 둘의
-// opacity/pointerEvents를 한 번에 맞춰주는 setHomeIconsOpacity를 통해서만 제어한다.
-const homePaymentButton = document.createElement('button');
-homePaymentButton.type = 'button';
-homePaymentButton.className = 'home-payment-button';
-homePaymentButton.textContent = '결제하기';
-homePaymentButton.setAttribute('aria-label', '퍼스널 RGB 결과지 결제하기');
-homePaymentButton.style.opacity = '0';
-homePaymentButton.style.pointerEvents = 'none';
-homePaymentButton.addEventListener('click', (e) => {
-  e.stopPropagation();
-  showPaymentScreen();
-});
-document.body.appendChild(homePaymentButton);
-
 function setHomeIconsOpacity(value) {
   tutorialButtonEl.style.opacity = value;
   tutorialButtonEl.style.pointerEvents = value === '1' ? 'auto' : 'none';
-  homePaymentButton.style.opacity = value;
-  homePaymentButton.style.pointerEvents = value === '1' ? 'auto' : 'none';
 }
 
 // 홈 화면 좌측 하단 "사업자 정보" 토글. 누르면 펼쳐지고 다시 누르면 접힌다.
@@ -1303,6 +1284,9 @@ const STAGE_HINTS = {
         label: 'Light',
         good: '안색이 환해지고 피부 결이 매끄러워 보이며 이목구비가 부드럽게 살아납니다.',
         bad: '밝기에 얼굴이 밀려 이목구비가 흐려지고, 그늘이 진 것처럼 어두워지며 다크서클과 팔자 주름 음영이 짙어집니다.',
+        // TODO: 아직 전용 이미지가 없어서 임시로 채도-소프트-굿 이미지를 대신 쓴다.
+        goodImage: 'face-soft-good.png',
+        badImage: 'face-soft-good.png',
       },
       {
         label: 'Deep',
@@ -1330,6 +1314,8 @@ const STAGE_HINTS = {
         good: '얼굴과 색이 자연스럽게 어우러져 편안하고 고급스러운 인상이 됩니다.',
         bad: '얼굴까지 같이 탁해져 흐릿하고 생기 없이, 피곤하거나 아파 보입니다.',
         goodImage: 'face-soft-good.png',
+        // TODO: 아직 전용 이미지가 없어서 임시로 같은(Good) 이미지를 대신 쓴다.
+        badImage: 'face-soft-good.png',
       },
     ],
   },
