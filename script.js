@@ -2839,6 +2839,10 @@ function openLetterAfterPayment() {
   // letterRevealOverlay는 배경이 투명해서(색 구름이 비쳐 보이게), 종합 단계에
   // 남아있던 "Select"/"← Back"/Warm·Cool 탭/상단 계절 탭 같은 UI가 안 가려지고
   // 그대로 겹쳐 보였다. 편지 화면을 여는 동안은 확실히 꺼둔다.
+  // 홈 화면의 "결제하기" 지름길로 들어온 경우 튜토리얼 아이콘/결제하기 버튼이
+  // 아직 화면에 떠 있는 상태라(정상 진단 경로에서는 이미 홈을 벗어날 때 숨겨짐),
+  // 여기서도 명시적으로 같이 꺼서 End 버튼과 겹치지 않게 한다.
+  setHomeIconsOpacity('0');
   stageAdvanceButton.style.opacity = '0';
   stageAdvanceButton.style.pointerEvents = 'none';
   backButton.style.opacity = '0';
