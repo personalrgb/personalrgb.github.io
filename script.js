@@ -517,9 +517,28 @@ if (isLikelyMobile) {
   updateResponsiveScale();
 }
 
+// 홈 화면 우측 상단, 튜토리얼 아이콘 바로 밑의 "결제하기" 버튼. 봉투를 눌렀을 때와
+// 완전히 같은 결제 화면(showPaymentScreen, 아래에서 정의됨 — 함수 선언이라 호이스팅됨)을
+// 그대로 띄운다. 튜토리얼 아이콘과 항상 같이 나타나고 같이 숨어야 하므로, 둘의
+// opacity/pointerEvents를 한 번에 맞춰주는 setHomeIconsOpacity를 통해서만 제어한다.
+const homePaymentButton = document.createElement('button');
+homePaymentButton.type = 'button';
+homePaymentButton.className = 'home-payment-button';
+homePaymentButton.textContent = '결제하기';
+homePaymentButton.setAttribute('aria-label', '퍼스널 RGB 결과지 결제하기');
+homePaymentButton.style.opacity = '0';
+homePaymentButton.style.pointerEvents = 'none';
+homePaymentButton.addEventListener('click', (e) => {
+  e.stopPropagation();
+  showPaymentScreen();
+});
+document.body.appendChild(homePaymentButton);
+
 function setHomeIconsOpacity(value) {
   tutorialButtonEl.style.opacity = value;
   tutorialButtonEl.style.pointerEvents = value === '1' ? 'auto' : 'none';
+  homePaymentButton.style.opacity = value;
+  homePaymentButton.style.pointerEvents = value === '1' ? 'auto' : 'none';
 }
 
 // 홈 화면 좌측 하단 "사업자 정보" 토글. 누르면 펼쳐지고 다시 누르면 접힌다.
