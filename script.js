@@ -2766,18 +2766,6 @@ async function verifyPaymentOnServer(paymentId) {
 
 paymentPayButton.addEventListener('click', async (e) => {
   e.stopPropagation();
-  // TODO: 포트원 실 연동 정보(PORTONE_STORE_ID/CHANNEL_KEY)가 아직 placeholder라
-  // 아래 실제 결제 로직을 그대로 실행하면 무조건 에러가 난다. 실 연동 값이
-  // 준비될 때까지 임시로 실제 결제/검증을 건너뛰고 바로 결과를 보여준다.
-  // 나중에 되돌리려면 이 if 블록만 지우면 된다.
-  if (true) {
-    hidePaymentScreen();
-    paymentOpenedFromHome = false;
-    if (pendingFinalSeason !== null) {
-      openLetterAfterPayment();
-    }
-    return;
-  }
   if (typeof PortOne === 'undefined') {
     paymentError.textContent = '결제 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
     paymentError.style.display = 'block';
