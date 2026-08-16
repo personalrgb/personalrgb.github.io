@@ -540,27 +540,6 @@ body {
   cursor: pointer;
 }
 
-/* 좌측에 제본용 펀치홀 두 개가 뚫려 있는 느낌을 낸다. */
-.hint-doc-page::before,
-.hint-doc-page::after {
-  content: '';
-  position: absolute;
-  left: 14px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1px solid rgba(17, 17, 17, 0.18);
-}
-
-.hint-doc-page::before {
-  top: 20px;
-}
-
-.hint-doc-page::after {
-  bottom: 20px;
-}
-
 .hint-doc-page-index {
   align-self: flex-end;
   margin: 0;

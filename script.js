@@ -2178,9 +2178,9 @@ function buildHintDocument(cards) {
     text.textContent = face.text;
 
     page.appendChild(index);
+    page.appendChild(img);
     page.appendChild(label);
     page.appendChild(badge);
-    page.appendChild(img);
     page.appendChild(text);
 
     tabEls.forEach((tab, i) => tab.classList.toggle('active', i === activeIndex));
