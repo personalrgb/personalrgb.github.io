@@ -520,6 +520,13 @@ body {
   object-fit: contain;
 }
 
+/* 서류 안 이미지는 카드 스택(모바일)보다 크게, 가운데 정렬로 보여준다. */
+.hint-doc-page .hint-card-illustration {
+  align-self: center;
+  width: 240px;
+  height: 240px;
+}
+
 .hint-card-text {
   margin: 0;
   font-size: 14px;
@@ -542,7 +549,7 @@ body {
   min-height: 680px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: 16px;
   padding: 40px 30px 32px;
@@ -554,35 +561,39 @@ body {
     4px 0 0 -1px #e4e4e1,
     8px 0 0 -2px #d6d6d3,
     0 20px 34px rgba(0, 0, 0, 0.2);
-  text-align: center;
+  text-align: left;
   cursor: pointer;
 }
 
+/* 몇 번째 페이지인지 보여주는 숫자는 서류 하단 중앙에 고정된다. */
 .hint-doc-page-index {
   position: absolute;
-  top: 24px;
-  right: 26px;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
   margin: 0;
   font-size: 11px;
   letter-spacing: 0.08em;
   color: rgba(23, 23, 23, 0.4);
 }
 
+/* 타이틀(라벨)과 Good/Bad 텍스트를 한 줄에 나란히 놓는다. */
+.hint-doc-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
 .hint-doc-badge {
   margin: 0;
   font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 3px 14px;
-  border-radius: 2px;
-  background: #171717;
-  color: #ffffff;
+  letter-spacing: 0.08em;
+  color: #171717;
 }
 
 .hint-doc-badge.bad {
-  background: transparent;
-  color: #171717;
-  border: 1px solid #171717;
+  color: rgba(23, 23, 23, 0.4);
 }
 
 /* 페이지가 넘어갈 때 오른쪽에서 살짝 미끄러져 들어오며 나타나는 모션. */

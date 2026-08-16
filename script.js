@@ -2168,6 +2168,11 @@ function buildHintDocument(cards) {
     badge.className = 'hint-doc-badge' + (face.state === 'bad' ? ' bad' : '');
     badge.textContent = face.state === 'good' ? 'GOOD' : 'BAD';
 
+    const titleRow = document.createElement('div');
+    titleRow.className = 'hint-doc-title-row';
+    titleRow.appendChild(label);
+    titleRow.appendChild(badge);
+
     const img = document.createElement('img');
     img.className = 'hint-card-illustration';
     img.src = face.image;
@@ -2177,11 +2182,10 @@ function buildHintDocument(cards) {
     text.className = 'hint-card-text';
     text.textContent = face.text;
 
-    page.appendChild(index);
     page.appendChild(img);
-    page.appendChild(label);
-    page.appendChild(badge);
+    page.appendChild(titleRow);
     page.appendChild(text);
+    page.appendChild(index);
 
     tabEls.forEach((tab, i) => tab.classList.toggle('active', i === activeIndex));
   }
