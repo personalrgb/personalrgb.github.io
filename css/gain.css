@@ -520,11 +520,16 @@ body {
   object-fit: contain;
 }
 
-/* 서류 안 이미지는 카드 스택(모바일)보다 크게, 가운데 정렬로 보여준다. */
+/* 서류 안 이미지는 카드 스택(모바일)보다 훨씬 크게 보여주되, 세로 기준으로
+   최대 높이를 잡아 서류가 화면 밖으로 넘칠 만큼 커지지 않게 한다(이미지가
+   세로로 긴 인물 사진이라 폭을 기준으로 키우면 높이가 감당 안 될 만큼
+   커진다). 그 안에서 폭은 원본 비율 그대로 최대한 채운다. */
 .hint-doc-page .hint-card-illustration {
   align-self: center;
-  width: 240px;
-  height: 240px;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: 60vh;
 }
 
 .hint-card-text {
@@ -550,9 +555,11 @@ body {
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  justify-content: center;
-  gap: 16px;
-  padding: 40px 30px 32px;
+  justify-content: flex-start;
+  gap: 24px;
+  /* 이미지 위(padding-top)와 이미지 아래(다음 요소까지의 gap)가 같은 24px가
+     되도록 맞춰서, 이미지 상하 여백이 동일해 보이게 한다. */
+  padding: 24px 20px 44px;
   background: #f5f5f3;
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 4px;
@@ -577,18 +584,26 @@ body {
   color: rgba(23, 23, 23, 0.4);
 }
 
-/* 타이틀(라벨)과 Good/Bad 텍스트를 한 줄에 나란히 놓는다. */
+/* 타이틀(라벨)과 Good/Bad 텍스트를 콜론으로 이어 한 줄에 나란히, 같은
+   크기로 놓는다. */
 .hint-doc-title-row {
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 8px;
+}
+
+.hint-doc-title-separator {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(23, 23, 23, 0.4);
 }
 
 .hint-doc-badge {
   margin: 0;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   color: #171717;
 }
 

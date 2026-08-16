@@ -2164,6 +2164,10 @@ function buildHintDocument(cards) {
     label.className = 'hint-card-label';
     label.textContent = face.label;
 
+    const separator = document.createElement('p');
+    separator.className = 'hint-doc-title-separator';
+    separator.textContent = ':';
+
     const badge = document.createElement('p');
     badge.className = 'hint-doc-badge' + (face.state === 'bad' ? ' bad' : '');
     badge.textContent = face.state === 'good' ? 'GOOD' : 'BAD';
@@ -2171,6 +2175,7 @@ function buildHintDocument(cards) {
     const titleRow = document.createElement('div');
     titleRow.className = 'hint-doc-title-row';
     titleRow.appendChild(label);
+    titleRow.appendChild(separator);
     titleRow.appendChild(badge);
 
     const img = document.createElement('img');
@@ -2406,6 +2411,23 @@ function showStageIntroVeil(heading, body) {
       stageIntroVeil.style.display = 'none';
     }, 800);
   }, 2500);
+}
+
+// 인트로 막이 떠 있는 동안 화면을 클릭하면, 다음 단계(색 선택 화면)로 바로
+// 건너뛰지 않고 그 다음 페이지인 서류 화면만 앞당겨 보여준다. 막이 이미
+// 사라진 상태였다면(=서류가 이미 보이는 중) false를 반환해 평소처럼
+// confirmStageHint가 계속 진행되게 한다.
+function skipStageIntroVeil() {
+  if (stageIntroVeil.style.display === 'none') return false;
+  clearTimeout(stageIntroVeilTimer);
+  stageIntroVeil.style.transition = 'opacity 0.4s ease';
+  stageIntroVeil.style.opacity = '0';
+  stageHintCards.style.transition = 'opacity 0.4s ease';
+  stageHintCards.style.opacity = '1';
+  stageIntroVeilTimer = setTimeout(() => {
+    stageIntroVeil.style.display = 'none';
+  }, 400);
+  return true;
 }
 
 function hideStageIntroVeil() {
@@ -3062,6 +3084,10 @@ function confirmStageHint() {
   // 봉투가 떠 있는 동안(pendingFinalSeason가 설정된 상태)에는 배경 클릭 등
   // 다른 경로로는 아무 것도 하지 않는다 — 봉투를 직접 눌러야만 결제 화면으로 넘어간다.
   if (pendingFinalSeason !== null) return;
+
+  // 인트로 막이 아직 떠 있는 상태였다면, 색 선택 화면으로 건너뛰지 않고
+  // 막만 먼저 걷어서 서류 화면을 보여준다.
+  if (skipStageIntroVeil()) return;
 
   if (!pendingStageIntro) return;
   const stage = pendingStageIntro;
