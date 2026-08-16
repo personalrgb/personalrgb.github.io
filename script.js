@@ -1305,9 +1305,8 @@ const STAGE_HINTS = {
         label: 'Light',
         good: '안색이 환해지고 피부 결이 매끄러워 보이며 이목구비가 부드럽게 살아납니다.',
         bad: '밝기에 얼굴이 밀려 이목구비가 흐려지고, 그늘이 진 것처럼 어두워지며 다크서클과 팔자 주름 음영이 짙어집니다.',
-        // TODO: 아직 전용 이미지가 없어서 임시로 채도-소프트-굿 이미지를 대신 쓴다.
-        goodImage: 'face-soft-good.png',
-        badImage: 'face-soft-good.png',
+        goodImage: 'face-light-good.png',
+        badImage: 'face-light-bad.png',
       },
       {
         label: 'Deep',
@@ -1335,8 +1334,7 @@ const STAGE_HINTS = {
         good: '얼굴과 색이 자연스럽게 어우러져 편안하고 고급스러운 인상이 됩니다.',
         bad: '얼굴까지 같이 탁해져 흐릿하고 생기 없이, 피곤하거나 아파 보입니다.',
         goodImage: 'face-soft-good.png',
-        // TODO: 아직 전용 이미지가 없어서 임시로 같은(Good) 이미지를 대신 쓴다.
-        badImage: 'face-soft-good.png',
+        badImage: 'face-soft-bad.png',
       },
     ],
   },
