@@ -532,33 +532,36 @@ body {
    우측에 튀어나온 색인 탭으로 원하는 페이지로 바로 건너뛸 수 있다. */
 .hint-doc {
   position: relative;
-  width: min(420px, 86vw);
+  width: min(520px, 88vw);
   margin: 4px auto 0;
 }
 
 .hint-doc-page {
   position: relative;
   box-sizing: border-box;
-  min-height: 480px;
+  min-height: 680px;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 16px;
   padding: 40px 30px 32px;
   background: #f5f5f3;
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 4px;
-  /* 아래로 살짝 어긋난 회색 종이 두 겹이 겹쳐 있는 것처럼 보이게 하는 그림자. */
+  /* 우측으로 살짝 어긋난 회색 종이 두 겹이 겹쳐 있는 것처럼 보이게 하는 그림자. */
   box-shadow:
-    0 4px 0 -1px #e4e4e1,
-    0 8px 0 -2px #d6d6d3,
+    4px 0 0 -1px #e4e4e1,
+    8px 0 0 -2px #d6d6d3,
     0 20px 34px rgba(0, 0, 0, 0.2);
   text-align: center;
   cursor: pointer;
 }
 
 .hint-doc-page-index {
-  align-self: flex-end;
+  position: absolute;
+  top: 24px;
+  right: 26px;
   margin: 0;
   font-size: 11px;
   letter-spacing: 0.08em;
