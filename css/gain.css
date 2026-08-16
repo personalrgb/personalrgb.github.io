@@ -475,6 +475,23 @@ body {
   color: rgba(255, 255, 255, 0.55);
 }
 
+/* 카드(서류)가 있는 단계 화면이 열릴 때, 화면을 잠깐 어둡게 가리고 그 위에
+   헤딩+설명 문구를 보여줬다가 몇 초 뒤 스르륵 사라지는 인트로 막. */
+.stage-intro-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.7);
+  pointer-events: none;
+}
+
 /* 명도/언더톤/채도 단계 안내에서 쓰는 콘텐츠 컨테이너. 데스크탑은 무채색
    서류 문서(.hint-doc) 한 개, 모바일은 카드 스택(.hint-card-stack)을 담는다. */
 .hint-cards {

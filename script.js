@@ -2364,19 +2364,72 @@ function buildMobileCardStack(cards) {
   return stack;
 }
 
+// 카드(서류)가 있는 단계 화면이 열릴 때, 서류가 바로 보이는 대신 화면을
+// 잠깐 어둡게 가리는 막 위에 헤딩+설명 문구를 띄웠다가 몇 초 뒤 스르륵
+// 사라지게 한다. 문구가 사라지고 나면 서류 화면 자체에는 이 문구가 다시
+// 나타나지 않는다 — 톤/명도/채도, 카드가 있는 모든 단계에 동일하게 적용된다.
+const stageIntroVeil = document.createElement('div');
+stageIntroVeil.className = 'stage-intro-veil';
+const stageIntroVeilHeading = document.createElement('h3');
+stageIntroVeilHeading.className = 'tutorial-heading';
+const stageIntroVeilBody = document.createElement('p');
+stageIntroVeilBody.className = 'tutorial-body';
+stageIntroVeilBody.style.maxWidth = '480px';
+stageIntroVeil.appendChild(stageIntroVeilHeading);
+stageIntroVeil.appendChild(stageIntroVeilBody);
+stageHintOverlay.appendChild(stageIntroVeil);
+
+let stageIntroVeilTimer = null;
+function showStageIntroVeil(heading, body) {
+  clearTimeout(stageIntroVeilTimer);
+  stageIntroVeilHeading.textContent = heading || '';
+  stageIntroVeilBody.textContent = body || '';
+  stageIntroVeilBody.style.display = body ? '' : 'none';
+  stageIntroVeil.style.display = 'flex';
+  stageIntroVeil.style.transition = 'none';
+  stageIntroVeil.style.opacity = '1';
+  // 막이 떠 있는 동안엔 뒤에 있는 서류가 비쳐 보이며 문구와 겹치지 않도록,
+  // 서류도 함께 숨겨둔다.
+  stageHintCards.style.transition = 'none';
+  stageHintCards.style.opacity = '0';
+  void stageIntroVeil.offsetWidth;
+  stageIntroVeil.style.transition = 'opacity 0.8s ease';
+  stageHintCards.style.transition = 'opacity 0.8s ease';
+  stageIntroVeilTimer = setTimeout(() => {
+    stageIntroVeil.style.opacity = '0';
+    stageHintCards.style.opacity = '1';
+    stageIntroVeilTimer = setTimeout(() => {
+      stageIntroVeil.style.display = 'none';
+    }, 800);
+  }, 2500);
+}
+
+function hideStageIntroVeil() {
+  clearTimeout(stageIntroVeilTimer);
+  stageIntroVeil.style.transition = 'none';
+  stageIntroVeil.style.opacity = '0';
+  stageIntroVeil.style.display = 'none';
+  stageHintCards.style.transition = 'none';
+  stageHintCards.style.opacity = '1';
+}
+
 function renderStageHintBody(hint) {
   stageHintCards.innerHTML = '';
   stageHintEnvelope.style.display = 'none';
   if (hint.cards) {
-    stageHintBody.textContent = hint.summary || '';
-    stageHintBody.style.display = hint.summary ? '' : 'none';
+    // 서류 화면 자체에는 헤딩/설명 문구를 띄우지 않는다 — 위 인트로 막에서만 보여준다.
+    stageHintHeading.style.display = 'none';
+    stageHintBody.style.display = 'none';
     stageHintCards.style.display = 'flex';
     if (isLikelyMobile) {
       stageHintCards.appendChild(buildMobileCardStack(hint.cards));
     } else {
       stageHintCards.appendChild(buildHintDocument(hint.cards));
     }
+    showStageIntroVeil(hint.heading, hint.summary);
   } else {
+    hideStageIntroVeil();
+    stageHintHeading.style.display = '';
     stageHintBody.textContent = hint.body || '';
     stageHintBody.style.display = '';
     stageHintCards.style.display = 'none';
