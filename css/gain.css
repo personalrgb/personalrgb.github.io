@@ -475,7 +475,8 @@ body {
   color: rgba(255, 255, 255, 0.55);
 }
 
-/* 명도/언더톤/채도 단계 안내에서 쓰는 Good/Bad 뒤집기 카드 두 장. */
+/* 명도/언더톤/채도 단계 안내에서 쓰는 콘텐츠 컨테이너. 데스크탑은 무채색
+   서류 문서(.hint-doc) 한 개, 모바일은 카드 스택(.hint-card-stack)을 담는다. */
 .hint-cards {
   display: none;
   width: 100%;
@@ -486,82 +487,6 @@ body {
   align-items: stretch;
   justify-content: center;
   margin-top: 4px;
-  perspective: 1400px;
-}
-
-/* 카드가 공중에 둥실둥실 떠 있는 것처럼 위아래로 오르내리며 살짝 회전하는
-   모션을 계속 반복한다. 두 카드가 똑같이 움직이면 부자연스러우니 두 번째
-   카드는 음수 딜레이로 주기를 어긋나게 시작한다. */
-@keyframes hintCardFloat {
-  0%, 100% { transform: translateY(0) rotate(0deg); }
-  25% { transform: translateY(-4px) rotate(-0.5deg); }
-  75% { transform: translateY(3px) rotate(0.4deg); }
-}
-
-.hint-card {
-  width: 340px;
-  cursor: pointer;
-  animation: hintCardFloat 9s ease-in-out infinite;
-  /* .hint-card 자체에도 뜨는 모션(transform)을 주기 때문에, 이 요소가 자체 3D
-     컨텍스트를 만들어 자식(.hint-card-inner)의 뒤집기 원근감을 깨뜨리지 않도록
-     preserve-3d로 부모의 perspective를 그대로 이어받게 한다. */
-  transform-style: preserve-3d;
-}
-
-.hint-card:nth-child(2n) {
-  animation-duration: 10s;
-  animation-delay: -5s;
-}
-
-.hint-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  min-height: 460px;
-  transform-style: preserve-3d;
-  transform: rotateY(0deg);
-}
-
-/* Good/Bad를 눌러 뒤집을 때, 살짝 작아졌다가 원래 크기로 돌아오면서 뒤집히는
-   느낌을 준다(단순 회전이 아니라 중간에 눌렸다 튀어나오는 느낌). */
-@keyframes hintCardFlipToBack {
-  0% { transform: scale(1) rotateY(0deg); }
-  50% { transform: scale(0.9) rotateY(90deg); }
-  100% { transform: scale(1) rotateY(180deg); }
-}
-
-@keyframes hintCardFlipToFront {
-  0% { transform: scale(1) rotateY(180deg); }
-  50% { transform: scale(0.9) rotateY(90deg); }
-  100% { transform: scale(1) rotateY(0deg); }
-}
-
-.hint-card-inner.flip-to-back {
-  animation: hintCardFlipToBack 0.6s cubic-bezier(0.4, 0.15, 0.2, 1) forwards;
-}
-
-.hint-card-inner.flip-to-front {
-  animation: hintCardFlipToFront 0.6s cubic-bezier(0.4, 0.15, 0.2, 1) forwards;
-}
-
-.hint-card-face {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 22px;
-  padding: 28px 22px;
-  border-radius: 22px;
-  background: #ffffff;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  text-align: center;
-}
-
-.hint-card-back {
-  transform: rotateY(180deg);
 }
 
 .hint-card-label {
@@ -578,31 +503,128 @@ body {
   object-fit: contain;
 }
 
-.hint-card-toggle {
-  display: flex;
-  gap: 14px;
-}
-
-.hint-toggle-btn {
-  border: none;
-  background: none;
-  padding: 2px;
-  font-family: inherit;
-  font-size: 13px;
-  color: rgba(23, 23, 23, 0.35);
-  cursor: pointer;
-}
-
-.hint-toggle-btn.active {
-  color: #171717;
-  font-weight: 700;
-}
-
 .hint-card-text {
   margin: 0;
   font-size: 14px;
   line-height: 1.65;
   color: rgba(23, 23, 23, 0.78);
+}
+
+/* 데스크탑 전용: Good/Bad 뒤집기 카드 두 장 대신, 무채색 서류철처럼 생긴
+   문서 한 개. 클릭하면 라벨×Good/Bad 조합 4페이지가 한 장씩 넘어가고,
+   우측에 튀어나온 색인 탭으로 원하는 페이지로 바로 건너뛸 수 있다. */
+.hint-doc {
+  position: relative;
+  width: min(420px, 86vw);
+  margin: 4px auto 0;
+}
+
+.hint-doc-page {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 40px 30px 32px;
+  background: #f5f5f3;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-radius: 4px;
+  /* 아래로 살짝 어긋난 회색 종이 두 겹이 겹쳐 있는 것처럼 보이게 하는 그림자. */
+  box-shadow:
+    0 4px 0 -1px #e4e4e1,
+    0 8px 0 -2px #d6d6d3,
+    0 20px 34px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  cursor: pointer;
+}
+
+/* 좌측에 제본용 펀치홀 두 개가 뚫려 있는 느낌을 낸다. */
+.hint-doc-page::before,
+.hint-doc-page::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(17, 17, 17, 0.18);
+}
+
+.hint-doc-page::before {
+  top: 20px;
+}
+
+.hint-doc-page::after {
+  bottom: 20px;
+}
+
+.hint-doc-page-index {
+  align-self: flex-end;
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  color: rgba(23, 23, 23, 0.4);
+}
+
+.hint-doc-badge {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  padding: 3px 14px;
+  border-radius: 2px;
+  background: #171717;
+  color: #ffffff;
+}
+
+.hint-doc-badge.bad {
+  background: transparent;
+  color: #171717;
+  border: 1px solid #171717;
+}
+
+/* 페이지가 넘어갈 때 오른쪽에서 살짝 미끄러져 들어오며 나타나는 모션. */
+@keyframes hintDocPageTurn {
+  0% { opacity: 0; transform: translateX(14px) scale(0.98); }
+  100% { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+.hint-doc-page.page-turn {
+  animation: hintDocPageTurn 0.35s ease-out;
+}
+
+/* 문서 우측에 튀어나와 있는 색인 탭. 각 탭은 해당 페이지의 라벨·Good/Bad를
+   제목으로 보여주고, 클릭하면 그 페이지로 바로 건너뛴다. */
+.hint-doc-tabs {
+  position: absolute;
+  top: 44px;
+  left: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.hint-doc-tab {
+  border: 1px solid rgba(17, 17, 17, 0.15);
+  border-left: none;
+  background: #e7e7e4;
+  color: rgba(23, 23, 23, 0.55);
+  font-family: inherit;
+  font-size: 10px;
+  letter-spacing: 0.03em;
+  padding: 7px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 0 3px 3px 0;
+}
+
+.hint-doc-tab.active {
+  background: #171717;
+  color: #ffffff;
+  border-color: #171717;
 }
 
 /* 모바일 전용: 카드 두 장을 뒤집는 대신, Good/Bad 얼굴 4장을 카드 더미로 겹쳐두고

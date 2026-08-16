@@ -2115,70 +2115,97 @@ stageHintBody.style.maxWidth = '480px';
 const stageHintCards = document.createElement('div');
 stageHintCards.className = 'hint-cards';
 
-// Good/Bad 카드 한 장(앞면=good, 뒷면=bad)을 만든다. 뒷면 텍스트는 Bad를 누르면
-// 카드가 뒤집히는 모션과 함께 드러난다. 얼굴 이미지는 나중에 실제 일러스트로
-// 교체하기 전까지 쓰는 임시 자리표시자(HINT_FACE_PLACEHOLDER).
-function buildHintCardFace(card, side) {
-  const face = document.createElement('div');
-  face.className = 'hint-card-face' + (side === 'bad' ? ' hint-card-back' : '');
-
-  const label = document.createElement('p');
-  label.className = 'hint-card-label';
-  label.textContent = card.label;
-
-  const img = document.createElement('img');
-  img.className = 'hint-card-illustration';
-  img.src = (side === 'good' ? card.goodImage : card.badImage) || HINT_FACE_PLACEHOLDER;
-  img.alt = '';
-
-  const toggle = document.createElement('div');
-  toggle.className = 'hint-card-toggle';
-  ['good', 'bad'].forEach((key) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'hint-toggle-btn' + (key === side ? ' active' : '');
-    btn.dataset.hintToggle = key;
-    btn.textContent = key === 'good' ? 'Good' : 'Bad';
-    toggle.appendChild(btn);
+// 데스크탑: Good/Bad 뒤집기 카드 두 장 대신, 무채색 서류철처럼 생긴 문서 한
+// 개를 보여준다. 라벨×Good/Bad 조합 4장(예: Warm-Good/Warm-Bad/Cool-Good/
+// Cool-Bad)이 페이지로 들어있고, 페이지를 클릭하면 한 장씩 넘어간다. 우측에는
+// 색인 탭이 튀어나와 있어(각 페이지 제목 표시) 원하는 페이지로 바로 건너뛸 수
+// 있다. 얼굴 이미지는 나중에 실제 일러스트로 교체하기 전까지 쓰는 임시
+// 자리표시자(HINT_FACE_PLACEHOLDER).
+function buildHintDocument(cards) {
+  const faces = [];
+  cards.forEach((card) => {
+    faces.push({ label: card.label, state: 'good', text: card.good, image: card.goodImage || HINT_FACE_PLACEHOLDER });
+    faces.push({ label: card.label, state: 'bad', text: card.bad, image: card.badImage || HINT_FACE_PLACEHOLDER });
   });
 
-  const text = document.createElement('p');
-  text.className = 'hint-card-text';
-  text.textContent = side === 'bad' ? card.bad : card.good;
+  const doc = document.createElement('div');
+  doc.className = 'hint-doc';
 
-  face.appendChild(label);
-  face.appendChild(img);
-  face.appendChild(toggle);
-  face.appendChild(text);
-  return face;
-}
+  const page = document.createElement('div');
+  page.className = 'hint-doc-page';
+  doc.appendChild(page);
 
-function buildHintCard(card) {
-  const wrap = document.createElement('div');
-  wrap.className = 'hint-card';
+  const tabs = document.createElement('div');
+  tabs.className = 'hint-doc-tabs';
+  doc.appendChild(tabs);
 
-  const inner = document.createElement('div');
-  inner.className = 'hint-card-inner';
-  inner.appendChild(buildHintCardFace(card, 'good'));
-  inner.appendChild(buildHintCardFace(card, 'bad'));
-  wrap.appendChild(inner);
+  let activeIndex = 0;
 
-  wrap.addEventListener('click', (e) => {
+  const tabEls = faces.map((face, i) => {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.className = 'hint-doc-tab';
+    tab.textContent = `${face.label} · ${face.state === 'good' ? 'Good' : 'Bad'}`;
+    tab.addEventListener('click', (e) => {
+      e.stopPropagation();
+      goTo(i);
+    });
+    tabs.appendChild(tab);
+    return tab;
+  });
+
+  function renderPage() {
+    const face = faces[activeIndex];
+    page.innerHTML = '';
+
+    const index = document.createElement('p');
+    index.className = 'hint-doc-page-index';
+    index.textContent = `${String(activeIndex + 1).padStart(2, '0')} / ${String(faces.length).padStart(2, '0')}`;
+
+    const label = document.createElement('p');
+    label.className = 'hint-card-label';
+    label.textContent = face.label;
+
+    const badge = document.createElement('p');
+    badge.className = 'hint-doc-badge' + (face.state === 'bad' ? ' bad' : '');
+    badge.textContent = face.state === 'good' ? 'GOOD' : 'BAD';
+
+    const img = document.createElement('img');
+    img.className = 'hint-card-illustration';
+    img.src = face.image;
+    img.alt = '';
+
+    const text = document.createElement('p');
+    text.className = 'hint-card-text';
+    text.textContent = face.text;
+
+    page.appendChild(index);
+    page.appendChild(label);
+    page.appendChild(badge);
+    page.appendChild(img);
+    page.appendChild(text);
+
+    tabEls.forEach((tab, i) => tab.classList.toggle('active', i === activeIndex));
+  }
+
+  function goTo(i) {
+    if (i === activeIndex) return;
+    activeIndex = i;
+    renderPage();
+    // 페이지가 넘어갈 때마다 다시 애니메이션이 재생되도록, 클래스를 지웠다가
+    // 리플로우를 강제한 뒤 다시 붙인다.
+    page.classList.remove('page-turn');
+    void page.offsetWidth;
+    page.classList.add('page-turn');
+  }
+
+  page.addEventListener('click', (e) => {
     e.stopPropagation();
-    const btn = e.target.closest('[data-hint-toggle]');
-    if (!btn) return;
-    const toBack = btn.dataset.hintToggle === 'bad';
-    const isFlipped = wrap.classList.contains('flipped');
-    if (toBack === isFlipped) return; // 이미 같은 면이면 다시 뒤집지 않는다.
-    wrap.classList.toggle('flipped', toBack);
-    // 같은 방향으로 다시 눌러도(예: 뒤집힌 상태에서 다시 Bad) 항상 애니메이션이
-    // 새로 재생되도록, 클래스를 지웠다가 리플로우를 강제한 뒤 다시 붙인다.
-    inner.classList.remove('flip-to-back', 'flip-to-front');
-    void inner.offsetWidth;
-    inner.classList.add(toBack ? 'flip-to-back' : 'flip-to-front');
+    goTo((activeIndex + 1) % faces.length);
   });
 
-  return wrap;
+  renderPage();
+  return doc;
 }
 
 // 명도/언더톤/채도처럼 두 축(Light-Deep 등)이 있는 단계는 카드 두 장을, 종합처럼
@@ -2349,7 +2376,7 @@ function renderStageHintBody(hint) {
     if (isLikelyMobile) {
       stageHintCards.appendChild(buildMobileCardStack(hint.cards));
     } else {
-      hint.cards.forEach((card) => stageHintCards.appendChild(buildHintCard(card)));
+      stageHintCards.appendChild(buildHintDocument(hint.cards));
     }
   } else {
     stageHintBody.textContent = hint.body || '';
