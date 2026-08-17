@@ -622,13 +622,12 @@ body {
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 4px;
   /* 우측으로 어긋난 회색 종이 세 겹(+ 맨 앞의 본체 = 총 4장, 갈피 4개와
-     맞춤)이 겹쳐 있는 것처럼 보이게 하는 그림자. 간격(15px)은 갈피의
-     계단식 간격(TAB_STEP_PX, script.js)과 맞춰서 같은 종이가 이어지는
-     것처럼 보이게 한다. */
+     맞춤)이 겹쳐 있는 것처럼 보이게 하는 그림자. 이 간격은 갈피의 계단식
+     간격(TAB_STEP_PX, script.js)과는 별개로 여기서 직접 조절한다. */
   box-shadow:
-    13px 0 0 -1px #e4e4e1,
-    26px 0 0 -2px #d6d6d3,
-    39px 0 0 -3px #c8c8c5,
+    13.5px 0 0 -1px #e4e4e1,
+    27px 0 0 -2px #d6d6d3,
+    40.5px 0 0 -3px #c8c8c5,
     0 20px 34px rgba(0, 0, 0, 0.2);
   text-align: left;
   cursor: pointer;
