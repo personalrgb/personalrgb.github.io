@@ -626,9 +626,9 @@ body {
      계단식 간격(TAB_STEP_PX, script.js)과 맞춰서 같은 종이가 이어지는
      것처럼 보이게 한다. */
   box-shadow:
-    15px 0 0 -1px #e4e4e1,
-    30px 0 0 -2px #d6d6d3,
-    45px 0 0 -3px #c8c8c5,
+    14px 0 0 -1px #e4e4e1,
+    28px 0 0 -2px #d6d6d3,
+    42px 0 0 -3px #c8c8c5,
     0 20px 34px rgba(0, 0, 0, 0.2);
   text-align: left;
   cursor: pointer;
