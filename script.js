@@ -2158,10 +2158,10 @@ function buildHintDocument(cards) {
 
   let activeIndex = 0;
 
-  // 갈피는 맨 위(0번)가 가장 앞이자 서류 오른쪽 면(각 겹쳐진 종이 층의 오른쪽
-  // 끝)과 정확히 맞닿는 자리이고, 아래로 갈수록 한 장씩 더 오른쪽(뒤)으로
-  // 밀려나 서류의 겹쳐진 종이 층(4px 간격)과 같은 간격으로 이어진다.
-  // 선택된 갈피만 이 순서를 무시하고 0번 자리(맨 앞)로 당겨진다.
+  // 갈피는 각자 자기 자리(맨 위 0번부터 아래로 갈수록 한 장씩 더
+  // 오른쪽/뒤로 밀려난 계단식 위치)에 고정돼 있고, 절대 움직이지 않는다.
+  // 대신 어떤 갈피를 고르면 종이(서류) 쪽이 그 갈피의 깊이만큼 이동해서
+  // 맞닿는다(아래 renderPage의 translateX).
   const TAB_STEP_PX = 18;
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
@@ -2235,12 +2235,14 @@ function buildHintDocument(cards) {
     page.appendChild(text);
     page.appendChild(index);
 
+    // 갈피는 자기 자리에 고정된 채로 있고, 그 갈피와 맞닿아야 하는 종이(서류)
+    // 쪽이 선택된 갈피의 깊이만큼 오른쪽으로 이동한다.
+    page.style.transform = `translateX(${activeIndex * TAB_STEP_PX}px)`;
+
     tabEls.forEach((tab, i) => {
       const isActive = i === activeIndex;
       tab.classList.toggle('active', isActive);
-      // 선택된 갈피는 순서와 무관하게 항상 맨 앞(0번 자리, 서류 오른쪽 면과
-      // 맞닿는 위치)으로 당겨지고 전부보다 앞으로 올라온다.
-      tab.style.marginLeft = isActive ? '0px' : `${i * TAB_STEP_PX}px`;
+      // 선택된 갈피는 위치는 그대로 두고, 다른 갈피보다 앞으로만 올라온다.
       tab.style.zIndex = isActive ? String(faces.length + 1) : String(faces.length - i);
     });
   }
