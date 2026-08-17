@@ -690,7 +690,9 @@ body {
 .hint-doc-tab {
   border: 1px solid rgba(17, 17, 17, 0.15);
   border-left: none;
-  background: #e9e7e2 url('../envelope-letter-card.png');
+  /* 배경색은 자리(slot)에 따라 script.js가 인라인으로 지정한다(맨 왼쪽이
+     밝고 오른쪽으로 갈수록 어두워짐, 서류 종이 계단층과 같은 색). */
+  background-image: url('../envelope-letter-card.png');
   background-size: cover;
   color: rgba(23, 23, 23, 0.6);
   font-family: inherit;

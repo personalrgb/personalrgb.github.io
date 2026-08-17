@@ -2163,6 +2163,9 @@ function buildHintDocument(cards) {
   // 자리로 오고, 그보다 앞(왼쪽)에 있던 갈피들은 순서를 유지한 채 맨 뒤로
   // 밀린다. 예: 1234에서 3을 고르면 3412가 된다(왼쪽으로 도는 순환).
   const TAB_STEP_PX = 13;
+  // 서류 종이 본체(가장 밝음) + 그림자 세 겹(갈수록 어두워짐)과 정확히 같은
+  // 색. 자리(slot) 0번이 이 배열의 첫 색을, 마지막 자리가 마지막 색을 쓴다.
+  const TAB_SLOT_COLORS = ['#f5f5f3', '#e4e4e1', '#d6d6d3', '#c8c8c5'];
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
@@ -2245,6 +2248,9 @@ function buildHintDocument(cards) {
       const slot = (i - activeIndex + n) % n;
       tab.style.marginLeft = `${slot * TAB_STEP_PX}px`;
       tab.style.zIndex = String(n - slot);
+      // 자리(slot)에 따라 색을 입힌다 — 서류 종이의 계단층(본체·그림자 세
+      // 겹)과 같은 색으로, 맨 왼쪽(0번)이 가장 밝고 오른쪽으로 갈수록 어둡다.
+      tab.style.backgroundColor = TAB_SLOT_COLORS[Math.min(slot, TAB_SLOT_COLORS.length - 1)];
     });
   }
 
