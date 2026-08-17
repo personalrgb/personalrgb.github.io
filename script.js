@@ -2113,6 +2113,25 @@ stageHintBody.style.maxWidth = '480px';
 const stageHintCards = document.createElement('div');
 stageHintCards.className = 'hint-cards';
 
+// 서류 안 얼굴 사진을 누르면 화면이 어두워지며 그 사진만 화면 중앙에 크게
+// 떠오르는 라이트박스. 여러 서류/페이지에서 공유해서 쓰는 싱글턴이라 한
+// 번만 만들어둔다.
+const hintImageLightbox = document.createElement('div');
+hintImageLightbox.className = 'hint-image-lightbox';
+const hintImageLightboxImg = document.createElement('img');
+hintImageLightbox.appendChild(hintImageLightboxImg);
+hintImageLightbox.addEventListener('click', () => {
+  hintImageLightbox.style.opacity = '0';
+  hintImageLightbox.style.pointerEvents = 'none';
+});
+document.body.appendChild(hintImageLightbox);
+
+function openHintImageLightbox(src) {
+  hintImageLightboxImg.src = src;
+  hintImageLightbox.style.opacity = '1';
+  hintImageLightbox.style.pointerEvents = 'auto';
+}
+
 // 데스크탑: Good/Bad 뒤집기 카드 두 장 대신, 무채색 서류철처럼 생긴 문서 한
 // 개를 보여준다. 라벨×Good/Bad 조합 4장(예: Warm-Good/Warm-Bad/Cool-Good/
 // Cool-Bad)이 페이지로 들어있고, 페이지를 클릭하면 한 장씩 넘어간다. 우측에는
@@ -2178,16 +2197,33 @@ function buildHintDocument(cards) {
     titleRow.appendChild(separator);
     titleRow.appendChild(badge);
 
+    // 클립이 사진 위쪽을 살짝 물고 있는 것처럼, 사진 위에 클립 이미지를
+    // 겹쳐서 꽂아둔다. 사진을 누르면 라이트박스로 크게 볼 수 있다.
+    const photoWrap = document.createElement('div');
+    photoWrap.className = 'hint-doc-photo';
+
+    const clip = document.createElement('img');
+    clip.className = 'hint-doc-clip';
+    clip.src = 'clip.png';
+    clip.alt = '';
+
     const img = document.createElement('img');
     img.className = 'hint-card-illustration';
     img.src = face.image;
     img.alt = '';
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openHintImageLightbox(face.image);
+    });
+
+    photoWrap.appendChild(clip);
+    photoWrap.appendChild(img);
 
     const text = document.createElement('p');
     text.className = 'hint-card-text';
     text.textContent = face.text;
 
-    page.appendChild(img);
+    page.appendChild(photoWrap);
     page.appendChild(titleRow);
     page.appendChild(text);
     page.appendChild(index);

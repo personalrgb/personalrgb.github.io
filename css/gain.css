@@ -520,16 +520,65 @@ body {
   object-fit: contain;
 }
 
+/* 클립이 사진 위쪽에 꽂혀 있는 것처럼 겹쳐 보여주는 감싸개. */
+.hint-doc-photo {
+  position: relative;
+  align-self: center;
+  display: flex;
+  justify-content: center;
+  margin-top: 46px;
+}
+
+.hint-doc-clip {
+  position: absolute;
+  top: -54px;
+  left: 50%;
+  width: 62px;
+  height: auto;
+  transform: translateX(-50%) rotate(-7deg);
+  z-index: 2;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.25));
+}
+
 /* 서류 안 이미지는 카드 스택(모바일)보다 훨씬 크게 보여주되, 세로 기준으로
    최대 높이를 잡아 서류가 화면 밖으로 넘칠 만큼 커지지 않게 한다(이미지가
    세로로 긴 인물 사진이라 폭을 기준으로 키우면 높이가 감당 안 될 만큼
-   커진다). 그 안에서 폭은 원본 비율 그대로 최대한 채운다. */
+   커진다). 그 안에서 폭은 원본 비율 그대로 최대한 채운다. 클립에 꽂힌
+   사진처럼 살짝 기울여두고, 클릭하면 라이트박스로 크게 볼 수 있다. */
 .hint-doc-page .hint-card-illustration {
-  align-self: center;
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 60vh;
+  max-height: 58vh;
+  transform: rotate(-3deg);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.18);
+  cursor: zoom-in;
+}
+
+/* 화면을 어둡게 가리고 그 위에 클릭한 얼굴 사진을 크게 보여주는 라이트박스. */
+.hint-image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px;
+  background: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+  cursor: zoom-out;
+}
+
+.hint-image-lightbox img {
+  max-width: min(560px, 88vw);
+  max-height: 88vh;
+  object-fit: contain;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
 .hint-card-text {
@@ -560,7 +609,9 @@ body {
   /* 이미지 위(padding-top)와 이미지 아래(다음 요소까지의 gap)가 같은 24px가
      되도록 맞춰서, 이미지 상하 여백이 동일해 보이게 한다. */
   padding: 24px 20px 44px;
-  background: #f5f5f3;
+  /* 결과 편지지와 같은 종이 질감 이미지를 깔아, 서류도 실제 종이처럼 보이게 한다. */
+  background: #f5f5f3 url('envelope-letter-card.png');
+  background-size: cover;
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 4px;
   /* 우측으로 살짝 어긋난 회색 종이 두 겹이 겹쳐 있는 것처럼 보이게 하는 그림자. */
@@ -621,29 +672,49 @@ body {
   animation: hintDocPageTurn 0.35s ease-out;
 }
 
-/* 문서 우측에 튀어나와 있는 색인 탭. 각 탭은 해당 페이지의 라벨·Good/Bad를
-   제목으로 보여주고, 클릭하면 그 페이지로 바로 건너뛴다. */
+/* 문서 우측에 튀어나와 있는 서류철 갈피. 실제 파일 폴더 인덱스처럼 세로로
+   길쭉하고, 서로 다른 깊이로 어긋나게 튀어나와 겹쳐 쌓인 것처럼 보이게
+   한다. 각 갈피는 해당 페이지의 라벨·Good/Bad를 제목으로 보여주고,
+   클릭하면 그 페이지로 바로 건너뛴다. */
 .hint-doc-tabs {
   position: absolute;
-  top: 44px;
+  top: 26px;
   left: 100%;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
 .hint-doc-tab {
   border: 1px solid rgba(17, 17, 17, 0.15);
   border-left: none;
-  background: #e7e7e4;
-  color: rgba(23, 23, 23, 0.55);
+  background: #e9e7e2 url('envelope-letter-card.png');
+  background-size: cover;
+  color: rgba(23, 23, 23, 0.6);
   font-family: inherit;
-  font-size: 10px;
-  letter-spacing: 0.03em;
-  padding: 7px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  width: 88px;
+  min-height: 84px;
+  box-sizing: border-box;
+  padding: 14px 12px;
+  display: flex;
+  align-items: center;
+  text-align: left;
   cursor: pointer;
-  white-space: nowrap;
-  border-radius: 0 3px 3px 0;
+  border-radius: 0 14px 14px 0;
+  box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
+}
+
+/* 갈피마다 튀어나온 깊이를 다르게 줘서, 층층이 쌓인 서류철 인덱스처럼 보이게 한다. */
+.hint-doc-tab:nth-child(odd) {
+  margin-left: 0;
+}
+
+.hint-doc-tab:nth-child(even) {
+  margin-left: 16px;
 }
 
 .hint-doc-tab.active {
