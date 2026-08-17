@@ -626,9 +626,9 @@ body {
      계단식 간격(TAB_STEP_PX, script.js)과 맞춰서 같은 종이가 이어지는
      것처럼 보이게 한다. */
   box-shadow:
-    13.2px 0 0 -1px #e4e4e1,
-    26.4px 0 0 -2px #d6d6d3,
-    39.6px 0 0 -3px #c8c8c5,
+    13px 0 0 -1px #e4e4e1,
+    26px 0 0 -2px #d6d6d3,
+    39px 0 0 -3px #c8c8c5,
     0 20px 34px rgba(0, 0, 0, 0.2);
   text-align: left;
   cursor: pointer;
@@ -682,7 +682,7 @@ body {
   top: 26px;
   left: 100%;
   /* 갈피 묶음 전체 위치(우측으로 밀린 정도)를 조정하는 값. */
-  margin-left: -5px;
+  margin-left: -4.8px;
   display: flex;
   flex-direction: column;
   gap: 12px;
