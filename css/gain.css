@@ -526,7 +526,7 @@ body {
   align-self: center;
   display: flex;
   justify-content: center;
-  margin-top: 50px;
+  margin-top: 78px;
 }
 
 /* 클립은 기울이지 않고 똑바로, 서류 위쪽 가장자리에 걸터앉은 것처럼 더
@@ -553,6 +553,9 @@ body {
   max-width: 100%;
   height: auto;
   max-height: 62vh;
+  /* 클립은 그대로 두고 사진만 위로 당긴다(클립은 감싸개 기준 절대 위치라
+     이 마진의 영향을 받지 않는다). */
+  margin-top: -28px;
   transform: rotate(-3deg);
   cursor: zoom-in;
 }
