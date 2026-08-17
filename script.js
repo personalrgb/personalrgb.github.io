@@ -2158,17 +2158,15 @@ function buildHintDocument(cards) {
 
   let activeIndex = 0;
 
-  // 갈피는 각자 자기 자리(맨 위 0번부터 아래로 갈수록 한 장씩 더
-  // 오른쪽/뒤로 밀려난 계단식 위치)에 고정돼 있고, 절대 움직이지 않는다.
-  // 대신 어떤 갈피를 고르면 종이(서류) 쪽이 그 갈피의 깊이만큼 이동해서
-  // 맞닿는다(아래 renderPage의 translateX).
+  // 서류 종이의 위치와 계단식 자리(0, 14, 28, 42px…)는 고정되어 있다. 갈피를
+  // 고르면 종이가 아니라 갈피들의 자리가 바뀐다 — 선택된 갈피가 맨 앞(0번)
+  // 자리로 오고, 그보다 앞(왼쪽)에 있던 갈피들은 순서를 유지한 채 맨 뒤로
+  // 밀린다. 예: 1234에서 3을 고르면 3412가 된다(왼쪽으로 도는 순환).
   const TAB_STEP_PX = 14;
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
     tab.className = 'hint-doc-tab';
-    tab.style.zIndex = String(faces.length - i);
-    tab.style.marginLeft = `${i * TAB_STEP_PX}px`;
     tab.textContent = `${face.label} · ${face.state === 'good' ? 'Good' : 'Bad'}`;
     tab.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2235,15 +2233,18 @@ function buildHintDocument(cards) {
     page.appendChild(text);
     page.appendChild(index);
 
-    // 갈피는 자기 자리에 고정된 채로 있고, 그 갈피와 맞닿아야 하는 종이(서류)
-    // 쪽이 선택된 갈피의 깊이만큼 오른쪽으로 이동한다.
-    page.style.transform = `translateX(${activeIndex * TAB_STEP_PX}px)`;
+    // 종이(서류)는 항상 제자리(0번 깊이)에 고정된다.
+    page.style.transform = 'translateX(0)';
 
+    const n = faces.length;
     tabEls.forEach((tab, i) => {
       const isActive = i === activeIndex;
       tab.classList.toggle('active', isActive);
-      // 선택된 갈피는 위치는 그대로 두고, 다른 갈피보다 앞으로만 올라온다.
-      tab.style.zIndex = isActive ? String(faces.length + 1) : String(faces.length - i);
+      // 선택된 갈피가 0번(맨 앞) 자리로 오고, 나머지는 원래 순서를 유지한
+      // 채 그 뒤로 한 칸씩 밀린다(왼쪽으로 도는 순환 이동).
+      const slot = (i - activeIndex + n) % n;
+      tab.style.marginLeft = `${slot * TAB_STEP_PX}px`;
+      tab.style.zIndex = String(n - slot);
     });
   }
 
