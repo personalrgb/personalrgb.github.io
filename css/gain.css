@@ -708,6 +708,9 @@ body {
   cursor: pointer;
   border-radius: 0 14px 14px 0;
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
+  /* 그림자가 우측·하단으로만 퍼지게 하고, 서류와 맞닿는 왼쪽 면에는 그림자가
+     번져 보이지 않게 잘라낸다. */
+  clip-path: inset(0 -30px -30px 0);
 }
 
 /* 갈피마다 튀어나온 깊이(margin-left)와 쌓임 순서(z-index)는 서류의 겹쳐진
