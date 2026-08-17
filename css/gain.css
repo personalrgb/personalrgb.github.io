@@ -664,6 +664,8 @@ body {
   gap: 8px;
   /* 본문 좌측 여백(12px)과 맞춘다. */
   padding-left: 12px;
+  /* 사진과의 간격(기본 gap 24px)을 줄여 타이틀을 위로 당긴다. */
+  margin-top: -14px;
 }
 
 .hint-doc-title-separator {
