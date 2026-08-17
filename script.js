@@ -2251,6 +2251,10 @@ function buildHintDocument(cards) {
       // 자리(slot)에 따라 색을 입힌다 — 서류 종이의 계단층(본체·그림자 세
       // 겹)과 같은 색으로, 맨 왼쪽(0번)이 가장 밝고 오른쪽으로 갈수록 어둡다.
       tab.style.backgroundColor = TAB_SLOT_COLORS[Math.min(slot, TAB_SLOT_COLORS.length - 1)];
+      // 0번(맨 앞) 자리는 실제 서류 본체와 맞닿아 있어 그 종이 질감까지
+      // 그대로 이어지지만, 그 뒤 자리들은 서류의 box-shadow로 흉내 낸
+      // 단색 층과 맞닿으므로 질감 없는 단색이어야 색이 완전히 같아 보인다.
+      tab.style.backgroundImage = slot === 0 ? "url('../envelope-letter-card.png')" : 'none';
     });
   }
 
