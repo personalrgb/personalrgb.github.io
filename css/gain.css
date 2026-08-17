@@ -681,10 +681,8 @@ body {
   position: absolute;
   top: 26px;
   left: 100%;
-  /* 각 갈피의 왼쪽 면이 서류(와 겹쳐진 종이 층들)의 오른쪽 면과 정확히
-     맞닿도록, 여기서는 따로 밀지 않는다 — 정렬은 각 갈피 자신의
-     margin-left(0, 4px, 8px, 12px…)가 서류의 겹쳐진 층 간격과 같은 값으로
-     맡는다. */
+  /* 갈피 묶음 전체를 우측으로 조금 더 밀어둔다. */
+  margin-left: 10px;
   display: flex;
   flex-direction: column;
   gap: 12px;
