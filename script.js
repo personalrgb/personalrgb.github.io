@@ -2162,7 +2162,7 @@ function buildHintDocument(cards) {
   // 고르면 종이가 아니라 갈피들의 자리가 바뀐다 — 선택된 갈피가 맨 앞(0번)
   // 자리로 오고, 그보다 앞(왼쪽)에 있던 갈피들은 순서를 유지한 채 맨 뒤로
   // 밀린다. 예: 1234에서 3을 고르면 3412가 된다(왼쪽으로 도는 순환).
-  const TAB_STEP_PX = 14;
+  const TAB_STEP_PX = 13.5;
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
