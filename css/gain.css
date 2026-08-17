@@ -526,7 +526,7 @@ body {
   align-self: center;
   display: flex;
   justify-content: center;
-  margin-top: 78px;
+  margin-top: 50px;
 }
 
 /* 클립은 기울이지 않고 똑바로, 서류 위쪽 가장자리에 걸터앉은 것처럼 더
@@ -606,7 +606,7 @@ body {
 .hint-doc-page {
   position: relative;
   box-sizing: border-box;
-  min-height: 680px;
+  min-height: 560px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
