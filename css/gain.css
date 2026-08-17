@@ -533,7 +533,7 @@ body {
    위로 올려둔다. */
 .hint-doc-clip {
   position: absolute;
-  top: -113px;
+  top: -113.5px;
   left: 50%;
   width: 62px;
   height: auto;
