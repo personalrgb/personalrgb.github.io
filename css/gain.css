@@ -681,7 +681,7 @@ body {
   top: 26px;
   left: 100%;
   /* 갈피 묶음 전체 위치(우측으로 밀린 정도)를 조정하는 값. */
-  margin-left: -1.08px;
+  margin-left: -1.1px;
   display: flex;
   flex-direction: column;
   gap: 12px;
