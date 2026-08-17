@@ -2158,13 +2158,17 @@ function buildHintDocument(cards) {
 
   let activeIndex = 0;
 
-  // 갈피는 맨 위(0번)가 가장 앞, 아래로 갈수록 한 장씩 뒤로 밀려있는 순서로
-  // 쌓는다. 선택된 갈피만 이 순서를 무시하고 전부보다 앞으로 올라온다.
+  // 갈피는 맨 위(0번)가 가장 앞이자 서류 오른쪽 면(각 겹쳐진 종이 층의 오른쪽
+  // 끝)과 정확히 맞닿는 자리이고, 아래로 갈수록 한 장씩 더 오른쪽(뒤)으로
+  // 밀려나 서류의 겹쳐진 종이 층(4px 간격)과 같은 간격으로 이어진다.
+  // 선택된 갈피만 이 순서를 무시하고 0번 자리(맨 앞)로 당겨진다.
+  const TAB_STEP_PX = 4;
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
     tab.className = 'hint-doc-tab';
     tab.style.zIndex = String(faces.length - i);
+    tab.style.marginLeft = `${i * TAB_STEP_PX}px`;
     tab.textContent = `${face.label} · ${face.state === 'good' ? 'Good' : 'Bad'}`;
     tab.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2234,7 +2238,9 @@ function buildHintDocument(cards) {
     tabEls.forEach((tab, i) => {
       const isActive = i === activeIndex;
       tab.classList.toggle('active', isActive);
-      // 선택된 갈피는 맨 위/아래 순서와 무관하게 항상 전부보다 앞으로 올라온다.
+      // 선택된 갈피는 순서와 무관하게 항상 맨 앞(0번 자리, 서류 오른쪽 면과
+      // 맞닿는 위치)으로 당겨지고 전부보다 앞으로 올라온다.
+      tab.style.marginLeft = isActive ? '0px' : `${i * TAB_STEP_PX}px`;
       tab.style.zIndex = isActive ? String(faces.length + 1) : String(faces.length - i);
     });
   }

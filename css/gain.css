@@ -682,8 +682,10 @@ body {
   position: absolute;
   top: 26px;
   left: 100%;
-  /* 서류 오른쪽 가장자리와 갈피 사이에 빈틈이 안 보이도록 확실히 겹쳐 붙인다. */
-  margin-left: -18px;
+  /* 각 갈피의 왼쪽 면이 서류(와 겹쳐진 종이 층들)의 오른쪽 면과 정확히
+     맞닿도록, 여기서는 따로 밀지 않는다 — 정렬은 각 갈피 자신의
+     margin-left(0, 4px, 8px, 12px…)가 서류의 겹쳐진 층 간격과 같은 값으로
+     맡는다. */
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -712,21 +714,10 @@ body {
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
 }
 
-/* 갈피마다 튀어나온 깊이를 다르게 줘서, 층층이 쌓인 서류철 인덱스처럼 보이게 한다. */
-.hint-doc-tab:nth-child(odd) {
-  margin-left: 0;
-}
-
-.hint-doc-tab:nth-child(even) {
-  margin-left: 16px;
-}
-
-/* 선택된 갈피는 검정 배경으로 바뀌는 대신, 서류와 같은 깊이(margin-left:0)로
-   당겨져 종이와 같은 높이에 붙어 있는 것처럼 보인다. 맨 앞으로 올라오는
-   z-index는 JS에서 인라인으로 직접 지정한다(순서별 기본 z-index를 확실히
-   덮어써야 해서 CSS 클래스보다 인라인이 필요하다). */
+/* 갈피마다 튀어나온 깊이(margin-left)와 쌓임 순서(z-index)는 서류의 겹쳐진
+   종이 층 간격에 맞춰 script.js가 인라인으로 직접 지정한다(선택된 갈피가
+   0번 자리로 당겨질 때도 인라인이라야 이 기본값을 확실히 덮어쓴다). */
 .hint-doc-tab.active {
-  margin-left: 0;
   color: #171717;
   box-shadow: 4px 5px 10px rgba(0, 0, 0, 0.2);
 }
