@@ -596,8 +596,10 @@ body {
   position: relative;
   /* 서류는 화면 중앙에 오지만 갈피는 그 오른쪽으로 더 튀어나오므로, 폭을
      88vw로만 잡으면 좁은 창에서 갈피가 화면 밖으로 잘려 나간다. 갈피가
-     차지할 폭(약 90px)까지 감안해서 화면 안에 항상 다 들어오게 한다. */
-  width: min(520px, calc(100vw - 220px));
+     차지할 폭(계단식 간격이 커진 만큼 더 넓게)까지 감안해서 화면 안에
+     항상 다 들어오게 하되, 너무 좁아져 타이틀/본문이 잘리지 않도록
+     최소 폭(320px)은 지킨다. */
+  width: min(520px, max(320px, calc(100vw - 280px)));
   margin: 4px auto 0;
 }
 
@@ -620,11 +622,11 @@ body {
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 4px;
   /* 우측으로 어긋난 회색 종이 두 겹이 겹쳐 있는 것처럼 보이게 하는 그림자.
-     간격(10px)은 갈피의 계단식 간격(TAB_STEP_PX, script.js)과 맞춰서
+     간격(18px)은 갈피의 계단식 간격(TAB_STEP_PX, script.js)과 맞춰서
      같은 종이가 이어지는 것처럼 보이게 한다. */
   box-shadow:
-    10px 0 0 -1px #e4e4e1,
-    20px 0 0 -2px #d6d6d3,
+    18px 0 0 -1px #e4e4e1,
+    36px 0 0 -2px #d6d6d3,
     0 20px 34px rgba(0, 0, 0, 0.2);
   text-align: left;
   cursor: pointer;
@@ -667,16 +669,6 @@ body {
 
 .hint-doc-badge.bad {
   color: rgba(23, 23, 23, 0.4);
-}
-
-/* 페이지가 넘어갈 때 오른쪽에서 살짝 미끄러져 들어오며 나타나는 모션. */
-@keyframes hintDocPageTurn {
-  0% { opacity: 0; transform: translateX(14px) scale(0.98); }
-  100% { opacity: 1; transform: translateX(0) scale(1); }
-}
-
-.hint-doc-page.page-turn {
-  animation: hintDocPageTurn 0.35s ease-out;
 }
 
 /* 문서 우측에 튀어나와 있는 서류철 갈피. 실제 파일 폴더 인덱스처럼 세로로

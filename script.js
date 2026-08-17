@@ -2162,7 +2162,7 @@ function buildHintDocument(cards) {
   // 끝)과 정확히 맞닿는 자리이고, 아래로 갈수록 한 장씩 더 오른쪽(뒤)으로
   // 밀려나 서류의 겹쳐진 종이 층(4px 간격)과 같은 간격으로 이어진다.
   // 선택된 갈피만 이 순서를 무시하고 0번 자리(맨 앞)로 당겨진다.
-  const TAB_STEP_PX = 10;
+  const TAB_STEP_PX = 18;
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
@@ -2249,11 +2249,6 @@ function buildHintDocument(cards) {
     if (i === activeIndex) return;
     activeIndex = i;
     renderPage();
-    // 페이지가 넘어갈 때마다 다시 애니메이션이 재생되도록, 클래스를 지웠다가
-    // 리플로우를 강제한 뒤 다시 붙인다.
-    page.classList.remove('page-turn');
-    void page.offsetWidth;
-    page.classList.add('page-turn');
   }
 
   page.addEventListener('click', (e) => {
