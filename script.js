@@ -2162,7 +2162,7 @@ function buildHintDocument(cards) {
   // 오른쪽/뒤로 밀려난 계단식 위치)에 고정돼 있고, 절대 움직이지 않는다.
   // 대신 어떤 갈피를 고르면 종이(서류) 쪽이 그 갈피의 깊이만큼 이동해서
   // 맞닿는다(아래 renderPage의 translateX).
-  const TAB_STEP_PX = 18;
+  const TAB_STEP_PX = 15;
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
