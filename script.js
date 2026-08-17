@@ -2158,10 +2158,13 @@ function buildHintDocument(cards) {
 
   let activeIndex = 0;
 
+  // 갈피는 맨 위(0번)가 가장 앞, 아래로 갈수록 한 장씩 뒤로 밀려있는 순서로
+  // 쌓는다. 선택된 갈피만 이 순서를 무시하고 전부보다 앞으로 올라온다.
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
     tab.className = 'hint-doc-tab';
+    tab.style.zIndex = String(faces.length - i);
     tab.textContent = `${face.label} · ${face.state === 'good' ? 'Good' : 'Bad'}`;
     tab.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2228,7 +2231,12 @@ function buildHintDocument(cards) {
     page.appendChild(text);
     page.appendChild(index);
 
-    tabEls.forEach((tab, i) => tab.classList.toggle('active', i === activeIndex));
+    tabEls.forEach((tab, i) => {
+      const isActive = i === activeIndex;
+      tab.classList.toggle('active', isActive);
+      // 선택된 갈피는 맨 위/아래 순서와 무관하게 항상 전부보다 앞으로 올라온다.
+      tab.style.zIndex = isActive ? String(faces.length + 1) : String(faces.length - i);
+    });
   }
 
   function goTo(i) {
