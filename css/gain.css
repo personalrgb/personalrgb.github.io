@@ -751,10 +751,10 @@ body {
   border-style: solid;
   border-color: rgba(17, 17, 17, 0.15);
   border-width: 1px 1px 1px 0;
-  /* 왼쪽(서류) 페이지(.hint-doc-page)와 완전히 같은 색·종이 질감을 써서
-     갈피가 서류에서 그대로 이어져 나온 것처럼 보이게 한다. */
-  background: #f5f5f3 url('../envelope-letter-card.png');
-  background-size: cover;
+  /* 배경색은 자리(slot)에 따라 script.js가 인라인으로 지정한다(서류 종이
+     계단층과 같은 무채색, 맨 앞이 밝고 뒤로 갈수록 어두워짐). 종이
+     질감(텍스처)은 맨 앞(active) 갈피에만 아래 .active 규칙에서 덧입힌다. */
+  background-color: #f5f5f3;
   color: rgba(23, 23, 23, 0.6);
   font-family: inherit;
   font-size: 11px;
@@ -769,19 +769,18 @@ body {
   align-items: center;
   text-align: left;
   cursor: pointer;
-  /* 오른쪽(바깥으로 튀어나온 쪽) 위/아래 모서리는 둥글리는 대신 대각선으로
-     깎아낸다. 왼쪽(서류에 맞닿는 쪽) 위아래는 ::before/::after 플레어가
-     차지하는 14px 폭만큼 클립 영역을 위/아래로 미리 터놓아, 모서리를
-     깎아도 플레어가 잘리지 않게 한다. */
+  /* 모서리만 살짝 깎는 게 아니라 윗면·아랫면 전체를 대각선으로 깎아낸다
+     (왼쪽 플레어가 끝나는 14px 지점부터 오른쪽 끝까지 통째로 비스듬히
+     잘라내는 사다리꼴 모양). 왼쪽(서류에 맞닿는 쪽) 위아래는
+     ::before/::after 플레어가 차지하는 14px 폭만큼 클립 영역을 위/아래로
+     미리 터놓아, 깎아도 플레어가 잘리지 않게 한다. */
   border-radius: 0;
   clip-path: polygon(
     0 -14px,
     14px -14px,
     14px 0,
-    calc(100% - 14px) 0,
-    100% 14px,
-    100% calc(100% - 14px),
-    calc(100% - 14px) 100%,
+    100% 24px,
+    100% calc(100% - 24px),
     14px 100%,
     14px calc(100% + 14px),
     0 calc(100% + 14px)
@@ -794,8 +793,8 @@ body {
    아래로 더 길게 뻗어나가고, 위·아래 변이 거기서 곡선으로 이어붙는다.
    radial-gradient로 사분원을 그려서 탭의 사각 모서리(0,0)·(0,H)에서
    시작해 위/아래 바깥쪽으로 곡선을 그리다가 위·아래 평평한 변에
-   자연스럽게 붙는다. 탭 배경(왼쪽 종이와 같은 색)과 정확히 같은 색으로
-   채워야 이어붙인 티가 나지 않는다. */
+   자연스럽게 붙는다. 탭 배경색(자리별로 달라짐)과 정확히 같은 색을
+   --tab-flare-color로 전달받아 이어붙인 티가 나지 않게 한다. */
 .hint-doc-tab::before,
 .hint-doc-tab::after {
   content: '';
@@ -813,7 +812,7 @@ body {
     transparent 14px,
     rgba(17, 17, 17, 0.15) 14px,
     rgba(17, 17, 17, 0.15) 15px,
-    #f5f5f3 15px
+    var(--tab-flare-color, #f5f5f3) 15px
   );
 }
 
@@ -824,7 +823,7 @@ body {
     transparent 14px,
     rgba(17, 17, 17, 0.15) 14px,
     rgba(17, 17, 17, 0.15) 15px,
-    #f5f5f3 15px
+    var(--tab-flare-color, #f5f5f3) 15px
   );
 }
 
@@ -834,6 +833,10 @@ body {
 .hint-doc-tab.active {
   color: #171717;
   box-shadow: 4px 5px 10px rgba(0, 0, 0, 0.2);
+  /* 맨 앞(0번) 갈피에만 왼쪽 종이(.hint-doc-page)와 같은 종이 질감을
+     덧입혀, 뒤에 깔린 갈피들과 구분되게 한다. */
+  background-image: url('../envelope-letter-card.png');
+  background-size: cover;
 }
 
 /* 모바일 전용: 카드 두 장을 뒤집는 대신, Good/Bad 얼굴 4장을 카드 더미로 겹쳐두고
