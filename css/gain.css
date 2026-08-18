@@ -619,8 +619,8 @@ body {
   position: absolute;
   top: -16px;
   bottom: -16px;
-  left: -14px;
-  right: -14px;
+  left: -18px;
+  right: -18px;
   background: #9c9c98;
   border-radius: 14px;
   box-shadow: 0 26px 44px rgba(0, 0, 0, 0.32);
@@ -637,6 +637,12 @@ body {
   flex: 1 1 50%;
   box-sizing: border-box;
   min-height: 560px;
+  /* 오른쪽 페이지와 똑같이 위쪽 여백(24px)을 줘서, 사람 사진·클립이 이
+     페이지로 옮겨와도 세로 위치(높이)는 그대로 유지되게 한다. */
+  padding-top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   background: #f5f5f3 url('../envelope-letter-card.png');
   background-size: cover;
   border: 1px solid rgba(17, 17, 17, 0.1);

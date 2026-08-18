@@ -2197,6 +2197,7 @@ function buildHintDocument(cards) {
   function renderPage() {
     const face = faces[activeIndex];
     page.innerHTML = '';
+    blankPage.innerHTML = '';
 
     const index = document.createElement('p');
     index.className = 'hint-doc-page-index';
@@ -2246,7 +2247,7 @@ function buildHintDocument(cards) {
     text.className = 'hint-card-text';
     text.textContent = face.text;
 
-    page.appendChild(photoWrap);
+    blankPage.appendChild(photoWrap);
     page.appendChild(titleRow);
     page.appendChild(text);
     page.appendChild(index);
