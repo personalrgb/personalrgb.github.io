@@ -967,6 +967,8 @@ body {
    스택 안으로만 한정한다. */
 .hint-stack-card .hint-card-text {
   font-size: 12px;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 
 /* 단계 6(결과 안내) 화면 중앙에 놓는 봉투 그래픽. 카드/폼폼/스티커/팔찌가 이미
