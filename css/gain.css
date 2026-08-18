@@ -775,26 +775,27 @@ body {
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
 }
 
-/* 갈피 왼쪽 위/아래 모서리가 안으로 깎이지 않고, 종이 쪽으로 밖으로
-   펼쳐지듯 둥글게 이어지는 부분. radial-gradient로 사분원을 그려서
-   탭의 사각 모서리(0,0)와 (0,H)에서 시작해 바깥쪽(왼쪽)으로 곡선을
-   그리다가 위/아래 평평한 변에 자연스럽게 붙는다. 탭 배경색(자리별로
-   달라짐)과 정확히 같은 색을 --tab-flare-color로 전달받아 이어붙인
-   티가 나지 않게 한다. */
+/* 갈피 왼쪽 위/아래 모서리가 안으로 깎이지 않고, 위/아래(세로) 방향으로
+   밖으로 펼쳐지듯 둥글게 이어지는 부분. 왼쪽(서류에 맞닿는) 변은 위/
+   아래로 더 길게 뻗어나가고, 위·아래 변이 거기서 곡선으로 이어붙는다.
+   radial-gradient로 사분원을 그려서 탭의 사각 모서리(0,0)·(0,H)에서
+   시작해 위/아래 바깥쪽으로 곡선을 그리다가 위·아래 평평한 변에
+   자연스럽게 붙는다. 탭 배경색(자리별로 달라짐)과 정확히 같은 색을
+   --tab-flare-color로 전달받아 이어붙인 티가 나지 않게 한다. */
 .hint-doc-tab::before,
 .hint-doc-tab::after {
   content: '';
   position: absolute;
-  left: -14px;
+  left: 0;
   width: 14px;
   height: 14px;
   pointer-events: none;
 }
 
 .hint-doc-tab::before {
-  top: 0;
+  top: -14px;
   background: radial-gradient(
-    circle at bottom left,
+    circle at top right,
     transparent 14px,
     rgba(17, 17, 17, 0.15) 14px,
     rgba(17, 17, 17, 0.15) 15px,
@@ -803,9 +804,9 @@ body {
 }
 
 .hint-doc-tab::after {
-  bottom: 0;
+  bottom: -14px;
   background: radial-gradient(
-    circle at top left,
+    circle at bottom right,
     transparent 14px,
     rgba(17, 17, 17, 0.15) 14px,
     rgba(17, 17, 17, 0.15) 15px,
