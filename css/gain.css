@@ -769,22 +769,10 @@ body {
   align-items: center;
   text-align: left;
   cursor: pointer;
-  /* 모서리만 살짝 깎는 게 아니라 윗면·아랫면 전체를 대각선으로 깎아낸다
-     (왼쪽 플레어가 끝나는 14px 지점부터 오른쪽 끝까지 통째로 비스듬히
-     잘라내는 사다리꼴 모양). 왼쪽(서류에 맞닿는 쪽) 위아래는
-     ::before/::after 플레어가 차지하는 14px 폭만큼 클립 영역을 위/아래로
-     미리 터놓아, 깎아도 플레어가 잘리지 않게 한다. */
-  border-radius: 0;
-  clip-path: polygon(
-    0 -14px,
-    14px -14px,
-    14px 0,
-    100% 24px,
-    100% calc(100% - 24px),
-    14px 100%,
-    14px calc(100% + 14px),
-    0 calc(100% + 14px)
-  );
+  /* 오른쪽 끝(바깥으로 튀어나온 쪽)만 모서리를 살짝 둥글리고, 왼쪽(서류에
+     맞닿는 쪽) 위아래 모서리는 안으로 깎이는 대신 ::before/::after로
+     밖으로 펼쳐지듯 둥글린다(아래 참고). */
+  border-radius: 0 10px 10px 0;
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
 }
 
