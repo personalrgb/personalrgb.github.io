@@ -548,7 +548,7 @@ body {
    세로로 긴 인물 사진이라 폭을 기준으로 키우면 높이가 감당 안 될 만큼
    커진다). 그 안에서 폭은 원본 비율 그대로 최대한 채운다. 클립에 꽂힌
    사진처럼 살짝 기울여두고, 클릭하면 라이트박스로 크게 볼 수 있다. */
-.hint-doc-page .hint-card-illustration {
+.hint-doc-page-blank .hint-card-illustration {
   width: auto;
   max-width: 100%;
   height: auto;
@@ -610,7 +610,7 @@ body {
      두려고 폭을 기존의 두 배로 잡는다 — 오른쪽 페이지 자체의 폭/레이아웃은
      그대로 유지된다. 갈피가 차지할 폭까지 감안해 화면 안에 항상 들어오게
      하되, 너무 좁아져 타이틀/본문이 잘리지 않도록 최소 폭을 지킨다. */
-  width: min(1040px, max(640px, calc(200vw - 560px)));
+  width: min(1140px, max(680px, calc(200vw - 560px)));
   margin: 4px auto 0;
 }
 
@@ -633,9 +633,12 @@ body {
   align-items: stretch;
 }
 
-/* 왼쪽의 빈 페이지. 오른쪽 페이지와 같은 종이 질감이지만 내용은 없다. */
+/* 왼쪽의 빈 페이지. 오른쪽 페이지와 같은 종이 질감이지만 내용은 없다.
+   사진이 실제로 커질 폭 여유를 주려고 오른쪽 페이지보다 살짝 더 넓게
+   잡는다(사진은 세로로 긴 인물 사진이라 max-height보다 폭이 먼저
+   병목이 되기 때문). */
 .hint-doc-page-blank {
-  flex: 1 1 50%;
+  flex: 1 1 55%;
   box-sizing: border-box;
   min-height: 620px;
   /* 오른쪽 페이지와 똑같이 위쪽 여백(24px)을 줘서, 사람 사진·클립이 이
@@ -653,7 +656,7 @@ body {
 
 .hint-doc-page {
   position: relative;
-  flex: 1 1 50%;
+  flex: 1 1 45%;
   box-sizing: border-box;
   min-height: 620px;
   display: flex;
@@ -760,9 +763,9 @@ body {
   align-items: center;
   text-align: left;
   cursor: pointer;
-  /* 색이 아니라 모양 자체를 참고 이미지처럼 각진 데 없이 네 모서리 모두
-     둥글게 만든다. */
-  border-radius: 22px;
+  /* 참고 이미지(001/002/003 인덱스 탭)처럼 서류에 붙는 왼쪽 면은 각지게
+     두고, 바깥으로 튀어나온 오른쪽 끝만 반원형으로 둥글게 만든다. */
+  border-radius: 0 999px 999px 0;
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
 }
 
