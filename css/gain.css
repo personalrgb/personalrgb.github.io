@@ -552,7 +552,7 @@ body {
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 110vh;
+  max-height: 130vh;
   /* 클립은 그대로 두고 사진만 위로 당긴다(클립은 감싸개 기준 절대 위치라
      이 마진의 영향을 받지 않는다). 이미지가 훨씬 커진 만큼 당기는 양은
      줄여서 클립과 안 부딪히게 살짝 내려준다. */
@@ -743,11 +743,10 @@ body {
 
 .hint-doc-tab {
   border: 1px solid rgba(17, 17, 17, 0.15);
-  border-left: none;
-  /* 배경색은 자리(slot)에 따라 script.js가 인라인으로 지정한다(하늘색
-     계열, 맨 왼쪽이 밝고 오른쪽으로 갈수록 진해짐). */
-  background-color: #bcdcea;
-  color: rgba(17, 17, 17, 0.75);
+  /* 배경색은 자리(slot)에 따라 script.js가 인라인으로 지정한다(서류 종이
+     계단층과 같은 무채색, 맨 왼쪽이 밝고 오른쪽으로 갈수록 어두워짐). */
+  background-color: #f5f5f3;
+  color: rgba(23, 23, 23, 0.6);
   font-family: inherit;
   font-size: 11px;
   font-weight: 600;
@@ -761,12 +760,10 @@ body {
   align-items: center;
   text-align: left;
   cursor: pointer;
-  /* 참고 이미지의 둥근 폴더 갈피처럼 바깥쪽 모서리를 넉넉하게 둥글린다. */
-  border-radius: 0 22px 22px 0;
+  /* 색이 아니라 모양 자체를 참고 이미지처럼 각진 데 없이 네 모서리 모두
+     둥글게 만든다. */
+  border-radius: 22px;
   box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
-  /* 그림자가 우측·하단으로만 퍼지게 하고, 서류와 맞닿는 왼쪽 면에는 그림자가
-     번져 보이지 않게 잘라낸다. */
-  clip-path: inset(0 -30px -30px 0);
 }
 
 /* 갈피마다 튀어나온 깊이(margin-left)와 쌓임 순서(z-index)는 서류의 겹쳐진
