@@ -509,8 +509,10 @@ let previousPaletteColor = null;
 // 화면(실전 모드 포함)에서는 숨긴다. 실전 모드에서는 대신 팔레트(확정 색 목록) 아이콘이 그 자리를 대신한다.
 const tutorialButtonEl = document.getElementById('tutorialButton');
 // 모바일에서는 작은 아이콘 대신 "튜토리얼" 텍스트 버튼으로 대체한다(터치로는
-// 아이콘보다 글자가 있는 쪽이 무엇을 누르는 건지 더 분명하다).
-if (isLikelyMobile) {
+// 아이콘보다 글자가 있는 쪽이 무엇을 누르는 건지 더 분명하다). isLikelyMobile(터치
+// 여부)만으로는 터치가 감지되지 않는 좁은 화면(모바일 확인을 위해 데스크탑
+// 브라우저 창을 좁힐 때 포함)을 놓치므로, 창 폭도 함께 확인한다.
+if (isLikelyMobile || window.innerWidth <= 760) {
   tutorialButtonEl.textContent = 'Tutorial';
   // 아이콘(작은 정사각형)에서 텍스트(더 넓은 버튼)로 바뀌면 버튼의 실제 세로
   // 위치/크기가 달라지므로, 모빌 세로 중앙 정렬을 다시 계산한다.
@@ -4385,7 +4387,9 @@ const tutorialSlides = Array.from(tutorialOverlay.querySelectorAll('.tutorial-sl
 let tutorialIndex = 0;
 // 전체화면 단축키 안내(첫 슬라이드)는 키보드 단축키가 있는 데스크탑에서만 의미가
 // 있으므로, 모바일에서는 이 슬라이드를 건너뛰고 바로 다음 슬라이드부터 시작한다.
-const TUTORIAL_START_INDEX = isLikelyMobile ? 1 : 0;
+// isLikelyMobile(터치 여부)만으로는 터치가 감지되지 않는 좁은 화면(모바일 확인을
+// 위해 데스크탑 브라우저 창을 좁힐 때 포함)을 놓치므로, 창 폭도 함께 확인한다.
+const TUTORIAL_START_INDEX = (isLikelyMobile || window.innerWidth <= 760) ? 1 : 0;
 
 function renderTutorialSlide() {
   tutorialSlides.forEach((slide, i) => slide.classList.toggle('active', i === tutorialIndex));
