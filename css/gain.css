@@ -623,8 +623,8 @@ body {
   position: absolute;
   top: -16px;
   bottom: -16px;
-  left: -100px;
-  right: -100px;
+  left: -80px;
+  right: -80px;
   background: #9c9c98;
   border-radius: 14px;
   box-shadow: 0 26px 44px rgba(0, 0, 0, 0.32);
