@@ -2271,10 +2271,6 @@ function buildHintDocument(cards) {
       // 갈피들은 이 색만 평평하게 쓴다.
       const slotColor = TAB_SLOT_COLORS[Math.min(slot, TAB_SLOT_COLORS.length - 1)];
       tab.style.backgroundColor = slotColor;
-      // 위/아래 모서리를 밖으로 펼쳐지듯 둥글리는 ::before/::after 플레어가
-      // 이 색과 정확히 같은 색을 써야 이어붙인 티가 안 나므로, CSS 변수로
-      // 같은 값을 전달한다.
-      tab.style.setProperty('--tab-flare-color', slotColor);
     });
   }
 
