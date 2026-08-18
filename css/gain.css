@@ -591,8 +591,8 @@ body {
 
 .hint-card-text {
   margin: 0;
-  font-size: 14px;
-  line-height: 2.3;
+  font-size: 16px;
+  line-height: 2;
   color: rgba(23, 23, 23, 0.78);
 }
 
@@ -711,27 +711,26 @@ body {
   /* 오른쪽 페이지에는 이제 사진이 없으므로(왼쪽 페이지로 옮김), 페이지
      자체의 위쪽 패딩(24px)에 더해 상단 여백을 넉넉히 준다. */
   margin-top: 64px;
-  /* 타이틀 한 줄이 차지하는 높이 자체를 늘린다(자식 라벨/구분자/배지가
-     모두 이 line-height를 물려받는다). */
-  line-height: 1.8;
 }
 
 /* 서류 타이틀(라벨)만 따로 줄인다. .hint-card-label은 모바일 카드
-   스택에도 쓰이므로 여기서 서류 쪽만 범위를 좁혀 크기를 줄인다. */
+   스택에도 쓰이므로 여기서 서류 쪽만 범위를 좁혀 크기를 줄인다. 행간(줄
+   사이 간격)은 그대로 두고, 글자 크기 자체를 키워서 타이틀 높이를
+   늘린다. */
 .hint-doc-title-row .hint-card-label {
-  font-size: 16px;
+  font-size: 19px;
 }
 
 .hint-doc-title-separator {
   margin: 0;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 500;
   color: #171717;
 }
 
 .hint-doc-badge {
   margin: 0;
-  font-size: 16px;
+  font-size: 19px;
   font-weight: 500;
   letter-spacing: 0.02em;
   color: #171717;
