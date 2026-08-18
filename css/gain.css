@@ -314,6 +314,17 @@ body {
   .tutorial-list li {
     font-size: 12px !important;
   }
+  /* 서류(카드) 화면 앞 인트로 막(언더톤·명도·채도 등)도 튜토리얼 안내
+     화면과 같은 글씨 크기·좌우 여백을 쓰게 한다. */
+  .stage-intro-veil {
+    padding: 24px 44px !important;
+  }
+  .stage-intro-veil .tutorial-heading {
+    font-size: 15px !important;
+  }
+  .stage-intro-veil .tutorial-body {
+    font-size: 12px !important;
+  }
   /* 모바일에서는 아이콘 대신 "Tutorial" 텍스트 버튼으로 대체하고(script.js),
      상단 톤 버튼 줄과 겹치지 않도록 하단 중앙으로 옮긴다. */
   .tutorial-button {
