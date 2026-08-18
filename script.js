@@ -2517,6 +2517,14 @@ function hideStageIntroVeil() {
   stageHintCards.style.opacity = '1';
 }
 
+// 서류(.hint-doc)는 최소 폭이 680px라서 터치 기기가 아니어도 창 폭이 좁으면
+// (모바일 화면 확인을 위해 데스크탑 브라우저 창을 좁힐 때 포함) 깨져 보인다.
+// isLikelyMobile(터치 여부 기준)과 별개로 폭 자체도 확인해서, 좁은 화면에서는
+// 터치 기기가 아니더라도 서류 대신 카드 스택으로 전환되게 한다.
+function shouldUseMobileHintLayout() {
+  return isLikelyMobile || window.innerWidth <= 760;
+}
+
 function renderStageHintBody(hint) {
   stageHintCards.innerHTML = '';
   stageHintEnvelope.style.display = 'none';
@@ -2525,7 +2533,7 @@ function renderStageHintBody(hint) {
     stageHintHeading.style.display = 'none';
     stageHintBody.style.display = 'none';
     stageHintCards.style.display = 'flex';
-    if (isLikelyMobile) {
+    if (shouldUseMobileHintLayout()) {
       stageHintCards.appendChild(buildMobileCardStack(hint.cards));
     } else {
       stageHintCards.appendChild(buildHintDocument(hint.cards));
