@@ -592,7 +592,7 @@ body {
 .hint-card-text {
   margin: 0;
   font-size: 14px;
-  line-height: 2;
+  line-height: 2.3;
   color: rgba(23, 23, 23, 0.78);
 }
 
@@ -711,6 +711,9 @@ body {
   /* 오른쪽 페이지에는 이제 사진이 없으므로(왼쪽 페이지로 옮김), 페이지
      자체의 위쪽 패딩(24px)에 더해 상단 여백을 넉넉히 준다. */
   margin-top: 64px;
+  /* 타이틀 한 줄이 차지하는 높이 자체를 늘린다(자식 라벨/구분자/배지가
+     모두 이 line-height를 물려받는다). */
+  line-height: 1.8;
 }
 
 /* 서류 타이틀(라벨)만 따로 줄인다. .hint-card-label은 모바일 카드
