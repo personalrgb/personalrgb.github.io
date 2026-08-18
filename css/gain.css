@@ -325,6 +325,18 @@ body {
   .stage-intro-veil .tutorial-body {
     font-size: 12px !important;
   }
+  /* 카드 없이 문구만 나오는 단계(종합 등)도 같은 글씨 크기·좌우 여백을 쓰게
+     한다. stageHintHeading/Body는 카드 화면과 같은 컨테이너를 공유해서
+     .tutorial-overlay/.stage-intro-veil 선택자로는 못 잡으므로 별도
+     클래스로 한정한다. */
+  .stage-hint-heading {
+    font-size: 15px !important;
+  }
+  .stage-hint-body {
+    font-size: 12px !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+  }
   /* 모바일에서는 아이콘 대신 "Tutorial" 텍스트 버튼으로 대체하고(script.js),
      상단 톤 버튼 줄과 겹치지 않도록 하단 중앙으로 옮긴다. */
   .tutorial-button {
