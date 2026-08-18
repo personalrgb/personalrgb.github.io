@@ -2267,8 +2267,13 @@ function buildHintDocument(cards) {
       // 자리(slot)에 따라 서류 종이 계단층과 같은 무채색을 입힌다 — 맨
       // 왼쪽(0번)이 가장 밝고 오른쪽으로 갈수록 어두워진다. 이제 갈피가
       // 네 모서리 다 둥근 독립된 모양이라 종이 질감은 넣지 않는다.
-      tab.style.backgroundColor = TAB_SLOT_COLORS[Math.min(slot, TAB_SLOT_COLORS.length - 1)];
+      const slotColor = TAB_SLOT_COLORS[Math.min(slot, TAB_SLOT_COLORS.length - 1)];
+      tab.style.backgroundColor = slotColor;
       tab.style.backgroundImage = 'none';
+      // 왼쪽 위/아래 모서리를 밖으로 펼쳐지듯 둥글리는 ::before/::after
+      // 플레어가 이 색과 정확히 같은 색을 써야 이어붙인 티가 안 나므로,
+      // CSS 변수로 같은 값을 전달한다.
+      tab.style.setProperty('--tab-flare-color', slotColor);
     });
   }
 
