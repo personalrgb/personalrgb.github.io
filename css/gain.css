@@ -592,14 +592,14 @@ body {
 .hint-card-text {
   margin: 0;
   font-size: 14px;
-  line-height: 1.65;
+  line-height: 1.85;
   color: rgba(23, 23, 23, 0.78);
 }
 
 /* 서류 안 본문은 위로 당겨 올리고, 페이지 좌우 패딩 위에 추가로 좌우
    여백을 더 줘서 살짝 안쪽으로 들여 쓴다. */
 .hint-doc-page .hint-card-text {
-  margin-top: 16px;
+  margin-top: 10px;
   padding: 0 12px;
   box-sizing: border-box;
 }
