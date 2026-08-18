@@ -773,7 +773,10 @@ body {
      맞닿는 쪽) 위아래 모서리는 안으로 깎이는 대신 ::before/::after로
      밖으로 펼쳐지듯 둥글린다(아래 참고). */
   border-radius: 0 10px 10px 0;
-  box-shadow: 3px 4px 8px rgba(0, 0, 0, 0.14);
+  /* 그림자의 흐림 반경(blur)이 가로 이동 거리(x)보다 크면 왼쪽(서류에
+     맞닿는 면) 쪽으로도 그림자가 살짝 번져 나가 이음매처럼 보인다. x를
+     blur보다 크게 잡아 왼쪽으로는 그림자가 전혀 번지지 않게 한다. */
+  box-shadow: 7px 5px 5px rgba(0, 0, 0, 0.14);
 }
 
 /* 갈피 왼쪽 위/아래 모서리가 안으로 깎이지 않고, 위/아래(세로) 방향으로
@@ -820,7 +823,9 @@ body {
    0번 자리로 당겨질 때도 인라인이라야 이 기본값을 확실히 덮어쓴다). */
 .hint-doc-tab.active {
   color: #171717;
-  box-shadow: 4px 5px 10px rgba(0, 0, 0, 0.2);
+  /* 여기서도 x(9px)를 blur(7px)보다 크게 잡아 왼쪽으로는 그림자가 번지지
+     않게 한다. */
+  box-shadow: 9px 6px 7px rgba(0, 0, 0, 0.2);
   /* 맨 앞(0번) 갈피에만 왼쪽 종이(.hint-doc-page)와 같은 종이 질감을
      덧입혀, 뒤에 깔린 갈피들과 구분되게 한다. */
   background-image: url('../envelope-letter-card.png');
