@@ -2335,13 +2335,27 @@ function buildMobileCardStack(cards) {
     const el = document.createElement('div');
     el.className = 'hint-stack-card';
 
+    // 라벨(Warm)과 Good/Bad를 서류(데스크탑) 타이틀과 같은 모양으로 —
+    // 줄바꿈 없이 한 줄에, 같은 글자 크기·색으로, 가운데에 ":" 기호를
+    // 넣어 나란히 보여준다.
+    const titleRow = document.createElement('div');
+    titleRow.className = 'hint-stack-title-row';
+
     const label = document.createElement('p');
     label.className = 'hint-card-label';
     label.textContent = face.label;
 
+    const separator = document.createElement('p');
+    separator.className = 'hint-stack-title-separator';
+    separator.textContent = ':';
+
     const badge = document.createElement('p');
-    badge.className = 'hint-stack-badge ' + (face.state === 'good' ? 'good' : 'bad');
+    badge.className = 'hint-stack-badge';
     badge.textContent = face.state === 'good' ? 'Good' : 'Bad';
+
+    titleRow.appendChild(label);
+    titleRow.appendChild(separator);
+    titleRow.appendChild(badge);
 
     const img = document.createElement('img');
     img.className = 'hint-card-illustration';
@@ -2352,8 +2366,7 @@ function buildMobileCardStack(cards) {
     text.className = 'hint-card-text';
     text.textContent = face.text;
 
-    el.appendChild(label);
-    el.appendChild(badge);
+    el.appendChild(titleRow);
     el.appendChild(img);
     el.appendChild(text);
     stack.appendChild(el);

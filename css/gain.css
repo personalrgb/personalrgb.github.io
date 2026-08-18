@@ -899,22 +899,26 @@ body {
   touch-action: pan-y;
 }
 
+/* 라벨(Warm)과 Good/Bad를 서류(데스크탑) 타이틀과 같은 모양으로 — 줄바꿈
+   없이 한 줄에, 콜론으로 이어 나란히 놓는다. */
+.hint-stack-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.hint-stack-title-separator {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: #171717;
+}
+
 .hint-stack-badge {
   margin: 0;
-  font-size: 12px;
-  font-weight: 700;
-  padding: 3px 12px;
-  border-radius: 999px;
-}
-
-.hint-stack-badge.good {
-  background: rgba(58, 160, 96, 0.15);
-  color: #1f7a3f;
-}
-
-.hint-stack-badge.bad {
-  background: rgba(203, 62, 62, 0.15);
-  color: #a3222b;
+  font-size: 20px;
+  font-weight: 500;
+  color: #171717;
 }
 
 /* 단계 6(결과 안내) 화면 중앙에 놓는 봉투 그래픽. 카드/폼폼/스티커/팔찌가 이미
