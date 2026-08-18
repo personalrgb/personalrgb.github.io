@@ -1092,21 +1092,26 @@ body {
    lr-body와 lr-flap을 같은 폭(+25%p)만큼 같이 내려서 봉투 몸통과 플랩의 상대
    위치(겹치는 부분)가 유지되게 한다. */
 @media (max-width: 480px) {
-  /* 30px 위로 올리고, 화면 밖으로 살짝 나갈 만큼 확대(transform은 제자리
-     중심 기준으로 커지므로 left/top/width/height는 그대로 두고 겹친다). */
+  /* 봉투(몸통+플랩)는 %/aspect-ratio 대신 고정 px 크기·위치를 쓴다 — 화면 폭에
+     따라 .letter-reveal 컨테이너 자체의 크기가 달라지므로, %로 두면 화면마다
+     봉투 높이가 다르게 보인다. 값은 기존 %(390px 폭 기준)를 그대로 px로
+     환산한 것이라 모양은 동일하고, 이제 폭이 다른 기기에서도 높이가 항상
+     같게 보인다. */
   .letter-reveal .lr-body {
-    left: 0.48%;
-    top: 135%;
-    width: 99%;
-    height: 78.9%;
-    transform: translateY(-30px) scale(1.18);
+    left: 50%;
+    top: 439px;
+    width: 400px;
+    height: 302px;
+    margin-left: -200px;
+    transform: translateY(-30px);
   }
   .letter-reveal .lr-flap {
-    left: 0.81%;
-    top: 114.44%;
-    width: 98.5%;
-    height: 41.7%;
-    transform: translateY(-30px) scale(1.18);
+    left: 50%;
+    top: 372px;
+    width: 397px;
+    height: 160px;
+    margin-left: -198.5px;
+    transform: translateY(-30px);
   }
   /* 편지지 가로폭을 20px 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
      왼쪽으로 절반만큼 당긴다. */
