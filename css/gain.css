@@ -301,7 +301,7 @@ body {
   /* 튜토리얼 안내 문구(단계 1 세팅 등, 카드·단색 화면 제외) 화면은 모바일에서
      좌우 여백을 넉넉히 주고 글씨를 조금 줄인다. */
   .tutorial-overlay {
-    padding: 24px 32px !important;
+    padding: 24px 44px !important;
   }
   /* .tutorial-heading/.tutorial-body는 서류 화면 앞 인트로 막(.stage-intro-veil)에서도
      재사용되므로, 이 축소는 .tutorial-overlay 안으로만 한정해 카드 화면에 번지지 않게 한다. */
