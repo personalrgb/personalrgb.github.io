@@ -803,24 +803,14 @@ body {
 
 .hint-doc-tab::before {
   top: -14px;
-  background: radial-gradient(
-    circle at top right,
-    transparent 14px,
-    rgba(17, 17, 17, 0.15) 14px,
-    rgba(17, 17, 17, 0.15) 15px,
-    var(--tab-flare-color, #f5f5f3) 15px
-  );
+  /* 테두리 선(획) 없이 투명에서 바로 채움색으로 넘어간다 — 곡선의 윤곽은
+     아래 filter: drop-shadow만으로 표현한다. */
+  background: radial-gradient(circle at top right, transparent 15px, var(--tab-flare-color, #f5f5f3) 15px);
 }
 
 .hint-doc-tab::after {
   bottom: -14px;
-  background: radial-gradient(
-    circle at bottom right,
-    transparent 14px,
-    rgba(17, 17, 17, 0.15) 14px,
-    rgba(17, 17, 17, 0.15) 15px,
-    var(--tab-flare-color, #f5f5f3) 15px
-  );
+  background: radial-gradient(circle at bottom right, transparent 15px, var(--tab-flare-color, #f5f5f3) 15px);
 }
 
 /* 갈피마다 튀어나온 깊이(margin-left)와 쌓임 순서(z-index)는 서류의 겹쳐진
@@ -838,34 +828,27 @@ body {
 }
 
 /* 맨 앞 갈피의 위/아래 플레어는 --tab-flare-color(민무늬 단색)만 채워지면
-   본체의 종이 질감과 달리 밋밋하게 떠 보인다. 곡선이 채워지는 안쪽(젤
-   마지막 색 정지점)을 투명으로 바꾸고 같은 종이 질감 이미지를 그 뒤에
-   한 겹 더 깔아, 본체와 같은 질감이 이어지게 한다(곡선 모양 자체는
-   위 radial-gradient와 동일하게 유지). */
+   본체의 종이 질감과 달리 밋밋하게 떠 보인다. 그렇다고 상자 전체에
+   텍스처를 깔면 "곡선 안쪽 투명 구멍"이 사라져서, 다른 갈피와 달리
+   filter: drop-shadow가 곡선이 아니라 네모난 상자 전체를 따라가 버린다
+   (이게 맨 왼쪽 갈피만 그림자가 이상해 보였던 원인). 그래서 텍스처
+   배경은 상자 전체에 깔되, mask-image로 곡선 바깥(투명 구멍)에 해당하는
+   부분을 다시 잘라내 진짜로 비워 둔다 — 그러면 다른 갈피와 똑같이 곡선
+   모양 그대로 그림자가 진다. */
 .hint-doc-tab.active::before,
 .hint-doc-tab.active::after {
-  background-image:
-    radial-gradient(
-      circle at top right,
-      transparent 14px,
-      rgba(17, 17, 17, 0.15) 14px,
-      rgba(17, 17, 17, 0.15) 15px,
-      transparent 15px
-    ),
-    url('../envelope-letter-card.png');
-  background-size: 14px 14px, cover;
+  background-image: url('../envelope-letter-card.png');
+  background-size: cover;
+}
+
+.hint-doc-tab.active::before {
+  -webkit-mask-image: radial-gradient(circle at top right, transparent 15px, #000 15px);
+  mask-image: radial-gradient(circle at top right, transparent 15px, #000 15px);
 }
 
 .hint-doc-tab.active::after {
-  background-image:
-    radial-gradient(
-      circle at bottom right,
-      transparent 14px,
-      rgba(17, 17, 17, 0.15) 14px,
-      rgba(17, 17, 17, 0.15) 15px,
-      transparent 15px
-    ),
-    url('../envelope-letter-card.png');
+  -webkit-mask-image: radial-gradient(circle at bottom right, transparent 15px, #000 15px);
+  mask-image: radial-gradient(circle at bottom right, transparent 15px, #000 15px);
 }
 
 /* 모바일 전용: 카드 두 장을 뒤집는 대신, Good/Bad 얼굴 4장을 카드 더미로 겹쳐두고
