@@ -826,10 +826,12 @@ body {
 }
 
 /* 맨 앞 갈피의 위/아래 플레어는 --tab-flare-color(민무늬 단색)만 채워지면
-   본체의 종이 질감과 달리 밋밋하게 떠 보인다. 위와 같은 원리로, 채움
-   구간(반지름 14px 밖)만 투명하게 비워서 그 뒤에 깐 종이 질감이 비치게
-   하고, 곡선 바깥(반지름 13px 안쪽)은 다른 갈피와 똑같이 서류 색으로
-   덮어 묻히게 한다. */
+   본체의 종이 질감과 달리 밋밋하게 떠 보인다. 채움 구간(반지름 14px
+   밖)만 투명하게 비워서 그 뒤에 깐 종이 질감이 비치게 한다. 곡선
+   바깥(반지름 13px 안쪽)은 gradient에서도 투명이지만, 그 뒤에 텍스처
+   레이어가 통째로 깔려 있어서 gradient만으로는 안 비고 텍스처가 그대로
+   채워져 흰 면처럼 보였다 — mask-image로 상자 자체를 잘라내야 진짜로
+   빈다. */
 .hint-doc-tab.active::before,
 .hint-doc-tab.active::after {
   background-size: 14px 14px, cover;
@@ -844,6 +846,8 @@ body {
       transparent 14px
     ),
     url('../envelope-letter-card.png');
+  -webkit-mask-image: radial-gradient(circle at top right, transparent 13px, #000 13px);
+  mask-image: radial-gradient(circle at top right, transparent 13px, #000 13px);
 }
 
 .hint-doc-tab.active::after {
@@ -855,6 +859,8 @@ body {
       transparent 14px
     ),
     url('../envelope-letter-card.png');
+  -webkit-mask-image: radial-gradient(circle at bottom right, transparent 13px, #000 13px);
+  mask-image: radial-gradient(circle at bottom right, transparent 13px, #000 13px);
 }
 
 /* 모바일 전용: 카드 두 장을 뒤집는 대신, Good/Bad 얼굴 4장을 카드 더미로 겹쳐두고
