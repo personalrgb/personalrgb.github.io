@@ -552,10 +552,11 @@ body {
   width: auto;
   max-width: 100%;
   height: auto;
-  max-height: 68vh;
+  max-height: 82vh;
   /* 클립은 그대로 두고 사진만 위로 당긴다(클립은 감싸개 기준 절대 위치라
-     이 마진의 영향을 받지 않는다). */
-  margin-top: -115px;
+     이 마진의 영향을 받지 않는다). 이미지가 훨씬 커진 만큼 당기는 양은
+     줄여서 클립과 안 부딪히게 살짝 내려준다. */
+  margin-top: -40px;
   transform: rotate(-3deg);
   cursor: zoom-in;
 }
@@ -636,7 +637,7 @@ body {
 .hint-doc-page-blank {
   flex: 1 1 50%;
   box-sizing: border-box;
-  min-height: 560px;
+  min-height: 780px;
   /* 오른쪽 페이지와 똑같이 위쪽 여백(24px)을 줘서, 사람 사진·클립이 이
      페이지로 옮겨와도 세로 위치(높이)는 그대로 유지되게 한다. */
   padding-top: 24px;
@@ -654,7 +655,7 @@ body {
   position: relative;
   flex: 1 1 50%;
   box-sizing: border-box;
-  min-height: 560px;
+  min-height: 780px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
@@ -701,8 +702,9 @@ body {
   gap: 8px;
   /* 본문 좌측 여백(12px)과 맞춘다. */
   padding-left: 12px;
-  /* 사진과의 간격(기본 gap 24px)을 줄여 타이틀을 위로 당긴다. */
-  margin-top: -14px;
+  /* 오른쪽 페이지에는 이제 사진이 없으므로(왼쪽 페이지로 옮김), 페이지
+     자체의 위쪽 패딩(24px)에 더해 상단 여백을 넉넉히 준다. */
+  margin-top: 64px;
 }
 
 .hint-doc-title-separator {
