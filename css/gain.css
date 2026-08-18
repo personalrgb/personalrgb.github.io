@@ -536,7 +536,7 @@ body {
    위로 올려둔다. */
 .hint-doc-clip {
   position: absolute;
-  top: -12.5px;
+  top: -14.5px;
   left: 50%;
   width: 62px;
   height: auto;
@@ -559,7 +559,7 @@ body {
   /* 클립은 그대로 두고 사진만 위로 당긴다(클립은 감싸개 기준 절대 위치라
      이 마진의 영향을 받지 않는다). 이미지가 훨씬 커진 만큼 당기는 양은
      줄여서 클립과 안 부딪히게 살짝 내려준다. */
-  margin-top: -40px;
+  margin-top: -33px;
   transform: rotate(-3deg);
   cursor: zoom-in;
 }
