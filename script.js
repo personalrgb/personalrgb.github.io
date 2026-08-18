@@ -2983,8 +2983,21 @@ async function verifyPaymentOnServer(paymentId) {
   return !!data.ok;
 }
 
+// TEMP: PG(포트원/KCP) 심사가 끝날 때까지, 실제 결제 대신 버튼을 누르면 바로
+// 결과 편지를 보여준다. 심사 통과 후에는 이 블록을 지우면 원래 결제 플로우로
+// 돌아간다.
+const TEMP_SKIP_PAYMENT = true;
+
 paymentPayButton.addEventListener('click', async (e) => {
   e.stopPropagation();
+  if (TEMP_SKIP_PAYMENT) {
+    hidePaymentScreen();
+    paymentOpenedFromHome = false;
+    if (pendingFinalSeason !== null) {
+      openLetterAfterPayment();
+    }
+    return;
+  }
   if (typeof PortOne === 'undefined') {
     paymentError.textContent = '결제 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
     paymentError.style.display = 'block';
