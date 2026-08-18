@@ -2930,7 +2930,39 @@ paymentBackButton.style.fontSize = '12px';
 paymentBackButton.style.fontWeight = '300';
 paymentBackButton.style.cursor = 'pointer';
 
+// PG(포트원/KCP) 심사 대기 중, 결제 카드 우측 상단(눈에 안 보이는 영역)을 12번
+// 연속으로 빠르게 터치/클릭하면 실제 결제 없이 바로 결과 편지를 보여준다. 결제
+// 버튼 자체는 항상 실제 PortOne 플로우를 그대로 타므로(placeholder storeId라
+// 오류가 뜬다), 이 우회는 이 숨은 제스처를 아는 사람만 쓸 수 있다.
+const SECRET_TAP_TARGET = 12;
+const SECRET_TAP_RESET_MS = 1500;
+let secretTapCount = 0;
+let secretTapTimer = null;
+const paymentSecretTapZone = document.createElement('div');
+paymentSecretTapZone.setAttribute('aria-hidden', 'true');
+paymentSecretTapZone.style.position = 'absolute';
+paymentSecretTapZone.style.top = '0';
+paymentSecretTapZone.style.right = '0';
+paymentSecretTapZone.style.width = '72px';
+paymentSecretTapZone.style.height = '72px';
+paymentSecretTapZone.style.zIndex = '2';
+paymentSecretTapZone.addEventListener('click', (e) => {
+  e.stopPropagation();
+  secretTapCount += 1;
+  clearTimeout(secretTapTimer);
+  secretTapTimer = setTimeout(() => { secretTapCount = 0; }, SECRET_TAP_RESET_MS);
+  if (secretTapCount < SECRET_TAP_TARGET) return;
+  secretTapCount = 0;
+  clearTimeout(secretTapTimer);
+  hidePaymentScreen();
+  paymentOpenedFromHome = false;
+  if (pendingFinalSeason !== null) {
+    openLetterAfterPayment();
+  }
+});
+
 paymentCard.appendChild(paymentBackButton);
+paymentCard.appendChild(paymentSecretTapZone);
 paymentCard.appendChild(paymentTitle);
 paymentCard.appendChild(paymentDescription);
 paymentCard.appendChild(paymentPayButton);
@@ -2983,21 +3015,8 @@ async function verifyPaymentOnServer(paymentId) {
   return !!data.ok;
 }
 
-// TEMP: PG(포트원/KCP) 심사가 끝날 때까지, 실제 결제 대신 버튼을 누르면 바로
-// 결과 편지를 보여준다. 심사 통과 후에는 이 블록을 지우면 원래 결제 플로우로
-// 돌아간다.
-const TEMP_SKIP_PAYMENT = true;
-
 paymentPayButton.addEventListener('click', async (e) => {
   e.stopPropagation();
-  if (TEMP_SKIP_PAYMENT) {
-    hidePaymentScreen();
-    paymentOpenedFromHome = false;
-    if (pendingFinalSeason !== null) {
-      openLetterAfterPayment();
-    }
-    return;
-  }
   if (typeof PortOne === 'undefined') {
     paymentError.textContent = '결제 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
     paymentError.style.display = 'block';
