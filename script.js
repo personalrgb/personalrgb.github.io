@@ -2148,9 +2148,24 @@ function buildHintDocument(cards) {
   const doc = document.createElement('div');
   doc.className = 'hint-doc';
 
+  // 서류 뒤에 회색 표지가 깔려 있고, 그 위에 펼쳐진 두 페이지(왼쪽은 빈
+  // 종이, 오른쪽에 실제 내용)가 보이게 한다. 오른쪽 페이지의 내용/레이아웃
+  // 자체는 그대로 두고, 겉모습만 "펼친 책"처럼 보이게 감싼 것이다.
+  const cover = document.createElement('div');
+  cover.className = 'hint-doc-cover';
+  doc.appendChild(cover);
+
+  const spread = document.createElement('div');
+  spread.className = 'hint-doc-spread';
+  doc.appendChild(spread);
+
+  const blankPage = document.createElement('div');
+  blankPage.className = 'hint-doc-page-blank';
+  spread.appendChild(blankPage);
+
   const page = document.createElement('div');
   page.className = 'hint-doc-page';
-  doc.appendChild(page);
+  spread.appendChild(page);
 
   const tabs = document.createElement('div');
   tabs.className = 'hint-doc-tabs';

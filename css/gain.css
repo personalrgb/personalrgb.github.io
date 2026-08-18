@@ -605,17 +605,48 @@ body {
    우측에 튀어나온 색인 탭으로 원하는 페이지로 바로 건너뛸 수 있다. */
 .hint-doc {
   position: relative;
-  /* 서류는 화면 중앙에 오지만 갈피는 그 오른쪽으로 더 튀어나오므로, 폭을
-     88vw로만 잡으면 좁은 창에서 갈피가 화면 밖으로 잘려 나간다. 갈피가
-     차지할 폭(계단식 간격이 커진 만큼 더 넓게)까지 감안해서 화면 안에
-     항상 다 들어오게 하되, 너무 좁아져 타이틀/본문이 잘리지 않도록
-     최소 폭(320px)은 지킨다. */
-  width: min(520px, max(320px, calc(100vw - 280px)));
+  /* 오른쪽 페이지(실제 내용, 기존과 같은 폭)와 왼쪽 빈 페이지를 나란히
+     두려고 폭을 기존의 두 배로 잡는다 — 오른쪽 페이지 자체의 폭/레이아웃은
+     그대로 유지된다. 갈피가 차지할 폭까지 감안해 화면 안에 항상 들어오게
+     하되, 너무 좁아져 타이틀/본문이 잘리지 않도록 최소 폭을 지킨다. */
+  width: min(1040px, max(640px, calc(200vw - 560px)));
   margin: 4px auto 0;
+}
+
+/* 서류 뒤에 깔리는 회색 표지. 펼쳐진 두 페이지보다 사방으로 조금 더 커서
+   가장자리가 표지처럼 삐져나와 보인다. */
+.hint-doc-cover {
+  position: absolute;
+  top: -16px;
+  bottom: -16px;
+  left: -14px;
+  right: -14px;
+  background: #9c9c98;
+  border-radius: 14px;
+  box-shadow: 0 26px 44px rgba(0, 0, 0, 0.32);
+  z-index: -1;
+}
+
+.hint-doc-spread {
+  display: flex;
+  align-items: stretch;
+}
+
+/* 왼쪽의 빈 페이지. 오른쪽 페이지와 같은 종이 질감이지만 내용은 없다. */
+.hint-doc-page-blank {
+  flex: 1 1 50%;
+  box-sizing: border-box;
+  min-height: 560px;
+  background: #f5f5f3 url('../envelope-letter-card.png');
+  background-size: cover;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  border-right: none;
+  border-radius: 4px 0 0 4px;
 }
 
 .hint-doc-page {
   position: relative;
+  flex: 1 1 50%;
   box-sizing: border-box;
   min-height: 560px;
   display: flex;
@@ -631,7 +662,7 @@ body {
   background: #f5f5f3 url('../envelope-letter-card.png');
   background-size: cover;
   border: 1px solid rgba(17, 17, 17, 0.1);
-  border-radius: 4px;
+  border-radius: 0 4px 4px 0;
   /* 우측으로 어긋난 회색 종이 세 겹(+ 맨 앞의 본체 = 총 4장, 갈피 4개와
      맞춤)이 겹쳐 있는 것처럼 보이게 하는 그림자. 이 간격은 갈피의 계단식
      간격(TAB_STEP_PX, script.js)과는 별개로 여기서 직접 조절한다. */
