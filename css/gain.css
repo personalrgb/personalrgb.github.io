@@ -549,8 +549,8 @@ body {
 
 /* 모바일 카드 스택 안의 사람 이미지만 더 크게, 조금 더 아래로 내려서 보여준다. */
 .hint-stack-card .hint-card-illustration {
-  width: 300px;
-  height: 300px;
+  width: 240px;
+  height: 240px;
   margin-top: 10px;
   margin-bottom: -8px;
 }
@@ -918,14 +918,14 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: min(320px, 78vw);
-  min-height: 460px;
+  width: min(290px, 74vw);
+  min-height: 420px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  padding: 22px 18px;
+  padding: 18px 16px;
   border-radius: 22px;
   background: #ffffff;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
@@ -942,24 +942,31 @@ body {
   gap: 8px;
 }
 
-/* .hint-card-label은 데스크탑 서류에서도 재사용되므로, 굵기 축소는
+/* .hint-card-label은 데스크탑 서류에서도 재사용되므로, 굵기·크기 축소는
    모바일 카드 스택 타이틀 행 안으로만 한정한다. */
 .hint-stack-title-row .hint-card-label {
   font-weight: 400;
+  font-size: 16px;
 }
 
 .hint-stack-title-separator {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 400;
   color: #171717;
 }
 
 .hint-stack-badge {
   margin: 0;
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 400;
   color: #171717;
+}
+
+/* .hint-card-text는 데스크탑 서류 본문에도 쓰이므로, 축소는 모바일 카드
+   스택 안으로만 한정한다. */
+.hint-stack-card .hint-card-text {
+  font-size: 12px;
 }
 
 /* 단계 6(결과 안내) 화면 중앙에 놓는 봉투 그래픽. 카드/폼폼/스티커/팔찌가 이미
