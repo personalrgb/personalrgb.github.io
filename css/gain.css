@@ -748,10 +748,12 @@ body {
 }
 
 .hint-doc-tab {
+  /* 왼쪽(서류에 맞닿는 면)만 테두리를 없애 종이와 이어지는 부분에 선이
+     보이지 않게 하고, 나머지 세 면만 테두리를 그린다. */
   position: relative;
   border-style: solid;
   border-color: rgba(17, 17, 17, 0.15);
-  border-width: 1px;
+  border-width: 1px 1px 1px 0;
   /* 배경색은 자리(slot)에 따라 script.js가 인라인으로 지정한다(서류 종이
      계단층과 같은 무채색, 맨 앞이 밝고 뒤로 갈수록 어두워짐). 종이
      질감(텍스처)은 맨 앞(active) 갈피에만 아래 .active 규칙에서 덧입힌다. */
@@ -798,14 +800,24 @@ body {
 
 .hint-doc-tab::before {
   top: -14px;
-  /* 테두리 선(획) 없이 투명에서 바로 채움색으로 넘어간다 — 곡선의 윤곽은
-     아래 filter: drop-shadow만으로 표현한다. */
-  background: radial-gradient(circle at top right, transparent 15px, var(--tab-flare-color, #f5f5f3) 15px);
+  background: radial-gradient(
+    circle at top right,
+    transparent 14px,
+    rgba(17, 17, 17, 0.15) 14px,
+    rgba(17, 17, 17, 0.15) 15px,
+    var(--tab-flare-color, #f5f5f3) 15px
+  );
 }
 
 .hint-doc-tab::after {
   bottom: -14px;
-  background: radial-gradient(circle at bottom right, transparent 15px, var(--tab-flare-color, #f5f5f3) 15px);
+  background: radial-gradient(
+    circle at bottom right,
+    transparent 14px,
+    rgba(17, 17, 17, 0.15) 14px,
+    rgba(17, 17, 17, 0.15) 15px,
+    var(--tab-flare-color, #f5f5f3) 15px
+  );
 }
 
 /* 갈피마다 튀어나온 깊이(margin-left)와 쌓임 순서(z-index)는 서류의 겹쳐진
@@ -834,6 +846,10 @@ body {
 .hint-doc-tab.active::after {
   background-image: url('../envelope-letter-card.png');
   background-size: cover;
+  /* mask-image가 상자 전체(테두리 포함)를 곡선 모양대로 잘라내므로, 이
+     테두리도 다른 갈피의 gradient 테두리(rgba(17,17,17,0.15) 링)처럼
+     곡선을 그대로 따라 그려진다. */
+  border: 1px solid rgba(17, 17, 17, 0.15);
 }
 
 .hint-doc-tab.active::before {
