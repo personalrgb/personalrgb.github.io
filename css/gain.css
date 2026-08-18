@@ -641,7 +641,7 @@ body {
    잡는다(사진은 세로로 긴 인물 사진이라 max-height보다 폭이 먼저
    병목이 되기 때문). */
 .hint-doc-page-blank {
-  flex: 1 1 65%;
+  flex: 1 1 50%;
   box-sizing: border-box;
   min-height: 620px;
   /* 오른쪽 페이지와 똑같이 위쪽 여백(24px)을 줘서, 사람 사진·클립이 이
@@ -659,7 +659,7 @@ body {
 
 .hint-doc-page {
   position: relative;
-  flex: 1 1 45%;
+  flex: 1 1 60%;
   box-sizing: border-box;
   min-height: 620px;
   display: flex;
