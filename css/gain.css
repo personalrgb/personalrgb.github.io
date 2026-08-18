@@ -520,6 +520,13 @@ body {
   object-fit: contain;
 }
 
+/* 모바일 카드 스택 안의 사람 이미지만 더 크게, 조금 더 아래로 내려서 보여준다. */
+.hint-stack-card .hint-card-illustration {
+  width: 210px;
+  height: 210px;
+  margin-top: 10px;
+}
+
 /* 클립이 사진 위쪽에 꽂혀 있는 것처럼 겹쳐 보여주는 감싸개. 클립은 이
    감싸개 기준 절대 위치라, 감싸개를 위로 올리면 사진과 클립이 함께
    따라 올라가 맨 밑 회색 표지 위쪽 가장자리에 클립이 걸쳐진 것처럼
