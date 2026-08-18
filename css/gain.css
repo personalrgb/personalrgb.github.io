@@ -793,12 +793,12 @@ body {
   width: 14px;
   height: 14px;
   pointer-events: none;
-  /* 곡선 바깥쪽(상자 전체)에 옅은 그림자를 얹는다. box-shadow는 상자
-     "안쪽"의 투명한 부분은 채우지 못하지만, 상자를 감싸는 그림자가
-     곡선 주변에 자연스럽게 깔려 다른 갈피 사이 그림자와 톤이 이어진다.
-     x(4px)를 blur(3px)보다 크게 잡아 왼쪽(서류에 맞닿는 변)으로는
-     번지지 않게 한다. */
-  box-shadow: 4px 3px 3px rgba(0, 0, 0, 0.16);
+  /* box-shadow는 상자(사각형) 테두리를 따라가서 곡선과 안 맞는 그림자가
+     생긴다. filter: drop-shadow는 상자가 아니라 실제로 칠해진 픽셀
+     모양(gradient로 그린 곡선 그 자체)을 따라 그림자를 드리우므로,
+     책갈피 곡선 모양 그대로 그림자가 진다. x(4px)를 blur(3px)보다 크게
+     잡아 왼쪽(서류에 맞닿는 변)으로는 번지지 않게 한다. */
+  filter: drop-shadow(4px 3px 3px rgba(0, 0, 0, 0.22));
 }
 
 .hint-doc-tab::before {
