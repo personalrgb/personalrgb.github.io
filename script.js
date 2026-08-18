@@ -3220,12 +3220,16 @@ function confirmStageHint() {
 
   showStageColorScreen(stage);
 }
-// 모바일에서는 실수로 스크롤/스와이프하다 잘못 넘어가는 걸 막기 위해 배경(또는
-// 카드)을 탭해도 넘어가지 않고 Next 버튼으로만 이동한다. 데스크탑은 Back
-// 버튼·카드(둘 다 자기 핸들러에서 stopPropagation으로 걸러짐) 이외에 배경 어디를
-// 클릭해도 다음 화면으로 넘어간다(튜토리얼 화면과 동일한 규칙).
+// 인트로 막(헤딩·설명 문구)이 떠 있는 동안은 모바일에서도 배경을 탭하면 곧장
+// 서류/카드 화면으로 넘어간다 — 시간이 지나도 저절로 사라지지 않고, 반드시
+// 사용자가 클릭(또는 Next)해야만 다음으로 넘어가게 하려는 의도다.
+// 막이 이미 걷힌 뒤(서류·카드가 실제로 보이는 중)에는, 모바일에서는 실수로
+// 스크롤/스와이프하다 잘못 넘어가는 걸 막기 위해 배경(또는 카드)을 탭해도
+// 넘어가지 않고 Next 버튼으로만 이동한다. 데스크탑은 Back 버튼·카드(둘 다
+// 자기 핸들러에서 stopPropagation으로 걸러짐) 이외에 배경 어디를 클릭해도
+// 다음 화면으로 넘어간다(튜토리얼 화면과 동일한 규칙).
 stageHintOverlay.addEventListener('click', () => {
-  if (isLikelyMobile) return;
+  if (isLikelyMobile && stageIntroVeil.style.display === 'none') return;
   confirmStageHint();
 });
 
