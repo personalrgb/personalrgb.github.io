@@ -599,7 +599,7 @@ body {
 /* 서류 안 본문은 위로 당겨 올리고, 페이지 좌우 패딩 위에 추가로 좌우
    여백을 더 줘서 살짝 안쪽으로 들여 쓴다. */
 .hint-doc-page .hint-card-text {
-  margin-top: -2px;
+  margin-top: -14px;
   padding: 0 12px;
   box-sizing: border-box;
 }
