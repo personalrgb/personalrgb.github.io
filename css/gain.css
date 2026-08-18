@@ -540,7 +540,8 @@ body {
 .hint-stack-card .hint-card-illustration {
   width: 300px;
   height: 300px;
-  margin-top: 25px;
+  margin-top: 10px;
+  margin-bottom: -8px;
 }
 
 /* 클립이 사진 위쪽에 꽂혀 있는 것처럼 겹쳐 보여주는 감싸개. 클립은 이
@@ -786,7 +787,7 @@ body {
   color: rgba(23, 23, 23, 0.6);
   font-family: inherit;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 400;
   letter-spacing: 0.02em;
   line-height: 1.3;
   width: 36px;
@@ -930,17 +931,23 @@ body {
   gap: 8px;
 }
 
+/* .hint-card-label은 데스크탑 서류에서도 재사용되므로, 굵기 축소는
+   모바일 카드 스택 타이틀 행 안으로만 한정한다. */
+.hint-stack-title-row .hint-card-label {
+  font-weight: 400;
+}
+
 .hint-stack-title-separator {
   margin: 0;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 400;
   color: #171717;
 }
 
 .hint-stack-badge {
   margin: 0;
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 400;
   color: #171717;
 }
 
