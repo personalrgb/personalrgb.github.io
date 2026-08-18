@@ -298,6 +298,22 @@ body {
   .palette-drag-hint {
     bottom: 210px !important;
   }
+  /* 튜토리얼 안내 문구(단계 1 세팅 등, 카드·단색 화면 제외) 화면은 모바일에서
+     좌우 여백을 넉넉히 주고 글씨를 조금 줄인다. */
+  .tutorial-overlay {
+    padding: 24px 32px !important;
+  }
+  /* .tutorial-heading/.tutorial-body는 서류 화면 앞 인트로 막(.stage-intro-veil)에서도
+     재사용되므로, 이 축소는 .tutorial-overlay 안으로만 한정해 카드 화면에 번지지 않게 한다. */
+  .tutorial-overlay .tutorial-heading {
+    font-size: 17px !important;
+  }
+  .tutorial-overlay .tutorial-body {
+    font-size: 13px !important;
+  }
+  .tutorial-list li {
+    font-size: 13px !important;
+  }
   /* 모바일에서는 아이콘 대신 "Tutorial" 텍스트 버튼으로 대체하고(script.js),
      상단 톤 버튼 줄과 겹치지 않도록 하단 중앙으로 옮긴다. */
   .tutorial-button {
