@@ -1399,7 +1399,9 @@ let paymentOpenedFromHome = false;
 let stageNavStack = [];
 function pushStageNav(entry) { stageNavStack.push(entry); }
 function goStageNavEntry(entry) {
-  if (entry.type === 'hint') showStageHintScreen(entry.stage);
+  // Back으로 되돌아오는 안내 카드 화면은 이미 한 번 봤던 화면이므로,
+  // 인트로 막(헤딩+설명 문구)을 다시 띄우지 않고 서류를 바로 보여준다.
+  if (entry.type === 'hint') showStageHintScreen(entry.stage, true);
   else showStageColorScreen(entry.stage);
 }
 
@@ -1808,13 +1810,16 @@ function showStageColorScreen(stage) {
   paletteViewButton.style.pointerEvents = 'auto';
 }
 
-// 단계의 "안내 카드" 화면(Good/Bad 카드 또는 종합 요약)을 보여준다.
-function showStageHintScreen(stage) {
+// 단계의 "안내 카드" 화면(Good/Bad 카드 또는 종합 요약)을 보여준다. skipIntro가
+// true면(Back으로 되돌아올 때) 헤딩+설명 문구를 띄우는 인트로 막을 생략하고
+// 서류를 바로 보여준다.
+function showStageHintScreen(stage, skipIntro) {
   pendingStageIntro = stage;
   const hint = STAGE_HINTS[stage];
   stageHintEyebrow.textContent = hint.eyebrow;
   stageHintHeading.textContent = hint.heading;
   renderStageHintBody(hint);
+  if (skipIntro) hideStageIntroVeil();
   stageHintNextButton.style.display = '';
   stageHintOverlay.style.opacity = '1';
   stageHintOverlay.style.pointerEvents = 'auto';
@@ -3424,7 +3429,7 @@ function changeOverlayColor(color) {
 let hasShownCornerDragHint = false;
 let cornerDragHintTimer = null;
 const cornerDragHint = document.createElement('p');
-cornerDragHint.textContent = '화면 모서리를 잡아 가운데로 당겨보세요';
+cornerDragHint.textContent = '화면 모서리를 잡아 가운데로 당겨 색상을 변경해보세요';
 cornerDragHint.style.position = 'fixed';
 cornerDragHint.style.top = '18%';
 cornerDragHint.style.left = '50%';
@@ -3445,7 +3450,7 @@ document.body.appendChild(cornerDragHint);
 let paletteDragHintTimer = null;
 const paletteDragHint = document.createElement('p');
 paletteDragHint.className = 'palette-drag-hint';
-paletteDragHint.textContent = '색을 선택해 팔레트에 담아보세요';
+paletteDragHint.textContent = '본인과 잘어울리는 색을 선택해 팔레트에 담아보세요';
 paletteDragHint.style.position = 'fixed';
 // paletteExpandArrow(팔레트 확장 화살표)가 bottom:124px, height:40px라 위쪽 끝이
 // 164px 지점에 있다. 그보다 넉넉히 위(190px)에 둬서 겹치지 않게 한다.
@@ -3467,7 +3472,7 @@ document.body.appendChild(paletteDragHint);
 // 팔레트에서 확인하세요" 힌트를 이어서 띄운다.
 let colorHintTimer = null;
 const colorHint = document.createElement('p');
-colorHint.textContent = '선택한 색을 팔레트에서 확인하세요';
+colorHint.textContent = '선택한 색을 팔레트에서 확인하여 다음 단계로 넘어가세요';
 colorHint.style.position = 'fixed';
 colorHint.style.top = 'calc(70px + env(safe-area-inset-top))';
 colorHint.style.right = 'calc(20px + env(safe-area-inset-right))';
