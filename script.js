@@ -2178,9 +2178,9 @@ function buildHintDocument(cards) {
   // 자리로 오고, 그보다 앞(왼쪽)에 있던 갈피들은 순서를 유지한 채 맨 뒤로
   // 밀린다. 예: 1234에서 3을 고르면 3412가 된다(왼쪽으로 도는 순환).
   const TAB_STEP_PX = 13;
-  // 서류 종이 본체(가장 밝음) + 그림자 세 겹(갈수록 어두워짐)과 정확히 같은
-  // 색. 자리(slot) 0번이 이 배열의 첫 색을, 마지막 자리가 마지막 색을 쓴다.
-  const TAB_SLOT_COLORS = ['#f5f5f3', '#e4e4e1', '#d6d6d3', '#c8c8c5'];
+  // 갈피 색(하늘색 계열, 자리가 뒤로 갈수록 살짝 진해짐). 자리(slot) 0번이
+  // 이 배열의 첫 색을, 마지막 자리가 마지막 색을 쓴다.
+  const TAB_SLOT_COLORS = ['#bcdcea', '#9dcbdd', '#7ebad0', '#5fa9c3'];
   const tabEls = faces.map((face, i) => {
     const tab = document.createElement('button');
     tab.type = 'button';
@@ -2264,13 +2264,11 @@ function buildHintDocument(cards) {
       const slot = (i - activeIndex + n) % n;
       tab.style.marginLeft = `${slot * TAB_STEP_PX}px`;
       tab.style.zIndex = String(n - slot);
-      // 자리(slot)에 따라 색을 입힌다 — 서류 종이의 계단층(본체·그림자 세
-      // 겹)과 같은 색으로, 맨 왼쪽(0번)이 가장 밝고 오른쪽으로 갈수록 어둡다.
+      // 자리(slot)에 따라 하늘색 계열로 색을 입힌다 — 맨 왼쪽(0번)이 가장
+      // 밝고 오른쪽으로 갈수록 살짝 진해진다. 색깔 있는 갈피라 종이 질감은
+      // 더 이상 넣지 않는다.
       tab.style.backgroundColor = TAB_SLOT_COLORS[Math.min(slot, TAB_SLOT_COLORS.length - 1)];
-      // 0번(맨 앞) 자리는 실제 서류 본체와 맞닿아 있어 그 종이 질감까지
-      // 그대로 이어지지만, 그 뒤 자리들은 서류의 box-shadow로 흉내 낸
-      // 단색 층과 맞닿으므로 질감 없는 단색이어야 색이 완전히 같아 보인다.
-      tab.style.backgroundImage = slot === 0 ? "url('../envelope-letter-card.png')" : 'none';
+      tab.style.backgroundImage = 'none';
     });
   }
 
