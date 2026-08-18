@@ -592,7 +592,7 @@ body {
 .hint-card-text {
   margin: 0;
   font-size: 14px;
-  line-height: 1.85;
+  line-height: 2;
   color: rgba(23, 23, 23, 0.78);
 }
 
