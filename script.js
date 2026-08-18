@@ -2473,9 +2473,12 @@ function buildMobileCardStack(cards) {
 }
 
 // 카드(서류)가 있는 단계 화면이 열릴 때, 서류가 바로 보이는 대신 화면을
-// 잠깐 어둡게 가리는 막 위에 헤딩+설명 문구를 띄웠다가 몇 초 뒤 스르륵
-// 사라지게 한다. 문구가 사라지고 나면 서류 화면 자체에는 이 문구가 다시
-// 나타나지 않는다 — 톤/명도/채도, 카드가 있는 모든 단계에 동일하게 적용된다.
+// 잠깐 어둡게 가리는 막 위에 헤딩+설명 문구를 띄운다. 가만히 둬도 저절로
+// 사라지지 않고, 사용자가 직접 선택(배경 클릭 또는 Next)해야만
+// skipStageIntroVeil로 걷힌다 — 문구를 안 읽고 그냥 다음으로 넘어가지
+// 못하게 하려는 의도다. 문구가 사라지고 나면 서류 화면 자체에는 이 문구가
+// 다시 나타나지 않는다 — 톤/명도/채도, 카드가 있는 모든 단계에 동일하게
+// 적용된다.
 const stageIntroVeil = document.createElement('div');
 stageIntroVeil.className = 'stage-intro-veil';
 const stageIntroVeilHeading = document.createElement('h3');
@@ -2500,16 +2503,6 @@ function showStageIntroVeil(heading, body) {
   // 서류도 함께 숨겨둔다.
   stageHintCards.style.transition = 'none';
   stageHintCards.style.opacity = '0';
-  void stageIntroVeil.offsetWidth;
-  stageIntroVeil.style.transition = 'opacity 0.8s ease';
-  stageHintCards.style.transition = 'opacity 0.8s ease';
-  stageIntroVeilTimer = setTimeout(() => {
-    stageIntroVeil.style.opacity = '0';
-    stageHintCards.style.opacity = '1';
-    stageIntroVeilTimer = setTimeout(() => {
-      stageIntroVeil.style.display = 'none';
-    }, 800);
-  }, 2500);
 }
 
 // 인트로 막이 떠 있는 동안 화면을 클릭하면, 다음 단계(색 선택 화면)로 바로
