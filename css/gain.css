@@ -520,20 +520,23 @@ body {
   object-fit: contain;
 }
 
-/* 클립이 사진 위쪽에 꽂혀 있는 것처럼 겹쳐 보여주는 감싸개. */
+/* 클립이 사진 위쪽에 꽂혀 있는 것처럼 겹쳐 보여주는 감싸개. 클립은 이
+   감싸개 기준 절대 위치라, 감싸개를 위로 올리면 사진과 클립이 함께
+   따라 올라가 맨 밑 회색 표지 위쪽 가장자리에 클립이 걸쳐진 것처럼
+   보이게 된다. */
 .hint-doc-photo {
   position: relative;
   align-self: center;
   display: flex;
   justify-content: center;
-  margin-top: 78px;
+  margin-top: -58px;
 }
 
 /* 클립은 기울이지 않고 똑바로, 서류 위쪽 가장자리에 걸터앉은 것처럼 더
    위로 올려둔다. */
 .hint-doc-clip {
   position: absolute;
-  top: -114.5px;
+  top: -12.5px;
   left: 50%;
   width: 62px;
   height: auto;
