@@ -431,7 +431,7 @@ body {
 
 .tutorial-shortcut {
   margin: 0;
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 700;
   color: #ffffff;
   letter-spacing: 0.02em;
@@ -439,7 +439,7 @@ body {
 
 .tutorial-hint {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 400;
   color: rgba(255, 255, 255, 0.8);
 }
@@ -458,7 +458,7 @@ body {
 
 .tutorial-eyebrow {
   margin: 0;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -476,14 +476,14 @@ body {
 
 .tutorial-heading {
   margin: 0;
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 700;
   color: #ffffff;
 }
 
 .tutorial-body {
   margin: 0;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.7;
   color: rgba(255, 255, 255, 0.92);
 }
@@ -502,7 +502,7 @@ body {
 .tutorial-list li {
   position: relative;
   padding-left: 1.1em;
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.5;
   color: rgba(255, 255, 255, 0.92);
 }
