@@ -2714,7 +2714,7 @@ letterRevealOverlay.addEventListener('wheel', (e) => {
   // requestAnimationFrame 안에서 한 박자 늦게 설정되므로, 편지를 막 연
   // 직후 첫 스크롤에서는 아직 갱신 전(오래된 값)일 수 있다. 매번 여기서
   // 직접 다시 재서 그 지연에 기대지 않게 한다.
-  const extraRise = -10;
+  const extraRise = 80;
   const maxScroll = Math.max(0, letterPaper.scrollHeight - letterScrollCapture.clientHeight + extraRise);
   // 트랙패드는 deltaY가 이미 px 단위(deltaMode 0)라 그대로 쓰면 되지만,
   // 마우스 휠은 브라우저/OS에 따라 "줄" 단위(deltaMode 1, 값이 1~3처럼
@@ -3149,7 +3149,7 @@ function openLetterAfterPayment() {
     // 데스크탑처럼 화면(캡처 영역)이 텍스트보다 더 큰 경우 음수가 나올 수 있는데,
     // 그대로 두면 스크롤 스페이서가 캡처 영역보다 작아져(실제 스크롤 불가) 아래
     // initialRise를 scrollTop에 반영할 수 없어 편지지가 들어올려진 채 굳어버린다.
-    const extraRise = -10;
+    const extraRise = 80;
     const maxScroll = Math.max(0, contentHeight - captureHeight + extraRise);
     letterPaperMaxScroll = maxScroll;
     letterScrollSpacer.style.height = `${captureHeight + maxScroll}px`;
