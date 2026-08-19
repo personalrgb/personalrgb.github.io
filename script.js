@@ -2716,7 +2716,13 @@ letterRevealOverlay.addEventListener('wheel', (e) => {
   // 직접 다시 재서 그 지연에 기대지 않게 한다.
   const extraRise = -10;
   const maxScroll = Math.max(0, letterPaper.scrollHeight - letterScrollCapture.clientHeight + extraRise);
-  letterPaperTargetY = Math.max(-maxScroll, Math.min(0, letterPaperTargetY - e.deltaY));
+  // 트랙패드는 deltaY가 이미 px 단위(deltaMode 0)라 그대로 쓰면 되지만,
+  // 마우스 휠은 브라우저/OS에 따라 "줄" 단위(deltaMode 1, 값이 1~3처럼
+  // 아주 작음)로 오는 경우가 있다 — 그대로 빼면 눈에 안 보일 만큼 느리게
+  // 움직여 "스크롤이 안 된다"처럼 보인다. 줄 단위면 한 줄당 대략 한 줄
+  // 높이(18px)만큼으로 환산해서 체감 속도를 맞춘다.
+  const deltaY = e.deltaMode === 1 ? e.deltaY * 18 : e.deltaMode === 2 ? e.deltaY * letterRevealOverlay.clientHeight : e.deltaY;
+  letterPaperTargetY = Math.max(-maxScroll, Math.min(0, letterPaperTargetY - deltaY));
   letterScrollCapture.scrollTop = -letterPaperTargetY;
   if (letterPaperRafId === null) {
     letterPaperRafId = requestAnimationFrame(stepLetterPaperFollow);
