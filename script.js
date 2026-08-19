@@ -3134,6 +3134,10 @@ function openLetterAfterPayment() {
   renderSynthesisBackdrop(pendingFinalSeason);
   synthesisBackdrop.style.opacity = '1';
   synthesisBackdrop.style.pointerEvents = 'none';
+  // 명도가 낮은(Deep·Dark) 타입은 색 구름 배경도 전체적으로 어두워서, 기본
+  // 어두운 글자색으로는 우측 상단 End 버튼이 배경에 묻힌다 — 그런 타입만
+  // 흰색으로 바꿔 대비를 준다.
+  letterEndButton.style.color = /Deep|Dark/.test(SEASON16_TAB_LABELS[pendingFinalSeason]) ? '#ffffff' : '#111111';
   renderLetterCardText(pendingFinalSeason);
   if (letterPaperRafId !== null) {
     cancelAnimationFrame(letterPaperRafId);
