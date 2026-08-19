@@ -1086,6 +1086,7 @@ body {
   width: 87.9%;
   height: 37.22%;
   z-index: 0;
+  transform: translateY(-20px);
 }
 
 /* 모바일에서는 편지 봉투(몸통+플랩)를 조금 더 크게, 훨씬 더 아래로 내린다.
@@ -1111,7 +1112,7 @@ body {
     width: 397px;
     height: 160px;
     margin-left: -198.5px;
-    transform: translateY(-30px);
+    transform: translateY(-50px);
   }
   /* 편지지 가로폭을 20px 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
      왼쪽으로 절반만큼 당긴다. */
