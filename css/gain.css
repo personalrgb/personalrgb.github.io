@@ -1452,6 +1452,10 @@ body {
   .site-footer-details.expanded {
     max-height: 150px;
   }
+  /* 하단 중앙 "Tutorial" 버튼과 같은 글자 크기로 맞춘다(같은 clamp 식). */
+  .site-footer-toggle {
+    font-size: clamp(8px, 2vw, 13px);
+  }
 }
 
 /* 봉투를 눌렀을 때 편지를 열기 전에 먼저 뜨는 결제 화면. */
