@@ -2917,14 +2917,8 @@ letterRevealFlash.style.pointerEvents = 'none';
 document.body.appendChild(letterRevealFlash);
 
 // ---- 결제 화면 ----
-// 봉투를 눌러도 편지를 바로 열지 않고, 먼저 결제창을 띄운다. 결제가 서버에서
-// 검증된 뒤에만(아래 openLetterAfterPayment) 편지 화면으로 넘어간다.
-// TODO: 아래 두 값은 포트원(PortOne) 대시보드에서 발급받은 실제 storeId/channelKey로
-// 교체해야 결제창이 정상적으로 뜬다(테스트 연동 값도 이 자리에 넣으면 된다).
-// 검증은 절대 프론트에서 끝내지 않는다 — netlify/functions/verify-payment.js가
-// 포트원 서버에 실제 결제 상태/금액을 재확인한 뒤에만 편지를 연다.
-const PORTONE_STORE_ID = 'REPLACE_WITH_PORTONE_STORE_ID';
-const PORTONE_CHANNEL_KEY = 'REPLACE_WITH_PORTONE_CHANNEL_KEY';
+// 봉투를 누르면 이 안내 카드를 먼저 보여주고, "결제하기"를 누르면 실제 결제
+// 연동이 되어 있는 독립 페이지(payment.html)로 이동한다.
 const PAYMENT_AMOUNT = 1000;
 const PAYMENT_ORDER_NAME = '퍼스널 RGB 진단 결과지';
 
@@ -3043,63 +3037,11 @@ paymentOverlay.addEventListener('click', (e) => {
   if (e.target === paymentOverlay) closePaymentWithoutPaying();
 });
 
-async function verifyPaymentOnServer(paymentId) {
-  const res = await fetch('/.netlify/functions/verify-payment', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ paymentId }),
-  });
-  if (!res.ok) return false;
-  const data = await res.json();
-  return !!data.ok;
-}
-
-paymentPayButton.addEventListener('click', async (e) => {
+// 앱 안에서 직접 PortOne.requestPayment()를 호출하던 것 대신, 실제 결제
+// 연동이 되어 있는 독립 결제 페이지(payment.html)로 이동시킨다.
+paymentPayButton.addEventListener('click', (e) => {
   e.stopPropagation();
-  if (typeof PortOne === 'undefined') {
-    paymentError.textContent = '결제 모듈을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.';
-    paymentError.style.display = 'block';
-    return;
-  }
-  paymentError.style.display = 'none';
-  paymentPayButton.disabled = true;
-  paymentPayButton.textContent = '결제 진행 중...';
-  const paymentId = `personalrgb-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-  try {
-    const response = await PortOne.requestPayment({
-      storeId: PORTONE_STORE_ID,
-      channelKey: PORTONE_CHANNEL_KEY,
-      paymentId,
-      orderName: PAYMENT_ORDER_NAME,
-      totalAmount: PAYMENT_AMOUNT,
-      currency: 'CURRENCY_KRW',
-      payMethod: 'CARD',
-    });
-    if (response.code) {
-      paymentError.textContent = response.message || '결제가 취소되었습니다.';
-      paymentError.style.display = 'block';
-      return;
-    }
-    const verified = await verifyPaymentOnServer(response.paymentId || paymentId);
-    if (!verified) {
-      paymentError.textContent = '결제 확인에 실패했습니다. 다시 시도해주세요.';
-      paymentError.style.display = 'block';
-      return;
-    }
-    hidePaymentScreen();
-    // 홈 화면의 "결제하기"는 pendingFinalSeason을 미리보기용(봄 페일=0)으로
-    // 미리 채워두므로, 실제 진단 여부와 무관하게 여기서 항상 편지를 연다.
-    paymentOpenedFromHome = false;
-    if (pendingFinalSeason !== null) {
-      openLetterAfterPayment();
-    }
-  } catch (err) {
-    paymentError.textContent = '결제 중 오류가 발생했습니다.';
-    paymentError.style.display = 'block';
-  } finally {
-    paymentPayButton.disabled = false;
-    paymentPayButton.textContent = `${PAYMENT_AMOUNT.toLocaleString()}원 결제하기`;
-  }
+  location.href = 'payment.html';
 });
 
 stageHintEnvelope.addEventListener('click', (e) => {
