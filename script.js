@@ -140,6 +140,10 @@ setTimeout(() => {
   braking = true;
   if (toneButtonsEl) toneButtonsEl.style.opacity = '1';
   if (tutorialButtonEl) setHomeIconsOpacity('1');
+  if (siteFooterEl) {
+    siteFooterEl.style.opacity = '1';
+    siteFooterEl.style.pointerEvents = 'auto';
+  }
 }, 1500);
 
 const stage = document.getElementById('stage');
@@ -546,7 +550,13 @@ function setHomeIconsOpacity(value) {
 }
 
 // 홈 화면 좌측 하단 "사업자 정보" 토글. 누르면 펼쳐지고 다시 누르면 접힌다.
+// 모바일은 확대→축소 인트로 자체가 생략되므로(위 isLikelyMobile 분기 참고),
+// 처음부터 바로 보여준다. 데스크탑은 인트로가 끝나는 setTimeout에서 나타난다.
 const siteFooterEl = document.getElementById('siteFooter');
+if (isLikelyMobile && siteFooterEl) {
+  siteFooterEl.style.opacity = '1';
+  siteFooterEl.style.pointerEvents = 'auto';
+}
 const siteFooterToggle = document.getElementById('siteFooterToggle');
 const siteFooterDetails = document.getElementById('siteFooterDetails');
 if (siteFooterToggle && siteFooterDetails) {

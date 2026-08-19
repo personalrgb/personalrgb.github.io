@@ -1087,7 +1087,7 @@ body {
   width: 87.9%;
   height: 37.22%;
   z-index: 0;
-  transform: translateY(-3px);
+  transform: translateY(-2px);
 }
 
 /* 모바일에서는 편지 봉투(몸통+플랩)를 조금 더 크게, 훨씬 더 아래로 내린다.
@@ -1106,7 +1106,7 @@ body {
     position: fixed;
     left: 50%;
     top: auto;
-    bottom: -139px;
+    bottom: -149px;
     width: 400px;
     height: 302px;
     margin-left: -200px;
@@ -1116,17 +1116,17 @@ body {
     position: fixed;
     left: 50%;
     top: auto;
-    bottom: 100px;
+    bottom: 90px;
     width: 397px;
     height: 160px;
     margin-left: -198.5px;
     transform: scale(1.15);
   }
-  /* 편지지 가로폭을 20px 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
+  /* 편지지 가로폭을 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
      왼쪽으로 절반만큼 당긴다. */
   .letter-reveal .lr-paper {
-    width: calc(100% + 20px);
-    left: -10px;
+    width: calc(100% + 40px);
+    left: -20px;
   }
 }
 
@@ -1406,7 +1406,11 @@ body {
   bottom: calc(10px + env(safe-area-inset-bottom));
   z-index: 500;
   color: #111111;
-  transition: color 0.4s ease;
+  /* 홈 화면 인트로(확대→축소) 동안에는 숨겨뒀다가, 인트로가 끝나는 시점에
+     톤 버튼/튜토리얼 아이콘과 함께 나타난다(script.js). */
+  opacity: 0;
+  pointer-events: none;
+  transition: color 0.4s ease, opacity 0.6s ease;
 }
 
 .site-footer-toggle {
