@@ -550,13 +550,10 @@ function setHomeIconsOpacity(value) {
 }
 
 // 홈 화면 좌측 하단 "사업자 정보" 토글. 누르면 펼쳐지고 다시 누르면 접힌다.
-// 모바일은 확대→축소 인트로 자체가 생략되므로(위 isLikelyMobile 분기 참고),
-// 처음부터 바로 보여준다. 데스크탑은 인트로가 끝나는 setTimeout에서 나타난다.
+// 모바일은 확대 애니메이션만 생략될 뿐, 톤 버튼·튜토리얼 아이콘이 나타나는
+// 1.5초 지연(아래 setTimeout)은 데스크탑과 동일하게 적용되므로, 여기서도
+// 그 시점까지는 숨겨둔다(초기 opacity:0은 CSS에서 처리).
 const siteFooterEl = document.getElementById('siteFooter');
-if (isLikelyMobile && siteFooterEl) {
-  siteFooterEl.style.opacity = '1';
-  siteFooterEl.style.pointerEvents = 'auto';
-}
 const siteFooterToggle = document.getElementById('siteFooterToggle');
 const siteFooterDetails = document.getElementById('siteFooterDetails');
 if (siteFooterToggle && siteFooterDetails) {
@@ -2707,10 +2704,19 @@ letterScrollCapture.addEventListener('scroll', () => {
 // letterPaperTargetY를 계산한다. preventDefault로 그 아래 레이어의 네이티브 스크롤
 // 자체를 막아, 두 경로가 동시에 값을 건드리며 충돌하지 않게 한다. 터치 스와이프는
 // 이 리스너와 무관하게 위 scroll 이벤트 경로를 그대로 쓴다.
-letterRevealStage.addEventListener('wheel', (e) => {
+// letterRevealStage(.letter-reveal, 편지 자체의 박스)가 아니라 화면 전체를 덮는
+// letterRevealOverlay에 붙인다 — 사용자가 편지 콘텐츠 바깥(여백)에서 스크롤을
+// 시도해도 반응하도록 히트 영역을 화면 전체로 넓힌 것이다.
+letterRevealOverlay.addEventListener('wheel', (e) => {
   e.preventDefault();
   e.stopPropagation();
-  letterPaperTargetY = Math.max(-letterPaperMaxScroll, Math.min(0, letterPaperTargetY - e.deltaY));
+  // letterPaperMaxScroll(모듈 변수)는 openLetterAfterPayment의
+  // requestAnimationFrame 안에서 한 박자 늦게 설정되므로, 편지를 막 연
+  // 직후 첫 스크롤에서는 아직 갱신 전(오래된 값)일 수 있다. 매번 여기서
+  // 직접 다시 재서 그 지연에 기대지 않게 한다.
+  const extraRise = -10;
+  const maxScroll = Math.max(0, letterPaper.scrollHeight - letterScrollCapture.clientHeight + extraRise);
+  letterPaperTargetY = Math.max(-maxScroll, Math.min(0, letterPaperTargetY - e.deltaY));
   letterScrollCapture.scrollTop = -letterPaperTargetY;
   if (letterPaperRafId === null) {
     letterPaperRafId = requestAnimationFrame(stepLetterPaperFollow);

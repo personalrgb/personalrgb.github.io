@@ -1106,7 +1106,7 @@ body {
     position: fixed;
     left: 50%;
     top: auto;
-    bottom: -149px;
+    bottom: -164px;
     width: 400px;
     height: 302px;
     margin-left: -200px;
@@ -1116,7 +1116,7 @@ body {
     position: fixed;
     left: 50%;
     top: auto;
-    bottom: 90px;
+    bottom: 75px;
     width: 397px;
     height: 160px;
     margin-left: -198.5px;
@@ -1125,8 +1125,8 @@ body {
   /* 편지지 가로폭을 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
      왼쪽으로 절반만큼 당긴다. */
   .letter-reveal .lr-paper {
-    width: calc(100% + 40px);
-    left: -20px;
+    width: calc(100% + 60px);
+    left: -30px;
   }
 }
 
