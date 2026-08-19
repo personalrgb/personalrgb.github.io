@@ -2671,6 +2671,7 @@ letterScrollCapture.addEventListener('click', (e) => {
 let letterPaperTargetY = 0;
 let letterPaperCurrentY = 0;
 let letterPaperRafId = null;
+let letterPaperMaxScroll = 0;
 function stepLetterPaperFollow() {
   const diff = letterPaperTargetY - letterPaperCurrentY;
   if (Math.abs(diff) < 0.5) {
@@ -2689,6 +2690,22 @@ letterScrollCapture.addEventListener('scroll', () => {
     letterPaperRafId = requestAnimationFrame(stepLetterPaperFollow);
   }
 });
+
+// 데스크탑 마우스 휠/트랙패드는 letterScrollCapture(안 보이는 overflow:auto 레이어)의
+// 네이티브 스크롤→scroll 이벤트 변환에만 기대지 않는다 — 브라우저/환경마다 이 변환이
+// 안정적으로 일어나지 않을 수 있어서, wheel 이벤트를 직접 받아 deltaY를 누적해
+// letterPaperTargetY를 계산한다. preventDefault로 그 아래 레이어의 네이티브 스크롤
+// 자체를 막아, 두 경로가 동시에 값을 건드리며 충돌하지 않게 한다. 터치 스와이프는
+// 이 리스너와 무관하게 위 scroll 이벤트 경로를 그대로 쓴다.
+letterRevealStage.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  letterPaperTargetY = Math.max(-letterPaperMaxScroll, Math.min(0, letterPaperTargetY - e.deltaY));
+  letterScrollCapture.scrollTop = -letterPaperTargetY;
+  if (letterPaperRafId === null) {
+    letterPaperRafId = requestAnimationFrame(stepLetterPaperFollow);
+  }
+}, { passive: false });
 
 function renderLetterCardText(seasonIndex) {
   letterCardText.innerHTML = '';
@@ -3112,6 +3129,7 @@ function openLetterAfterPayment() {
     // initialRise를 scrollTop에 반영할 수 없어 편지지가 들어올려진 채 굳어버린다.
     const extraRise = -10;
     const maxScroll = Math.max(0, contentHeight - captureHeight + extraRise);
+    letterPaperMaxScroll = maxScroll;
     letterScrollSpacer.style.height = `${captureHeight + maxScroll}px`;
 
     // 처음 열릴 때부터 편지지를 살짝 들어올린 위치에서 시작한다. 모바일은 화면이

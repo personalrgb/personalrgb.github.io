@@ -1087,7 +1087,7 @@ body {
   width: 87.9%;
   height: 37.22%;
   z-index: 0;
-  transform: translateY(-5px);
+  transform: translateY(-3px);
 }
 
 /* 모바일에서는 편지 봉투(몸통+플랩)를 조금 더 크게, 훨씬 더 아래로 내린다.
