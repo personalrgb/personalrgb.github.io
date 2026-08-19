@@ -265,9 +265,8 @@ $("#payBtn").addEventListener("click", async () => {
       paymentId: makePaymentId(),
       orderName: product.name,
       totalAmount: product.amount,
-      currency: "KRW",
+      currency: "CURRENCY_KRW",
       payMethod: method === "kakaopay" ? "EASY_PAY" : "CARD",
-      productType: "DIGITAL",
       customer: {
         fullName: name,
         phoneNumber: tel,
