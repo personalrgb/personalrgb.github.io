@@ -3107,13 +3107,18 @@ function openLetterAfterPayment() {
     const contentHeight = letterPaper.scrollHeight;
     const captureHeight = letterScrollCapture.clientHeight;
     // 편지지가 봉투에서 붕 떠 보이지 않도록 여유 없이 딱 마지막 줄까지만 올라간다.
+    // 데스크탑처럼 화면(캡처 영역)이 텍스트보다 더 큰 경우 음수가 나올 수 있는데,
+    // 그대로 두면 스크롤 스페이서가 캡처 영역보다 작아져(실제 스크롤 불가) 아래
+    // initialRise를 scrollTop에 반영할 수 없어 편지지가 들어올려진 채 굳어버린다.
     const extraRise = -10;
-    const maxScroll = Math.max(0, contentHeight - captureHeight) + extraRise;
+    const maxScroll = Math.max(0, contentHeight - captureHeight + extraRise);
     letterScrollSpacer.style.height = `${captureHeight + maxScroll}px`;
 
     // 처음 열릴 때부터 편지지를 살짝 들어올린 위치에서 시작한다. 모바일은 화면이
     // 좁아 봉투에 더 많이 가려 보이므로 데스크탑보다 조금 더 높이 들어올린다.
-    const initialRise = contentHeight * (isLikelyMobile ? 0.15 : 0.08);
+    // 실제 스크롤 가능 범위(maxScroll)를 넘어서 들어올리면 scrollTop이 그만큼
+    // 못 따라가 시작 위치와 어긋나므로 maxScroll로 상한을 둔다.
+    const initialRise = Math.min(contentHeight * (isLikelyMobile ? 0.15 : 0.08), maxScroll);
     if (letterPaperRafId !== null) {
       cancelAnimationFrame(letterPaperRafId);
       letterPaperRafId = null;
