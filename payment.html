@@ -259,7 +259,12 @@ $("#payBtn").addEventListener("click", async () => {
   showMsg("", "");
 
   try {
-    const response = await PortOne.requestPayment({
+    // redirectUrl은 모바일 브라우저에서 결제창이 리다이렉트 방식으로 열릴 때만
+    // 쓰인다. PC의 HTML5_INICIS 카드결제는 팝업 + Promise 응답 방식이라
+    // redirectUrl을 같이 보내면 "지원하지 않는 기능" 파싱 에러가 났다 —
+    // 모바일에서만 포함시킨다.
+    const isMobileBrowser = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
+    const requestPayload = {
       storeId: PORTONE_CONFIG.storeId,
       channelKey: PORTONE_CONFIG.channelKey[method],
       paymentId: makePaymentId(),
@@ -272,8 +277,11 @@ $("#payBtn").addEventListener("click", async () => {
         phoneNumber: tel,
         email: email,
       },
-      redirectUrl: PORTONE_CONFIG.redirectUrl,
-    });
+    };
+    if (isMobileBrowser) {
+      requestPayload.redirectUrl = PORTONE_CONFIG.redirectUrl;
+    }
+    const response = await PortOne.requestPayment(requestPayload);
 
     // PC 환경에서는 여기로 결과가 돌아옴 (모바일은 redirectUrl로 이동)
     if (response.code !== undefined) {
