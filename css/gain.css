@@ -1096,24 +1096,31 @@ body {
 @media (max-width: 480px) {
   /* 봉투(몸통+플랩)는 %/aspect-ratio 대신 고정 px 크기·위치를 쓴다 — 화면 폭에
      따라 .letter-reveal 컨테이너 자체의 크기가 달라지므로, %로 두면 화면마다
-     봉투 높이가 다르게 보인다. 값은 기존 %(390px 폭 기준)를 그대로 px로
-     환산한 것이라 모양은 동일하고, 이제 폭이 다른 기기에서도 높이가 항상
-     같게 보인다. */
+     봉투 높이가 다르게 보인다. 그 값을 %/top이 아니라 position:fixed +
+     bottom(뷰포트 기준)으로 앵커한다 — .letter-reveal은 화면에 세로 중앙
+     정렬되어 있어서, top으로 앵커하면 기기 화면 "높이"가 다를 때(같은 폭이라도)
+     중앙 정렬 위치 자체가 달라져 봉투가 화면마다 다르게 보였다. bottom은
+     뷰포트 바닥 기준 절대 거리라 화면 폭·높이와 무관하게 항상 같은 위치에
+     온다. */
   .letter-reveal .lr-body {
+    position: fixed;
     left: 50%;
-    top: 439px;
+    top: auto;
+    bottom: -79px;
     width: 400px;
     height: 302px;
     margin-left: -200px;
-    transform: translateY(-100px) scale(1.15);
+    transform: scale(1.15);
   }
   .letter-reveal .lr-flap {
+    position: fixed;
     left: 50%;
-    top: 372px;
+    top: auto;
+    bottom: 160px;
     width: 397px;
     height: 160px;
     margin-left: -198.5px;
-    transform: translateY(-120px) scale(1.15);
+    transform: scale(1.15);
   }
   /* 편지지 가로폭을 20px 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
      왼쪽으로 절반만큼 당긴다. */
