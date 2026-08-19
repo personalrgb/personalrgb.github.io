@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>결제 결과 | Personal RGB</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="personal-rgb-logo.png">
+<style>
+  :root { --fg:#1a1a1a; --muted:#6b6b6b; --line:#e5e5e5; }
+  * { box-sizing: border-box; }
+  body {
+    margin:0; background:#fff; color:var(--fg);
+    font-family:-apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                "Pretendard","Noto Sans KR",sans-serif;
+    line-height:1.6; -webkit-font-smoothing:antialiased;
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh; padding:20px;
+  }
+  .box { max-width:400px; width:100%; text-align:center; }
+  .icon { font-size:44px; line-height:1; margin-bottom:16px; }
+  h1 { font-size:20px; font-weight:700; margin:0 0 8px; letter-spacing:-0.02em; }
+  p.desc { color:var(--muted); font-size:14px; margin:0 0 24px; white-space:pre-wrap; }
+  dl {
+    text-align:left; border:1px solid var(--line); border-radius:12px;
+    padding:16px; margin:0 0 24px; font-size:14px;
+  }
+  dl div { display:flex; justify-content:space-between; gap:12px; padding:5px 0; }
+  dt { color:var(--muted); flex-shrink:0; }
+  dd { margin:0; text-align:right; word-break:break-all; font-weight:500; }
+  a.btn {
+    display:block; padding:15px; border-radius:12px; text-decoration:none;
+    font-size:15px; font-weight:600; background:#1a1a1a; color:#fff;
+  }
+  a.ghost { background:#fff; color:var(--fg); border:1px solid var(--line); margin-top:8px; }
+  footer {
+    margin-top:32px; padding-top:16px; border-top:1px solid var(--line);
+    font-size:11px; color:var(--muted); line-height:1.8;
+  }
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="icon" id="icon">⏳</div>
+  <h1 id="title">결제 결과를 확인하는 중…</h1>
+  <p class="desc" id="desc"></p>
+  <dl id="detail" style="display:none">
+    <div><dt>주문번호</dt><dd id="dPaymentId">-</dd></div>
+    <div><dt>거래번호</dt><dd id="dTxId">-</dd></div>
+  </dl>
+  <a class="btn" href="./">홈으로 돌아가기</a>
+  <a class="btn ghost" href="./payment.html">다시 결제하기</a>
+
+  <footer>
+    상호: 원(WON) · 대표: 김예원 · 사업자등록번호: 805-71-00569<br>
+    문의: moyah1128@gmail.com
+  </footer>
+</div>
+
+<script>
+// 모바일 결제는 redirectUrl로 이동하며 쿼리 파라미터에 결과가 담깁니다.
+const params = new URLSearchParams(location.search);
+const code = params.get("code");            // 실패 시에만 존재
+const message = params.get("message");
+const paymentId = params.get("paymentId");
+const txId = params.get("txId");
+
+const $ = (id) => document.getElementById(id);
+
+if (code) {
+  $("icon").textContent = "⚠️";
+  $("title").textContent = "결제에 실패했습니다";
+  $("desc").textContent = message || "잠시 후 다시 시도해 주세요.";
+} else if (paymentId) {
+  $("icon").textContent = "✅";
+  $("title").textContent = "결제가 완료되었습니다";
+  $("desc").textContent = "진단 리포트를 이메일로 보내드립니다.";
+  $("detail").style.display = "block";
+  $("dPaymentId").textContent = paymentId;
+  $("dTxId").textContent = txId || "-";
+  // 실제 서비스에서는 이 시점에 서버로 paymentId를 보내
+  // 포트원 API로 결제 금액·상태를 검증해야 한다.
+} else {
+  $("icon").textContent = "🔎";
+  $("title").textContent = "결제 정보가 없습니다";
+  $("desc").textContent = "결제 페이지에서 다시 시도해 주세요.";
+}
+</script>
+</body>
+</html>

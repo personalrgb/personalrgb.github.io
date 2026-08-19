@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>결제하기 | Personal RGB</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" href="personal-rgb-logo.png">
+<script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --line: #e5e5e5;
+    --accent: #1a1a1a;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+                 "Pretendard", "Noto Sans KR", sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 32px 20px 80px; }
+  h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.02em; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
+
+  .card {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 16px;
+  }
+  .card h2 {
+    font-size: 13px; font-weight: 600; color: var(--muted);
+    margin: 0 0 12px; letter-spacing: 0.02em;
+  }
+
+  .product {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px; border: 1px solid var(--accent);
+    border-radius: 10px; background: #fafafa;
+  }
+  .product .name { flex: 1; font-size: 15px; font-weight: 500; }
+  .product .price { font-size: 15px; font-weight: 600; }
+
+  label.field { display: block; margin-bottom: 12px; }
+  label.field:last-child { margin-bottom: 0; }
+  label.field span {
+    display: block; font-size: 13px; color: var(--muted); margin-bottom: 6px;
+  }
+  input[type="text"], input[type="tel"], input[type="email"] {
+    width: 100%; padding: 11px 12px; font-size: 15px;
+    border: 1px solid var(--line); border-radius: 8px;
+    font-family: inherit; background: #fff; color: var(--fg);
+  }
+  input:focus { outline: none; border-color: var(--accent); }
+
+  .methods { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .method {
+    padding: 12px; text-align: center; font-size: 14px; font-weight: 500;
+    border: 1px solid var(--line); border-radius: 10px; cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  .method.selected { border-color: var(--accent); background: #fafafa; font-weight: 600; }
+  .method input { display: none; }
+
+  .total {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding: 16px 2px 20px; font-size: 15px;
+  }
+  .total strong { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+
+  button.pay {
+    width: 100%; padding: 16px; font-size: 16px; font-weight: 600;
+    color: #fff; background: var(--accent); border: none;
+    border-radius: var(--radius); cursor: pointer; font-family: inherit;
+  }
+  button.pay:disabled { background: #c4c4c4; cursor: not-allowed; }
+
+  .agree {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px; color: var(--muted); margin: 0 2px 16px;
+  }
+  .agree input { margin: 3px 0 0; accent-color: var(--accent); }
+  .agree a { color: var(--muted); }
+
+  .msg {
+    margin-top: 14px; padding: 12px; border-radius: 8px;
+    font-size: 14px; display: none; white-space: pre-wrap;
+  }
+  .msg.error { display: block; background: #fef2f2; color: #b91c1c; }
+  .msg.ok { display: block; background: #f0fdf4; color: #15803d; }
+
+  footer {
+    margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted); line-height: 1.8;
+  }
+  footer .biz { margin: 0; }
+  footer a { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>결제하기</h1>
+  <p class="sub">Personal RGB 퍼스널 컬러 진단</p>
+
+  <!-- 상품 -->
+  <div class="card">
+    <h2>상품</h2>
+    <div class="product">
+      <input type="radio" name="product" value="basic" data-name="퍼스널 컬러 진단 결과지" data-amount="1000" checked style="display:none">
+      <span class="name">퍼스널 컬러 진단 결과지</span>
+      <span class="price">1,000원</span>
+    </div>
+  </div>
+
+  <!-- 구매자 정보 -->
+  <div class="card">
+    <h2>구매자 정보</h2>
+    <label class="field">
+      <span>이름</span>
+      <input type="text" id="buyerName" placeholder="홍길동" autocomplete="name">
+    </label>
+    <label class="field">
+      <span>휴대폰 번호</span>
+      <input type="tel" id="buyerTel" placeholder="01012345678" autocomplete="tel">
+    </label>
+    <label class="field">
+      <span>이메일</span>
+      <input type="email" id="buyerEmail" placeholder="example@email.com" autocomplete="email">
+    </label>
+  </div>
+
+  <!-- 결제수단 -->
+  <div class="card">
+    <h2>결제수단</h2>
+    <div class="methods">
+      <label class="method selected">
+        <input type="radio" name="method" value="card" checked>신용카드
+      </label>
+      <label class="method">
+        <input type="radio" name="method" value="kakaopay">카카오페이
+      </label>
+    </div>
+  </div>
+
+  <div class="total">
+    <span>총 결제금액</span>
+    <strong id="totalAmount">1,000원</strong>
+  </div>
+
+  <label class="agree">
+    <input type="checkbox" id="agree">
+    <span>
+      <a href="./terms.html" target="_blank">이용약관</a> 및
+      <a href="./privacy.html" target="_blank">개인정보처리방침</a>에 동의하며,
+      결제 진행에 동의합니다.
+    </span>
+  </label>
+
+  <button class="pay" id="payBtn">결제하기</button>
+  <div class="msg" id="msg"></div>
+
+  <footer>
+    <p class="biz">
+      상호: 원(WON) &nbsp;|&nbsp; 대표: 김예원<br>
+      사업자등록번호: 805-71-00569<br>
+      문의: moyah1128@gmail.com<br>
+      결제대행: NHN KCP / KG이니시스 (포트원)<br>
+      <a href="./terms.html">이용약관/환불정책</a> · <a href="./privacy.html">개인정보처리방침</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   포트원 설정 — 관리자 콘솔 > 연동 정보에서 복사
+   https://admin.portone.io/integration-v2/manage/channel
+   ───────────────────────────────────────────── */
+const PORTONE_CONFIG = {
+  storeId: "store-여기에-상점ID-붙여넣기",
+  channelKey: {
+    card:     "channel-key-여기에-KG이니시스-테스트채널키",
+    kakaopay: "channel-key-여기에-카카오페이-테스트채널키",
+  },
+  // 모바일 결제 후 돌아올 주소
+  redirectUrl: location.origin + location.pathname.replace(/payment\.html$/, "") + "payment-complete.html",
+};
+
+/* ── UI 동작 ────────────────────────────────── */
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => document.querySelectorAll(s);
+
+function syncSelected(groupSelector, itemSelector) {
+  $$(groupSelector).forEach((input) => {
+    input.addEventListener("change", () => {
+      $$(itemSelector).forEach((el) => el.classList.remove("selected"));
+      input.closest(itemSelector).classList.add("selected");
+      updateTotal();
+    });
+  });
+}
+syncSelected('input[name="method"]', ".method");
+
+function selectedProduct() {
+  const el = $('input[name="product"]:checked');
+  return { name: el.dataset.name, amount: Number(el.dataset.amount) };
+}
+
+function updateTotal() {
+  $("#totalAmount").textContent = selectedProduct().amount.toLocaleString("ko-KR") + "원";
+}
+
+function showMsg(text, type) {
+  const el = $("#msg");
+  el.textContent = text;
+  el.className = "msg " + type;
+}
+
+// 주문번호 생성 (중복되면 결제 실패하므로 매번 새로 생성)
+function makePaymentId() {
+  const d = new Date();
+  const stamp =
+    d.getFullYear() +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    String(d.getDate()).padStart(2, "0") +
+    String(d.getHours()).padStart(2, "0") +
+    String(d.getMinutes()).padStart(2, "0") +
+    String(d.getSeconds()).padStart(2, "0");
+  const rand = Math.random().toString(36).slice(2, 8);
+  return `prgb-${stamp}-${rand}`;
+}
+
+/* ── 결제 요청 ──────────────────────────────── */
+$("#payBtn").addEventListener("click", async () => {
+  const name = $("#buyerName").value.trim();
+  const tel = $("#buyerTel").value.replace(/[^0-9]/g, "");
+  const email = $("#buyerEmail").value.trim();
+  const method = $('input[name="method"]:checked').value;
+  const product = selectedProduct();
+
+  // KG이니시스는 이름·연락처·이메일이 필수값
+  if (!name)  return showMsg("이름을 입력해 주세요.", "error");
+  if (!tel)   return showMsg("휴대폰 번호를 입력해 주세요.", "error");
+  if (!email) return showMsg("이메일을 입력해 주세요.", "error");
+  if (!$("#agree").checked) return showMsg("약관에 동의해 주세요.", "error");
+
+  const btn = $("#payBtn");
+  btn.disabled = true;
+  btn.textContent = "결제창을 여는 중…";
+  showMsg("", "");
+
+  try {
+    const response = await PortOne.requestPayment({
+      storeId: PORTONE_CONFIG.storeId,
+      channelKey: PORTONE_CONFIG.channelKey[method],
+      paymentId: makePaymentId(),
+      orderName: product.name,
+      totalAmount: product.amount,
+      currency: "KRW",
+      payMethod: method === "kakaopay" ? "EASY_PAY" : "CARD",
+      productType: "DIGITAL",
+      customer: {
+        fullName: name,
+        phoneNumber: tel,
+        email: email,
+      },
+      redirectUrl: PORTONE_CONFIG.redirectUrl,
+    });
+
+    // PC 환경에서는 여기로 결과가 돌아옴 (모바일은 redirectUrl로 이동)
+    if (response.code !== undefined) {
+      showMsg("결제에 실패했습니다.\n" + response.message, "error");
+    } else {
+      // 실제 서비스에서는 반드시 서버(netlify/functions/verify-payment.js 등)에서
+      // 결제 금액·상태를 재검증해야 한다. 이 페이지는 프론트엔드 호출까지만 담당한다.
+      showMsg("결제가 완료되었습니다.\n주문번호: " + response.paymentId, "ok");
+    }
+  } catch (e) {
+    showMsg("결제 중 오류가 발생했습니다.\n" + (e.message || e), "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "결제하기";
+  }
+});
+
+updateTotal();
+</script>
+</body>
+</html>
