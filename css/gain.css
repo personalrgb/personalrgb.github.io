@@ -1105,7 +1105,7 @@ body {
     width: 400px;
     height: 302px;
     margin-left: -200px;
-    transform: translateY(-70px);
+    transform: translateY(-100px) scale(1.15);
   }
   .letter-reveal .lr-flap {
     left: 50%;
@@ -1113,7 +1113,7 @@ body {
     width: 397px;
     height: 160px;
     margin-left: -198.5px;
-    transform: translateY(-90px);
+    transform: translateY(-120px) scale(1.15);
   }
   /* 편지지 가로폭을 20px 더 넓히고, 늘어난 만큼 좌우로 균등하게 걸치도록
      왼쪽으로 절반만큼 당긴다. */
