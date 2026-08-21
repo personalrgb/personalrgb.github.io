@@ -2129,7 +2129,7 @@ stageHintContent.style.flexDirection = 'column';
 stageHintContent.style.alignItems = 'center';
 stageHintContent.style.gap = '26px';
 stageHintContent.style.width = '100%';
-stageHintContent.style.maxWidth = '760px';
+stageHintContent.style.maxWidth = '800px';
 
 const stageHintEyebrow = document.createElement('p');
 stageHintEyebrow.className = 'tutorial-eyebrow';
