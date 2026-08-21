@@ -610,6 +610,7 @@ body {
   transform: translateX(-50%);
   z-index: -2;
   pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
 }
 
 /* 서류 안 이미지는 카드 스택(모바일)보다 훨씬 크게 보여주되, 세로 기준으로
