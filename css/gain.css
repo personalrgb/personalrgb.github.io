@@ -619,7 +619,7 @@ body {
    사진처럼 살짝 기울여두고, 클릭하면 라이트박스로 크게 볼 수 있다. */
 .hint-doc-page-blank .hint-card-illustration {
   width: auto;
-  max-width: 100%;
+  max-width: 98%;
   height: auto;
   max-height: 130vh;
   /* 클립은 그대로 두고 사진만 위로 당긴다(클립은 감싸개 기준 절대 위치라
