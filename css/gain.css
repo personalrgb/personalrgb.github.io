@@ -598,15 +598,20 @@ body {
   filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.25));
 }
 
-/* 클립의 뒷다리(클립 앞부분 clip.png와 같은 비율의 이미지라 위치·크기를
-   완전히 동일하게 잡으면 그대로 겹쳐진다) — 실제 클립처럼 종이 뒤로 넘어가
-   보이도록, 서류 표지(.hint-doc-cover, z-index: -1)보다도 더 뒤에 둔다. */
+/* 클립의 뒷다리. clip.png와 같은 위치(top/left)에서 시작하지만, 원본
+   비율(height: auto) 그대로 두면 앞 클립과 똑같이 짧아져서 서류·표지에
+   완전히 가려져 전혀 안 보인다. 실제 클립처럼 종이 뒤로 넘어가 아래로
+   삐져나온 게 보이도록, 폭(굵기)은 앞 클립과 맞추되 높이는 표지 아래
+   가장자리를 넉넉히 지나치도록 직접 늘린다 — object-fit 기본값(fill)이라
+   내용은 세로로만 늘어나는데, 이 구간은 거의 곧은 직선 와이어라 늘어나도
+   휘어 보이지 않는다. 서류 표지(.hint-doc-cover, z-index: -1)보다도 더
+   뒤에 둔다. */
 .hint-doc-clip-back {
   position: absolute;
   top: -23px;
   left: 50%;
   width: 62px;
-  height: auto;
+  height: 1000px;
   transform: translateX(-50%);
   z-index: -2;
   pointer-events: none;
