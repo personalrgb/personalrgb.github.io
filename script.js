@@ -2256,6 +2256,13 @@ function buildHintDocument(cards) {
     const photoWrap = document.createElement('div');
     photoWrap.className = 'hint-doc-photo';
 
+    // 클립의 뒷다리 — clip.png와 같은 위치·크기로 겹쳐두되, 서류 표지보다도
+    // 더 뒤(z-index)에 둬서 클립이 종이 뒤로 넘어가 꽂힌 것처럼 보이게 한다.
+    const clipBack = document.createElement('img');
+    clipBack.className = 'hint-doc-clip-back';
+    clipBack.src = 'clip-back.png';
+    clipBack.alt = '';
+
     const clip = document.createElement('img');
     clip.className = 'hint-doc-clip';
     clip.src = 'clip.png';
@@ -2270,6 +2277,7 @@ function buildHintDocument(cards) {
       openHintImageLightbox(face.image);
     });
 
+    photoWrap.appendChild(clipBack);
     photoWrap.appendChild(clip);
     photoWrap.appendChild(img);
 
