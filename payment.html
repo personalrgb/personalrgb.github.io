@@ -27,6 +27,12 @@
     -webkit-font-smoothing: antialiased;
   }
   .wrap { max-width: 480px; margin: 0 auto; padding: 32px 20px 80px; }
+  a.back {
+    display: inline-flex; align-items: center; gap: 4px;
+    margin-bottom: 20px; font-size: 13px; color: var(--muted);
+    text-decoration: none;
+  }
+  a.back:hover { color: var(--fg); }
   h1 { font-size: 22px; font-weight: 700; margin: 0 0 4px; letter-spacing: -0.02em; }
   .sub { color: var(--muted); font-size: 14px; margin: 0 0 28px; }
 
@@ -107,6 +113,8 @@
 </head>
 <body>
 <div class="wrap">
+
+  <a class="back" href="index.html" id="backLink">← 뒤로</a>
 
   <h1>결제하기</h1>
   <p class="sub">Personal RGB 퍼스널 컬러 진단</p>
@@ -198,6 +206,16 @@ const PORTONE_CONFIG = {
 /* ── UI 동작 ────────────────────────────────── */
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
+
+// 앱 안에서 결제 화면으로 넘어온 경우엔 브라우저 히스토리로 원래
+// 화면(진단 결과지 등)으로 돌아가고, 이 페이지를 직접 열어서
+// 뒤로 갈 곳이 없는 경우에만 홈으로 이동한다.
+document.getElementById("backLink").addEventListener("click", (e) => {
+  if (history.length > 1) {
+    e.preventDefault();
+    history.back();
+  }
+});
 
 function syncSelected(groupSelector, itemSelector) {
   $$(groupSelector).forEach((input) => {
