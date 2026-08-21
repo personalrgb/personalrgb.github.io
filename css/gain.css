@@ -595,7 +595,7 @@ body {
   transform: translateX(-50%);
   z-index: 2;
   pointer-events: none;
-  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.25));
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.28));
 }
 
 /* 클립의 뒷다리. clip.png(앞 클립)와 완전히 같은 위치·크기로 겹쳐두고,
@@ -625,7 +625,7 @@ body {
   /* 클립은 그대로 두고 사진만 위로 당긴다(클립은 감싸개 기준 절대 위치라
      이 마진의 영향을 받지 않는다). 이미지가 훨씬 커진 만큼 당기는 양은
      줄여서 클립과 안 부딪히게 살짝 내려준다. */
-  margin-top: 26px;
+  margin-top: 22px;
   transform: rotate(-3deg);
   cursor: zoom-in;
   /* 서류에서는 사진이 훨씬 크게 보이므로 그림자도 비례해 더 크고 넓게. */
