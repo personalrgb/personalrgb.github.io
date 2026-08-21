@@ -618,7 +618,10 @@ body {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.26)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.18));
 }
 
-/* 화면을 어둡게 가리고 그 위에 클릭한 얼굴 사진을 크게 보여주는 라이트박스. */
+/* 화면을 어둡게 가리고 그 위에 클릭한 얼굴 사진을 크게 보여주는 라이트박스.
+   배경이 완전히 불투명하지 않으면(예전엔 0.82 + blur) 뒤에 있던 흰 서류/
+   사진이 은은하게 비쳐서 확대된 사진 둘레에 얼룩 같은 그림자가 생겼다 —
+   완전 불투명으로 바꿔 그 비침을 없앤다. */
 .hint-image-lightbox {
   position: fixed;
   inset: 0;
@@ -627,9 +630,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 32px;
-  background: rgba(0, 0, 0, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: #000;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.4s ease;
@@ -640,7 +641,6 @@ body {
   max-width: min(560px, 88vw);
   max-height: 88vh;
   object-fit: contain;
-  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
 }
 
 .hint-card-text {
