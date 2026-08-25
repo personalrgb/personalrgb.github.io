@@ -1791,6 +1791,18 @@ function showStageColorScreen(stage) {
   const wasSynthesis = practiceStage === 'synthesis';
   practiceStage = stage;
 
+  // 언더톤 단계에 처음 들어갈 때만 뜨는 안내 문구 3개(모서리 드래그→팔레트
+  // 담기→다음 단계로)는 4초+0.5초 텀으로 순차 예약(setTimeout)돼 있다. 사용자가
+  // 그 텀 안에 다음 단계로 넘어가버리면 예약된 다음 문구가 취소되지 않고 그대로
+  // 명도/채도 화면 위에 떠버렸다 — 언더톤이 아닌 단계로 들어올 때는 셋 다 강제로
+  // 치운다.
+  if (stage !== 'tone') {
+    hideCornerDragHint();
+    hidePaletteDragHint();
+    hideColorHint();
+    hintChainFromTutorial = false;
+  }
+
   if (stage === 'synthesis') {
     enterSynthesisStage();
     return;
