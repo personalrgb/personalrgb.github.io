@@ -1526,10 +1526,10 @@ body {
 .payment-card {
   position: relative;
   width: 100%;
-  max-width: 480px;
-  background: #fffdfb;
+  max-width: 520px;
+  background: rgba(255, 253, 251, 0.92);
   border-radius: 22px;
-  padding: 56px 44px 44px;
+  padding: 60px 48px 48px;
   text-align: center;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
