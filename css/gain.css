@@ -369,14 +369,18 @@ body {
 
 .tutorial-button {
   position: fixed;
-  /* 상단 톤 버튼 줄과 높이를 맞춘다. */
-  top: calc(36px + env(safe-area-inset-top));
-  right: calc(28px + env(safe-area-inset-right));
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 1002;
   background: transparent;
   border: none;
   color: #111111;
-  padding: 6px;
+  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.6vw, 16px);
+  font-size: clamp(8px, 2vw, 13px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
   cursor: pointer;
   display: flex;
   align-items: center;
