@@ -3612,13 +3612,27 @@ function hideCornerDragHint() {
 let hintChainFromTutorial = false;
 function advanceCornerDragHint() {
   hideCornerDragHint();
-  if (hintChainFromTutorial) {
-    setTimeout(() => showPaletteDragHint(currentColor), 500);
-  }
+  if (hintChainFromTutorial) startPaletteChain(currentColor);
+}
+
+// 팔레트 담기→다음 단계 안내(2·3번째 문구)는 평생 한 번만 보여준다. 모서리
+// 힌트(1번째 문구)가 홈 화면 카드 클릭 등으로 이미 소비된 뒤 튜토리얼을 거쳐
+// 처음 실전 화면에 들어온 경우에도, 이 두 문구는 아직 못 봤을 수 있으니
+// 여기서 바로 이어서 보여줄 수 있게 별도 함수로 뺐다.
+let hasShownPaletteChain = false;
+function startPaletteChain(color) {
+  if (hasShownPaletteChain) return;
+  hasShownPaletteChain = true;
+  setTimeout(() => showPaletteDragHint(color), 500);
 }
 
 function maybeShowCornerDragHint(color, fromTutorial) {
-  if (hasShownCornerDragHint) return;
+  if (hasShownCornerDragHint) {
+    // 첫 문장(모서리를 잡고~)은 이미 봤지만, 튜토리얼을 거쳐 처음 실전
+    // 화면에 들어온 거라면 그 뒤에 이어지는 문구는 생략하지 않고 보여준다.
+    if (fromTutorial) startPaletteChain(color);
+    return;
+  }
   hasShownCornerDragHint = true;
   hintChainFromTutorial = fromTutorial;
   const { l } = hexToHSL(color);
