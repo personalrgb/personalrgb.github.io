@@ -376,7 +376,11 @@ body {
   background: transparent;
   border: none;
   color: #111111;
-  padding: 6px;
+  /* 상단 톤 버튼과 글자 크기/굵기/여백을 완전히 동일하게 맞춘다. */
+  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.6vw, 16px);
+  font-size: clamp(8px, 2vw, 13px);
+  font-weight: 400;
+  white-space: nowrap;
   cursor: pointer;
   display: flex;
   align-items: center;
