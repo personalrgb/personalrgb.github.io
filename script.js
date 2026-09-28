@@ -517,7 +517,7 @@ const tutorialButtonEl = document.getElementById('tutorialButton');
 // 여부)만으로는 터치가 감지되지 않는 좁은 화면(모바일 확인을 위해 데스크탑
 // 브라우저 창을 좁힐 때 포함)을 놓치므로, 창 폭도 함께 확인한다.
 if (isLikelyMobile || window.innerWidth <= 760) {
-  tutorialButtonEl.textContent = 'Tutorial';
+  tutorialButtonEl.textContent = 'Test';
   // 아이콘(작은 정사각형)에서 텍스트(더 넓은 버튼)로 바뀌면 버튼의 실제 세로
   // 위치/크기가 달라지므로, 모빌 세로 중앙 정렬을 다시 계산한다.
   updateResponsiveScale();
