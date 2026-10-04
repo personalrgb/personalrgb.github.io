@@ -3462,6 +3462,36 @@ function changeOverlayColor(color) {
 // 다음 색으로 바뀌는 제스처)를 처음 보는 사용자를 위한 안내다.
 let hasShownCornerDragHint = false;
 let cornerDragHintTimer = null;
+// 힌트 문구(3개) 중 하나라도 떠 있는 동안 배경을 어둡게 눌러 문구 가독성을
+// 높이고, 화면 어디를 누르든 원래 동작(모서리 드래그 등) 대신 다음 문구로
+// 넘기기만 하게 한다. z-index는 힌트 문구(1003)보다 한 단계 아래라 문구
+// 자체는 그대로 밝게 보인다.
+let hintsActive = false;
+const hintDimOverlay = document.createElement('div');
+hintDimOverlay.style.position = 'fixed';
+hintDimOverlay.style.inset = '0';
+hintDimOverlay.style.zIndex = '1002';
+hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.45)';
+hintDimOverlay.style.opacity = '0';
+hintDimOverlay.style.pointerEvents = 'none';
+hintDimOverlay.style.transition = 'opacity 0.3s ease';
+document.body.appendChild(hintDimOverlay);
+
+function setHintsActive(active) {
+  hintsActive = active;
+  hintDimOverlay.style.opacity = active ? '1' : '0';
+  hintDimOverlay.style.pointerEvents = active ? 'auto' : 'none';
+}
+
+// 현재 떠 있는 힌트를 바로 다음 단계로 넘긴다(타이머를 기다리지 않음). 마지막
+// 힌트(colorHint)를 넘기면 hideColorHint가 hintsActive를 꺼서 원래 화면으로 돌아간다.
+function skipCurrentHint() {
+  if (cornerDragHint.style.opacity === '1') advanceCornerDragHint();
+  else if (paletteDragHint.style.opacity === '1') advancePaletteDragHint();
+  else if (colorHint.style.opacity === '1') hideColorHint();
+}
+hintDimOverlay.addEventListener('click', skipCurrentHint);
+
 const cornerDragHint = document.createElement('p');
 cornerDragHint.textContent = '화면 모서리를 잡아 가운데로 당겨 색상을 변경해보세요';
 cornerDragHint.style.position = 'fixed';
@@ -3536,6 +3566,7 @@ function hideColorHint() {
   colorHint.style.opacity = '0';
   colorHintGlow.style.transitionDuration = '1.8s';
   colorHintGlow.style.opacity = '0';
+  setHintsActive(false);
 }
 
 function showColorHint(color) {
@@ -3543,6 +3574,7 @@ function showColorHint(color) {
   const { l } = hexToHSL(color);
   colorHint.style.color = l < 50 ? '#ffffff' : '#111111';
   colorHint.style.opacity = '1';
+  setHintsActive(true);
   clearTimeout(colorHintTimer);
   colorHintTimer = setTimeout(hideColorHint, 4000);
   colorHintGlow.style.transitionDuration = '0.35s';
@@ -3554,6 +3586,7 @@ function hidePaletteDragHint() {
   paletteDragHint.style.opacity = '0';
   paletteCenterGlow.style.transitionDuration = '1.8s';
   paletteCenterGlow.style.opacity = '0';
+  setHintsActive(false);
 }
 
 function advancePaletteDragHint() {
@@ -3573,6 +3606,7 @@ function showPaletteDragHint(color) {
   const { l } = hexToHSL(color);
   paletteDragHint.style.color = l < 50 ? '#ffffff' : '#111111';
   paletteDragHint.style.opacity = '1';
+  setHintsActive(true);
   clearTimeout(paletteDragHintTimer);
   paletteDragHintTimer = setTimeout(advancePaletteDragHint, 4000);
   paletteCenterGlow.style.transitionDuration = '0.35s';
@@ -3582,6 +3616,7 @@ function showPaletteDragHint(color) {
 function hideCornerDragHint() {
   clearTimeout(cornerDragHintTimer);
   cornerDragHint.style.opacity = '0';
+  setHintsActive(false);
 }
 
 // 페이지(색 카드)를 넘기는 순간에도 힌트 체인이 끊기지 않고 이어지도록, 자연스러운
@@ -3617,6 +3652,7 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   const { l } = hexToHSL(color);
   cornerDragHint.style.color = l < 50 ? '#ffffff' : '#111111';
   cornerDragHint.style.opacity = '1';
+  setHintsActive(true);
   clearTimeout(cornerDragHintTimer);
   cornerDragHintTimer = setTimeout(advanceCornerDragHint, 4000);
 }
