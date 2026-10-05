@@ -3500,9 +3500,8 @@ function clearHintSpotlightTimers() {
 // 4초/재생 끝까지 기다리지 않고 클릭해서 넘겨도 예약된 프레임은 취소되지
 // 않아 그대로 이어서 그려진다 — cornerDragDemoActive가 꺼지면 다음 프레임부터
 // 즉시 멈추도록 animateCurl에 취소 체크를 넘긴다.
-// 힌트 문구 노출 시간·힌트 사이 전환 텀. 기존(4000ms/500ms)은 전체 체인이
-// 너무 느리게 느껴져 단축했다.
-const HINT_DISPLAY_MS = 2300;
+// 힌트 문구 노출 시간·힌트 사이 전환 텀.
+const HINT_DISPLAY_MS = 3200;
 const HINT_CHAIN_GAP_MS = 280;
 const PALETTE_CONFIRM_DELAY_MS = 450; // 두 번째 힌트: 체크→원형 확정까지의 지연
 
@@ -3512,7 +3511,7 @@ const CORNER_DRAG_PHASE1_MS = 650; // 모서리 -> 중앙으로 당기는 시간
 const CORNER_DRAG_PHASE2_MS = 260; // 반대 모서리로 말려들어가는 시간
 const CORNER_DRAG_PAUSE_MS = 180; // 반복 사이 정지
 const CORNER_DRAG_CYCLE_MS = CORNER_DRAG_PHASE1_MS + CORNER_DRAG_PHASE2_MS + CORNER_DRAG_PAUSE_MS;
-const CORNER_DRAG_READ_BUFFER_MS = 350; // 시연이 끝난 뒤 문구를 읽을 여유
+const CORNER_DRAG_READ_BUFFER_MS = 1250; // 시연이 끝난 뒤 문구를 읽을 여유
 const COLOR_FADE_DELAY_MS = 1050; // showColorOverlayFade의 1초 페이드와 맞춤
 
 function playCornerDragDemo(repeatsLeft) {
