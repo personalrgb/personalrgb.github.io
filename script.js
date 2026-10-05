@@ -3496,8 +3496,8 @@ hintSpotlightPropsStyle.textContent = `
 `;
 document.head.appendChild(hintSpotlightPropsStyle);
 
-const HINT_SPOTLIGHT_RADIUS = 240; // 구멍 전체(선명~완전히 어두워지는 지점까지) 반경
-const HINT_SPOTLIGHT_CLEAR_PCT = 28; // 반경 중 선명하게 보이는 구간의 비율(%) — 그 바깥은 전부 그라데이션
+const HINT_SPOTLIGHT_RADIUS = 170; // 구멍 전체(선명~완전히 어두워지는 지점까지) 반경
+const HINT_SPOTLIGHT_CLEAR_PCT = 16; // 반경 중 선명하게 보이는 구간의 비율(%) — 작아진 만큼 비율을 낮춰 경계가 여전히 넉넉하고 자연스럽게 풀리게 한다
 const HINT_SPOTLIGHT_CORNER = { x: '88%', y: '12%' };
 const HINT_SPOTLIGHT_MOVE_MS = 1000;
 let hintSpotlightTimers = [];
@@ -3541,7 +3541,7 @@ function startHintSpotlight() {
 function startPaletteHintSpotlight() {
   clearHintSpotlightTimers();
   const r = paletteBar.getBoundingClientRect();
-  const padX = 90, padY = 70;
+  const padX = 55, padY = 40;
   hintDimOverlay.style.transition = 'none';
   hintDimOverlay.style.background = hintSpotlightGradient(`ellipse ${r.width / 2 + padX}px ${r.height / 2 + padY}px`);
   hintDimOverlay.style.setProperty('--spot-x', (r.left + r.width / 2) + 'px');
