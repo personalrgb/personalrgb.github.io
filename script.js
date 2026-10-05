@@ -3504,6 +3504,7 @@ function clearHintSpotlightTimers() {
 const HINT_DISPLAY_MS = 4500;
 const HINT_CHAIN_GAP_MS = 280;
 const PALETTE_CONFIRM_DELAY_MS = 450; // 두 번째 힌트: 체크→원형 확정까지의 지연
+const PALETTE_CONFIRM_HOLD_MS = 900; // 확정(원형) 상태를 유지하다 다시 체크로 취소되기까지
 
 let cornerDragDemoActive = false;
 const CORNER_DRAG_REPEATS = 2;
@@ -3583,7 +3584,11 @@ function startPaletteSelectDemo() {
   paletteDemoColor = color;
   hintSpotlightTimers.push(setTimeout(() => {
     if (!paletteDemoActive) return;
-    confirmSwatchColor(paletteDemoColor, paletteDemoSwatch);
+    confirmSwatchColor(paletteDemoColor, paletteDemoSwatch); // 체크 -> 원형
+    hintSpotlightTimers.push(setTimeout(() => {
+      if (!paletteDemoActive) return;
+      confirmSwatchColor(paletteDemoColor, paletteDemoSwatch); // 원형 -> 체크(취소)
+    }, PALETTE_CONFIRM_HOLD_MS));
   }, PALETTE_CONFIRM_DELAY_MS));
 }
 
