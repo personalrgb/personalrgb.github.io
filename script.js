@@ -3729,9 +3729,9 @@ colorHintGlow.className = 'palette-icon-hint-glow';
 document.body.appendChild(colorHintGlow);
 
 // 첫 번째・두 번째 힌트가 떠 있는 동안은 아직 설명할 차례가 안 된 뒤쪽
-// UI(← Back, 팔레트 아이콘, 하단 팔레트 바)가 먼저 눈에 띄지 않도록 잠시
-// 숨긴다. 세 번째 힌트는 바로 그 팔레트 아이콘/팔레트를 가리키는 내용이라
-// 다시 보여준다.
+// UI(← Back, 팔레트 아이콘, 하단 팔레트 바, 팔레트 펼침 화살표, Warm/Cool
+// 탭)가 먼저 눈에 띄지 않도록 잠시 숨긴다. 세 번째 힌트는 바로 그 팔레트
+// 아이콘/팔레트를 가리키는 내용이라 다시 보여준다.
 function hidePracticeChromeForHint() {
   backButton.style.opacity = '0';
   backButton.style.pointerEvents = 'none';
@@ -3739,6 +3739,10 @@ function hidePracticeChromeForHint() {
   paletteViewButton.style.pointerEvents = 'none';
   paletteBar.style.opacity = '0';
   paletteBar.style.pointerEvents = 'none';
+  paletteExpandArrow.style.opacity = '0';
+  paletteExpandArrow.style.pointerEvents = 'none';
+  paletteToneTabs.style.opacity = '0';
+  paletteToneTabs.style.pointerEvents = 'none';
 }
 
 function showPracticeChromeForHint() {
@@ -3747,7 +3751,11 @@ function showPracticeChromeForHint() {
   if (isPracticeMode) {
     paletteViewButton.style.opacity = '1';
     paletteViewButton.style.pointerEvents = 'auto';
+    paletteToneTabs.style.opacity = '1';
+    paletteToneTabs.style.pointerEvents = 'auto';
   }
+  paletteExpandArrow.style.opacity = '1';
+  paletteExpandArrow.style.pointerEvents = 'auto';
   paletteBar.style.opacity = '1';
   paletteBar.style.pointerEvents = 'auto';
 }
@@ -3850,9 +3858,11 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   cornerDragHint.style.opacity = '1';
   // showColorOverlayFade(튜토리얼 직후 첫 진입)는 colorOverlay가 1초간 페이드인
   // 하므로, 그 자식인 curlCanvas가 반투명해지지 않도록 시연 시작을 그만큼 늦춘다.
+  // 카드를 직접 클릭해 들어온 경우(fromTutorial=false)는 그 문제가 없지만,
+  // 문구를 먼저 읽을 시간을 주기 위해 똑같이 약 1초 늦춘 뒤에 시연을 시작한다.
   // 힌트 노출 시간도 "지연 + 실제 시연 길이"에 맞춰 직접 계산해서, 시연이 끝나기도
   // 전에 힌트가 먼저 사라져 애니메이션이 중간에 끊기는 일이 없게 한다.
-  const demoDelay = fromTutorial ? COLOR_FADE_DELAY_MS : 0;
+  const demoDelay = COLOR_FADE_DELAY_MS;
   startHintSpotlight(demoDelay);
   setHintsActive(true);
   // showColorOverlayFade -> showStageColorScreen 순으로 이어지는데, 뒤쪽이
