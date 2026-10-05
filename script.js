@@ -3500,7 +3500,21 @@ function clearHintSpotlightTimers() {
 // 4초/재생 끝까지 기다리지 않고 클릭해서 넘겨도 예약된 프레임은 취소되지
 // 않아 그대로 이어서 그려진다 — cornerDragDemoActive가 꺼지면 다음 프레임부터
 // 즉시 멈추도록 animateCurl에 취소 체크를 넘긴다.
+// 힌트 문구 노출 시간·힌트 사이 전환 텀. 기존(4000ms/500ms)은 전체 체인이
+// 너무 느리게 느껴져 단축했다.
+const HINT_DISPLAY_MS = 2300;
+const HINT_CHAIN_GAP_MS = 280;
+const PALETTE_CONFIRM_DELAY_MS = 450; // 두 번째 힌트: 체크→원형 확정까지의 지연
+
 let cornerDragDemoActive = false;
+const CORNER_DRAG_REPEATS = 2;
+const CORNER_DRAG_PHASE1_MS = 650; // 모서리 -> 중앙으로 당기는 시간
+const CORNER_DRAG_PHASE2_MS = 260; // 반대 모서리로 말려들어가는 시간
+const CORNER_DRAG_PAUSE_MS = 180; // 반복 사이 정지
+const CORNER_DRAG_CYCLE_MS = CORNER_DRAG_PHASE1_MS + CORNER_DRAG_PHASE2_MS + CORNER_DRAG_PAUSE_MS;
+const CORNER_DRAG_READ_BUFFER_MS = 350; // 시연이 끝난 뒤 문구를 읽을 여유
+const COLOR_FADE_DELAY_MS = 1050; // showColorOverlayFade의 1초 페이드와 맞춤
+
 function playCornerDragDemo(repeatsLeft) {
   if (repeatsLeft <= 0 || !cornerDragDemoActive) return;
   const w = window.innerWidth, h = window.innerHeight;
@@ -3526,9 +3540,9 @@ function playCornerDragDemo(repeatsLeft) {
       refreshPaletteForCurrentColor(currentColor);
       const idx = currentPalette.findIndex(c => c.toLowerCase() === nextColor.toLowerCase());
       currentPaletteIndex = idx >= 0 ? idx : 0;
-      hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(repeatsLeft - 1), 300));
-    }, 0, 1, 340, oppositeCorner, nextColor, isCancelled);
-  }, 0, 0, 1100, C, currentColor, isCancelled);
+      hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(repeatsLeft - 1), CORNER_DRAG_PAUSE_MS));
+    }, 0, 1, CORNER_DRAG_PHASE2_MS, oppositeCorner, nextColor, isCancelled);
+  }, 0, 0, CORNER_DRAG_PHASE1_MS, C, currentColor, isCancelled);
 }
 
 // delayMs: showColorOverlayFade로 처음 들어올 때는 colorOverlay 자체가 아직
@@ -3543,9 +3557,9 @@ function startHintSpotlight(delayMs = 0) {
   hintDimOverlay.style.background = 'transparent';
   cornerDragDemoActive = true;
   if (delayMs > 0) {
-    hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(2), delayMs));
+    hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(CORNER_DRAG_REPEATS), delayMs));
   } else {
-    playCornerDragDemo(2);
+    playCornerDragDemo(CORNER_DRAG_REPEATS);
   }
 }
 
@@ -3571,7 +3585,7 @@ function startPaletteSelectDemo() {
   hintSpotlightTimers.push(setTimeout(() => {
     if (!paletteDemoActive) return;
     confirmSwatchColor(paletteDemoColor, paletteDemoSwatch);
-  }, 700));
+  }, PALETTE_CONFIRM_DELAY_MS));
 }
 
 function resetPaletteSelectDemo() {
@@ -3710,7 +3724,7 @@ function showColorHint(color) {
   startColorHintSpotlight();
   setHintsActive(true);
   clearTimeout(colorHintTimer);
-  colorHintTimer = setTimeout(hideColorHint, 4000);
+  colorHintTimer = setTimeout(hideColorHint, HINT_DISPLAY_MS);
   colorHintGlow.style.transitionDuration = '0.35s';
   colorHintGlow.style.opacity = '1';
 }
@@ -3727,8 +3741,8 @@ function hidePaletteDragHint() {
 
 function advancePaletteDragHint() {
   hidePaletteDragHint();
-  // 팔레트 힌트의 페이드아웃(0.5초)이 끝난 뒤에 이어서 색 확인 힌트를 띄운다.
-  setTimeout(() => showColorHint(currentColor), 500);
+  // 팔레트 힌트의 페이드아웃이 끝난 뒤에 이어서 색 확인 힌트를 띄운다.
+  setTimeout(() => showColorHint(currentColor), HINT_CHAIN_GAP_MS);
 }
 
 // 두 번째 힌트가 뜰 때 하단 중앙 팔레트 스와치에 은은한 발광을 준다. 문구가 뜨는
@@ -3744,7 +3758,7 @@ function showPaletteDragHint(color) {
   startPaletteHintSpotlight();
   setHintsActive(true);
   clearTimeout(paletteDragHintTimer);
-  paletteDragHintTimer = setTimeout(advancePaletteDragHint, 4000);
+  paletteDragHintTimer = setTimeout(advancePaletteDragHint, HINT_DISPLAY_MS);
   paletteCenterGlow.style.transitionDuration = '0.35s';
   paletteCenterGlow.style.opacity = '1';
 }
@@ -3774,7 +3788,7 @@ let hasShownPaletteChain = false;
 function startPaletteChain(color) {
   if (hasShownPaletteChain) return;
   hasShownPaletteChain = true;
-  setTimeout(() => showPaletteDragHint(color), 500);
+  setTimeout(() => showPaletteDragHint(color), HINT_CHAIN_GAP_MS);
 }
 
 function maybeShowCornerDragHint(color, fromTutorial) {
@@ -3790,10 +3804,14 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   cornerDragHint.style.opacity = '1';
   // showColorOverlayFade(튜토리얼 직후 첫 진입)는 colorOverlay가 1초간 페이드인
   // 하므로, 그 자식인 curlCanvas가 반투명해지지 않도록 시연 시작을 그만큼 늦춘다.
-  startHintSpotlight(fromTutorial ? 1050 : 0);
+  // 힌트 노출 시간도 "지연 + 실제 시연 길이"에 맞춰 직접 계산해서, 시연이 끝나기도
+  // 전에 힌트가 먼저 사라져 애니메이션이 중간에 끊기는 일이 없게 한다.
+  const demoDelay = fromTutorial ? COLOR_FADE_DELAY_MS : 0;
+  startHintSpotlight(demoDelay);
   setHintsActive(true);
   clearTimeout(cornerDragHintTimer);
-  cornerDragHintTimer = setTimeout(advanceCornerDragHint, 4000);
+  const displayMs = demoDelay + CORNER_DRAG_REPEATS * CORNER_DRAG_CYCLE_MS + CORNER_DRAG_READ_BUFFER_MS;
+  cornerDragHintTimer = setTimeout(advanceCornerDragHint, displayMs);
 }
 
 function showColorOverlay(color, x, y) {
