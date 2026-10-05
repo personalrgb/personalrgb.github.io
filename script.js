@@ -489,7 +489,10 @@ colorOverlay.appendChild(curlCanvas);
 const curlCtx = curlCanvas.getContext('2d');
 
 function resizeCurlCanvas() {
-  const dpr = window.devicePixelRatio || 1;
+  // dpr을 그대로 쓰면 고배율(3x 등) 기기에서 화면 전체 크기의 캔버스를 매 프레임
+  // fillRect+그림자블러로 채우는 비용이 9배까지 뛴다. 2배면 시각적으로 충분히
+  // 선명해서, 다른 캔버스(예: 1626번 줄)와 동일하게 2로 상한을 둔다.
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
   curlCanvas.width = window.innerWidth * dpr;
   curlCanvas.height = window.innerHeight * dpr;
   curlCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
