@@ -3540,45 +3540,38 @@ function startHintSpotlight() {
   playCornerDragDemo(2);
 }
 
-// 두 번째 힌트("팔레트에 담아보세요")도 배경을 어둡게 누르는 대신, 팔레트
-// 바를 한 칸 드래그해서 다음 색으로 넘어가는 실제 동작을 자동으로 재생해서
-// 보여준다. 어디까지나 시연일 뿐 사용자가 실제로 고른 게 아니므로, 힌트가
-// 끝나면(스킵하든 4초가 다 지나든) hidePaletteDragHint에서 원래 색·인덱스로
-// 되돌린다.
-// 실제 드래그처럼 매 프레임 직접 좌표를 보간하지 않는다 — 스와치 하나하나가
-// 이미 자기 transform에 CSS transition(PALETTE_SWATCH_TRANSITION)을 갖고
-// 있으므로, 목표 인덱스만 한 번 바꿔주면 브라우저가 알아서 부드럽게 넘긴다.
-// (rAF로 매 프레임 50개 스와치의 transform을 직접 갱신하던 예전 방식은, 각
-// 스와치의 backdrop-filter 블러까지 매 프레임 다시 계산하게 만들어 눈에 띄는
-// 렉을 유발했다.)
+// 두 번째 힌트("팔레트에 담아보세요")는 배경을 어둡게 누르지 않고, 가운데로
+// 와 있는 스와치를 실제로 한 번 더 탭해 "확정"했을 때와 똑같은 동작(체크
+// 표시 구멍이 원형 구멍으로 바뀌는 것, confirmSwatchColor)을 그대로 재생해서
+// 보여준다. 어디까지나 시연이므로, 힌트가 끝나면(스킵하든 4초가 다 지나든)
+// confirmSwatchColor를 다시 호출해 원래 상태(체크)로 되돌린다 — 그 함수
+// 자체가 토글이라 두 번 부르면 자연히 원복된다.
 let paletteDemoActive = false;
-let paletteDemoOriginal = null;
+let paletteDemoSwatch = null;
+let paletteDemoColor = null;
 
 function startPaletteSelectDemo() {
-  paletteDemoOriginal = { index: currentPaletteIndex, color: currentColor };
+  const swatch = paletteSwatchEls[currentPaletteIndex];
+  const color = currentPalette[currentPaletteIndex];
+  if (!swatch || !color) return;
+  // 이미 확정돼 원형으로 표시 중인 색이면 보여줄 전환이 없으니 그냥 둔다.
+  if (confirmedColors.some((c) => c.toLowerCase() === color.toLowerCase())) return;
   paletteDemoActive = true;
-  currentPaletteIndex = (currentPaletteIndex + 1) % currentPalette.length;
-  changeOverlayColor(currentPalette[currentPaletteIndex]);
-  applyPaletteLayout();
+  paletteDemoSwatch = swatch;
+  paletteDemoColor = color;
+  hintSpotlightTimers.push(setTimeout(() => {
+    if (!paletteDemoActive) return;
+    confirmSwatchColor(paletteDemoColor, paletteDemoSwatch);
+  }, 700));
 }
 
-// 시연으로 바뀐 색·인덱스·스와치 위치를 전부 원래대로 되돌린다. 전환 없이
-// 즉시 복원해야, 힌트 문구가 사라지는 순간과 자연스럽게 섞여 사용자가 어색한
-// 역재생을 보지 않는다.
 function resetPaletteSelectDemo() {
   if (!paletteDemoActive) return;
   paletteDemoActive = false;
-  paletteDragActive = false;
-  paletteDragOffsetX = 0;
-  if (paletteDemoOriginal) {
-    setPaletteSwatchTransitionsEnabled(false);
-    currentPaletteIndex = paletteDemoOriginal.index;
-    changeOverlayColor(paletteDemoOriginal.color);
-    applyPaletteLayout();
-    void paletteBar.offsetWidth;
-    setPaletteSwatchTransitionsEnabled(true);
-  }
-  paletteDemoOriginal = null;
+  const stillConfirmed = confirmedColors.some((c) => c.toLowerCase() === paletteDemoColor.toLowerCase());
+  if (stillConfirmed) confirmSwatchColor(paletteDemoColor, paletteDemoSwatch);
+  paletteDemoSwatch = null;
+  paletteDemoColor = null;
 }
 
 function startPaletteHintSpotlight() {
