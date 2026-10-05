@@ -3497,9 +3497,7 @@ hintSpotlightPropsStyle.textContent = `
 document.head.appendChild(hintSpotlightPropsStyle);
 
 const HINT_SPOTLIGHT_RADIUS = 170; // 구멍 전체(선명~완전히 어두워지는 지점까지) 반경
-const HINT_SPOTLIGHT_CLEAR_PCT = 16; // 반경 중 선명하게 보이는 구간의 비율(%) — 작아진 만큼 비율을 낮춰 경계가 여전히 넉넉하고 자연스럽게 풀리게 한다
-const HINT_SPOTLIGHT_CORNER = { x: '88%', y: '12%' };
-const HINT_SPOTLIGHT_MOVE_MS = 1000;
+const HINT_SPOTLIGHT_CLEAR_PCT = 16; // 반경 중 선명하게 보이는 구간의 비율(%) — 작아진 만큼 비율을 낮워 경계가 여전히 넉넉하고 자연스럽게 풀리게 한다
 let hintSpotlightTimers = [];
 
 function clearHintSpotlightTimers() {
@@ -3511,9 +3509,29 @@ function hintSpotlightGradient(shape) {
   return `radial-gradient(${shape} at var(--spot-x) var(--spot-y), transparent 0%, transparent ${HINT_SPOTLIGHT_CLEAR_PCT}%, rgba(0, 0, 0, 0.6) 100%)`;
 }
 
+// mask-image로 뚫는 구멍(알약 모양 등 radial-gradient로는 못 만드는 모양용):
+// 전체를 흰색(= 어두운 배경 그대로 보임)으로 채우고, 그 위에 검은(= 구멍, 투명)
+// 둥근 사각형을 가우시안 블러로 흐려서 겹친다. 흰색/검은색 경계가 블러 반경만큼
+// 부드럽게 섞이면서 자연스러운 경계가 된다.
+function hintSpotlightMaskUrl(x, y, w, h, rx, blurStd) {
+  const vw = window.innerWidth, vh = window.innerHeight;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw} ${vh}">` +
+    `<filter id="b"><feGaussianBlur stdDeviation="${blurStd}"/></filter>` +
+    `<rect x="0" y="0" width="${vw}" height="${vh}" fill="#fff"/>` +
+    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="#000" filter="url(#b)"/>` +
+    `</svg>`;
+  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
+}
+
+function clearHintSpotlightMask() {
+  hintDimOverlay.style.webkitMaskImage = 'none';
+  hintDimOverlay.style.maskImage = 'none';
+}
+
 // 원형 구멍을 즉시(전환 없이) 지정한 좌표에 배치한다.
 function placeHintSpotlight(x, y) {
   hintDimOverlay.style.transition = 'none';
+  clearHintSpotlightMask();
   hintDimOverlay.style.background = hintSpotlightGradient(`circle ${HINT_SPOTLIGHT_RADIUS}px`);
   hintDimOverlay.style.setProperty('--spot-x', x);
   hintDimOverlay.style.setProperty('--spot-y', y);
@@ -3525,8 +3543,13 @@ function placeHintSpotlight(x, y) {
 // 자동으로 재생해서 그 동작 자체를 보여준다. startPageDrag를 그대로 쓰면
 // "실제로 드래그가 시작됐다"고 보고 힌트를 바로 꺼버리므로, 그 함수는 거치지
 // 않고 endPageDrag의 커밋 분기와 똑같은 연출만 가져와 재생한다.
+// animateCurl은 requestAnimationFrame으로 진행되는데, 사용자가 힌트1을
+// 4초/재생 끝까지 기다리지 않고 클릭해서 넘겨도 예약된 프레임은 취소되지
+// 않아 그대로 이어서 그려진다 — cornerDragDemoActive가 꺼지면 다음 프레임부터
+// 즉시 멈추도록 animateCurl에 취소 체크를 넘긴다.
+let cornerDragDemoActive = false;
 function playCornerDragDemo(repeatsLeft) {
-  if (repeatsLeft <= 0) return;
+  if (repeatsLeft <= 0 || !cornerDragDemoActive) return;
   const w = window.innerWidth, h = window.innerHeight;
   const C = { x: w, y: 0 };
   const { e1, e2 } = edgeVectorsForCorner('tr');
@@ -3534,9 +3557,12 @@ function playCornerDragDemo(repeatsLeft) {
   const toP = { x: w / 2, y: h / 2 };
   const oppositeCorner = { x: 0, y: h };
   const { color: nextColor } = getNextColor();
+  const isCancelled = () => !cornerDragDemoActive;
 
   animateCurl(C, e1, e2, fromP, toP, currentColor, () => {
+    if (isCancelled()) return;
     animateCurl(C, e1, e2, oppositeCorner, oppositeCorner, currentColor, () => {
+      if (isCancelled()) return;
       currentColor = nextColor;
       colorOverlay.style.background = currentColor;
       updateBackButtonContrast(currentColor);
@@ -3548,42 +3574,56 @@ function playCornerDragDemo(repeatsLeft) {
       const idx = currentPalette.findIndex(c => c.toLowerCase() === nextColor.toLowerCase());
       currentPaletteIndex = idx >= 0 ? idx : 0;
       hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(repeatsLeft - 1), 300));
-    }, 0, 1, 340, oppositeCorner, nextColor);
-  }, 0, 0, 1100, C, currentColor);
+    }, 0, 1, 340, oppositeCorner, nextColor, isCancelled);
+  }, 0, 0, 1100, C, currentColor, isCancelled);
 }
 
 function startHintSpotlight() {
   clearHintSpotlightTimers();
+  clearHintSpotlightMask();
   // 평평한 어둠/구멍 없이, 클릭만 받아 다음 힌트로 넘기는 투명한 레이어로 둔다.
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
   hintDimOverlay.style.background = 'transparent';
+  cornerDragDemoActive = true;
   playCornerDragDemo(2);
 }
 
-// 두 번째 힌트("팔레트에 담아보세요"): 하단 팔레트 바가 실제로 보이는
-// 자리에 맞춰 타원 구멍을 뚫는다. 움직이지 않고 그 자리에 고정.
+// 두 번째 힌트("팔레트에 담아보세요"): 하단 팔레트 바 모양 그대로 알약형
+// 구멍을 뚫는다. 가우시안 블러로 경계를 넉넉하게 흐리고, 움직이지 않고
+// 그 자리에 고정.
 function startPaletteHintSpotlight() {
   clearHintSpotlightTimers();
   const r = paletteBar.getBoundingClientRect();
   const padX = 55, padY = 40;
+  const x = r.left - padX, y = r.top - padY;
+  const w = r.width + padX * 2, h = r.height + padY * 2;
   hintDimOverlay.style.transition = 'none';
-  hintDimOverlay.style.background = hintSpotlightGradient(`ellipse ${r.width / 2 + padX}px ${r.height / 2 + padY}px`);
-  hintDimOverlay.style.setProperty('--spot-x', (r.left + r.width / 2) + 'px');
-  hintDimOverlay.style.setProperty('--spot-y', (r.top + r.height / 2) + 'px');
+  hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
+  const maskUrl = hintSpotlightMaskUrl(x, y, w, h, h / 2, 34);
+  hintDimOverlay.style.webkitMaskImage = maskUrl;
+  hintDimOverlay.style.maskImage = maskUrl;
+  hintDimOverlay.style.webkitMaskSize = '100% 100%';
+  hintDimOverlay.style.maskSize = '100% 100%';
+  hintDimOverlay.style.webkitMaskRepeat = 'no-repeat';
+  hintDimOverlay.style.maskRepeat = 'no-repeat';
   void hintDimOverlay.offsetWidth;
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
 }
 
-// 세 번째 힌트("팔레트에서 확인하세요"): 첫 번째 힌트와 똑같은 우측 상단
-// 자리에, 움직이지 않고 고정된 구멍을 뚫는다.
+// 세 번째 힌트("팔레트에서 확인하세요"): 실제 팔레트 아이콘(paletteViewButton)
+// 위치에, 움직이지 않고 고정된 구멍을 뚫는다.
 function startColorHintSpotlight() {
   clearHintSpotlightTimers();
-  placeHintSpotlight(HINT_SPOTLIGHT_CORNER.x, HINT_SPOTLIGHT_CORNER.y);
+  clearHintSpotlightMask();
+  const r = paletteViewButton.getBoundingClientRect();
+  placeHintSpotlight((r.left + r.width / 2) + 'px', (r.top + r.height / 2) + 'px');
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
 }
 
 function endHintSpotlight() {
   clearHintSpotlightTimers();
+  clearHintSpotlightMask();
+  cornerDragDemoActive = false;
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
   hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
   // 첫 번째 힌트의 모서리 드래그 시연이 중간에 끊겼을 수 있으니, 반쯤 말린
@@ -4125,11 +4165,12 @@ function updatePageDrag(x, y) {
   renderCurl(C, P, e1, e2, currentColor);
 }
 
-function animateCurl(C, e1, e2, fromP, toP, frontColor, onDone, shrinkFrom = 0, shrinkTo = 0, duration = 480, shrinkTarget = C, baseColor = frontColor) {
+function animateCurl(C, e1, e2, fromP, toP, frontColor, onDone, shrinkFrom = 0, shrinkTo = 0, duration = 480, shrinkTarget = C, baseColor = frontColor, cancelCheck = null) {
   const start = performance.now();
   const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
 
   function step(now) {
+    if (cancelCheck && cancelCheck()) return;
     const t = Math.min(1, (now - start) / duration);
     const eased = easeOutCubic(t);
     const P = {
