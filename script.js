@@ -3483,34 +3483,12 @@ function setHintsActive(active) {
   hintDimOverlay.style.pointerEvents = active ? 'auto' : 'none';
 }
 
-const HINT_SPOTLIGHT_RADIUS = 170; // 세 번째 힌트 구멍의 반경
+const HINT_SPOTLIGHT_RADIUS = 260; // 세 번째 힌트 구멍의 반경
 let hintSpotlightTimers = [];
 
 function clearHintSpotlightTimers() {
   hintSpotlightTimers.forEach(clearTimeout);
   hintSpotlightTimers = [];
-}
-
-// mask-image로 뚫는 구멍(알약 모양·원 등 radial-gradient보다 자연스럽게 흐려야
-// 하는 모양용): 전체를 흰색(= 어두운 배경 그대로 보임)으로 채우고, 그 위에
-// 검은(= 구멍, 투명) 둥근 사각형을 가우시안 블러로 흐려서 겹친다. 흰색/검은색
-// 경계가 블러 반경만큼 부드럽게 섞이면서 자연스러운 경계가 된다.
-// 전체를 흰색(= 어두운 배경 그대로 보임)으로 채우고, 그 위에 검은(= 구멍, 투명)
-// 둥근 사각형을 가우시안 블러로 흐려서 겹친다. 흰색/검은색 경계가 블러 반경만큼
-// 부드럽게 섞이면서 자연스러운 경계가 된다.
-function hintSpotlightMaskUrl(x, y, w, h, rx, blurStd) {
-  const vw = window.innerWidth, vh = window.innerHeight;
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw} ${vh}">` +
-    `<filter id="b"><feGaussianBlur stdDeviation="${blurStd}"/></filter>` +
-    `<rect x="0" y="0" width="${vw}" height="${vh}" fill="#fff"/>` +
-    `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="#000" filter="url(#b)"/>` +
-    `</svg>`;
-  return `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
-}
-
-function clearHintSpotlightMask() {
-  hintDimOverlay.style.webkitMaskImage = 'none';
-  hintDimOverlay.style.maskImage = 'none';
 }
 
 // 첫 번째 힌트("모서리를 잡아 가운데로")는 배경을 어둡게 누르는 대신, 실제
@@ -3555,7 +3533,6 @@ function playCornerDragDemo(repeatsLeft) {
 
 function startHintSpotlight() {
   clearHintSpotlightTimers();
-  clearHintSpotlightMask();
   // 평평한 어둠/구멍 없이, 클릭만 받아 다음 힌트로 넘기는 투명한 레이어로 둔다.
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
   hintDimOverlay.style.background = 'transparent';
@@ -3626,38 +3603,29 @@ function resetPaletteSelectDemo() {
 
 function startPaletteHintSpotlight() {
   clearHintSpotlightTimers();
-  clearHintSpotlightMask();
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
   hintDimOverlay.style.background = 'transparent';
   startPaletteSelectDemo();
 }
 
 // 세 번째 힌트("팔레트에서 확인하세요"): 실제 팔레트 아이콘(paletteViewButton)
-// 위치에, 움직이지 않고 고정된 구멍을 뚫는다. 원형 경계도 가우시안 블러(SVG
-// mask)로 흐려서, 비율 기반 그라데이션보다 더 자연스럽고 넉넉하게 풀리게 한다.
+// 위치에, 움직이지 않고 고정된 구멍을 뚫는다. SVG 가우시안 블러 mask는 전체
+// 화면 크기의 필터를 매번 새로 레스터라이즈해야 해서 체감될 정도로 렉을
+// 유발했다 — GPU에서 가볍게 합성되는 radial-gradient로 되돌리고, 선명~완전히
+// 어두워지는 구간을 넓게 잡아 경계를 부드럽게 흐린다.
 function startColorHintSpotlight() {
   clearHintSpotlightTimers();
   const r = paletteViewButton.getBoundingClientRect();
   const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-  // 가우시안 블러는 선명한 중심부를 블러 반경만큼 안쪽으로도 깎아먹으므로,
-  // 아이콘 바로 앞은 여전히 선명하게 남도록 기준 반경을 블러만큼 더 키운다.
-  const radius = HINT_SPOTLIGHT_RADIUS + 60;
   hintDimOverlay.style.transition = 'none';
-  hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
-  const maskUrl = hintSpotlightMaskUrl(cx - radius, cy - radius, radius * 2, radius * 2, radius, 40);
-  hintDimOverlay.style.webkitMaskImage = maskUrl;
-  hintDimOverlay.style.maskImage = maskUrl;
-  hintDimOverlay.style.webkitMaskSize = '100% 100%';
-  hintDimOverlay.style.maskSize = '100% 100%';
-  hintDimOverlay.style.webkitMaskRepeat = 'no-repeat';
-  hintDimOverlay.style.maskRepeat = 'no-repeat';
+  hintDimOverlay.style.background =
+    `radial-gradient(circle ${HINT_SPOTLIGHT_RADIUS}px at ${cx}px ${cy}px, transparent 0%, transparent 10%, rgba(0, 0, 0, 0.6) 100%)`;
   void hintDimOverlay.offsetWidth;
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
 }
 
 function endHintSpotlight() {
   clearHintSpotlightTimers();
-  clearHintSpotlightMask();
   cornerDragDemoActive = false;
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
   hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
