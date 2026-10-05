@@ -3483,21 +3483,7 @@ function setHintsActive(active) {
   hintDimOverlay.style.pointerEvents = active ? 'auto' : 'none';
 }
 
-// 힌트 문구가 떠 있는 동안 화면 전체를 평평하게 어둡히는 대신, 그 문구와
-// 관련된 자리에 구멍(스포트라이트)을 뚫어 보여준다. box-shadow blur는 반경을
-// 키우면(120px+) 거대한 spread와 맞물려 타일 경계가 비치는 렌더링 결함이
-// 생겨서, 대신 radial-gradient로 진짜 그라데이션을 그린다. 중심 좌표
-// (--spot-x/--spot-y)를 트랜지션 가능한 커스텀 프로퍼티로 등록해둬서, 배경
-// 전체를 inset:0으로 고정해둔 채로도 구멍 위치를 매끄럽게 움직일 수 있다.
-const hintSpotlightPropsStyle = document.createElement('style');
-hintSpotlightPropsStyle.textContent = `
-  @property --spot-x { syntax: '<length-percentage>'; inherits: false; initial-value: 50%; }
-  @property --spot-y { syntax: '<length-percentage>'; inherits: false; initial-value: 50%; }
-`;
-document.head.appendChild(hintSpotlightPropsStyle);
-
-const HINT_SPOTLIGHT_RADIUS = 170; // 구멍 전체(선명~완전히 어두워지는 지점까지) 반경
-const HINT_SPOTLIGHT_CLEAR_PCT = 16; // 반경 중 선명하게 보이는 구간의 비율(%) — 작아진 만큼 비율을 낮워 경계가 여전히 넉넉하고 자연스럽게 풀리게 한다
+const HINT_SPOTLIGHT_RADIUS = 170; // 세 번째 힌트 구멍의 반경
 let hintSpotlightTimers = [];
 
 function clearHintSpotlightTimers() {
@@ -3505,11 +3491,10 @@ function clearHintSpotlightTimers() {
   hintSpotlightTimers = [];
 }
 
-function hintSpotlightGradient(shape) {
-  return `radial-gradient(${shape} at var(--spot-x) var(--spot-y), transparent 0%, transparent ${HINT_SPOTLIGHT_CLEAR_PCT}%, rgba(0, 0, 0, 0.6) 100%)`;
-}
-
-// mask-image로 뚫는 구멍(알약 모양 등 radial-gradient로는 못 만드는 모양용):
+// mask-image로 뚫는 구멍(알약 모양·원 등 radial-gradient보다 자연스럽게 흐려야
+// 하는 모양용): 전체를 흰색(= 어두운 배경 그대로 보임)으로 채우고, 그 위에
+// 검은(= 구멍, 투명) 둥근 사각형을 가우시안 블러로 흐려서 겹친다. 흰색/검은색
+// 경계가 블러 반경만큼 부드럽게 섞이면서 자연스러운 경계가 된다.
 // 전체를 흰색(= 어두운 배경 그대로 보임)으로 채우고, 그 위에 검은(= 구멍, 투명)
 // 둥근 사각형을 가우시안 블러로 흐려서 겹친다. 흰색/검은색 경계가 블러 반경만큼
 // 부드럽게 섞이면서 자연스러운 경계가 된다.
@@ -3526,16 +3511,6 @@ function hintSpotlightMaskUrl(x, y, w, h, rx, blurStd) {
 function clearHintSpotlightMask() {
   hintDimOverlay.style.webkitMaskImage = 'none';
   hintDimOverlay.style.maskImage = 'none';
-}
-
-// 원형 구멍을 즉시(전환 없이) 지정한 좌표에 배치한다.
-function placeHintSpotlight(x, y) {
-  hintDimOverlay.style.transition = 'none';
-  clearHintSpotlightMask();
-  hintDimOverlay.style.background = hintSpotlightGradient(`circle ${HINT_SPOTLIGHT_RADIUS}px`);
-  hintDimOverlay.style.setProperty('--spot-x', x);
-  hintDimOverlay.style.setProperty('--spot-y', y);
-  void hintDimOverlay.offsetWidth; // 강제 리플로우로 위 위치를 먼저 확정
 }
 
 // 첫 번째 힌트("모서리를 잡아 가운데로")는 배경을 어둡게 누르는 대신, 실제
@@ -3588,18 +3563,88 @@ function startHintSpotlight() {
   playCornerDragDemo(2);
 }
 
-// 두 번째 힌트("팔레트에 담아보세요"): 하단 팔레트 바 모양 그대로 알약형
-// 구멍을 뚫는다. 가우시안 블러로 경계를 넉넉하게 흐리고, 움직이지 않고
-// 그 자리에 고정.
+// 두 번째 힌트("팔레트에 담아보세요")도 배경을 어둡게 누르는 대신, 팔레트
+// 바를 한 칸 드래그해서 다음 색으로 넘어가는 실제 동작을 자동으로 재생해서
+// 보여준다. 어디까지나 시연일 뿐 사용자가 실제로 고른 게 아니므로, 힌트가
+// 끝나면(스킵하든 4초가 다 지나든) hidePaletteDragHint에서 원래 색·인덱스로
+// 되돌린다.
+let paletteDemoActive = false;
+let paletteDemoOriginal = null;
+
+function playPaletteSelectDemo() {
+  if (!paletteDemoActive) return;
+  const duration = 650;
+  const start = performance.now();
+  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+  paletteDragActive = true;
+  setPaletteSwatchTransitionsEnabled(false);
+
+  function step(now) {
+    if (!paletteDemoActive) return;
+    const t = Math.min(1, (now - start) / duration);
+    const eased = easeOutCubic(t);
+    paletteDragOffsetX = -PALETTE_SLOT_WIDTH * eased;
+    applyPaletteLayout();
+    if (t < 1) {
+      requestAnimationFrame(step);
+      return;
+    }
+    paletteDragOffsetX = 0;
+    paletteDragActive = false;
+    currentPaletteIndex = (currentPaletteIndex + 1) % currentPalette.length;
+    changeOverlayColor(currentPalette[currentPaletteIndex]);
+    setPaletteSwatchTransitionsEnabled(true);
+    applyPaletteLayout();
+  }
+  requestAnimationFrame(step);
+}
+
+function startPaletteSelectDemo() {
+  paletteDemoOriginal = { index: currentPaletteIndex, color: currentColor };
+  paletteDemoActive = true;
+  playPaletteSelectDemo();
+}
+
+// 시연으로 바뀐 색·인덱스·스와치 위치를 전부 원래대로 되돌린다. 전환 없이
+// 즉시 복원해야, 힌트 문구가 사라지는 순간과 자연스럽게 섞여 사용자가 어색한
+// 역재생을 보지 않는다.
+function resetPaletteSelectDemo() {
+  if (!paletteDemoActive) return;
+  paletteDemoActive = false;
+  paletteDragActive = false;
+  paletteDragOffsetX = 0;
+  if (paletteDemoOriginal) {
+    setPaletteSwatchTransitionsEnabled(false);
+    currentPaletteIndex = paletteDemoOriginal.index;
+    changeOverlayColor(paletteDemoOriginal.color);
+    applyPaletteLayout();
+    void paletteBar.offsetWidth;
+    setPaletteSwatchTransitionsEnabled(true);
+  }
+  paletteDemoOriginal = null;
+}
+
 function startPaletteHintSpotlight() {
   clearHintSpotlightTimers();
-  const r = paletteBar.getBoundingClientRect();
-  const padX = 55, padY = 40;
-  const x = r.left - padX, y = r.top - padY;
-  const w = r.width + padX * 2, h = r.height + padY * 2;
+  clearHintSpotlightMask();
+  hintDimOverlay.style.transition = 'opacity 0.3s ease';
+  hintDimOverlay.style.background = 'transparent';
+  startPaletteSelectDemo();
+}
+
+// 세 번째 힌트("팔레트에서 확인하세요"): 실제 팔레트 아이콘(paletteViewButton)
+// 위치에, 움직이지 않고 고정된 구멍을 뚫는다. 원형 경계도 가우시안 블러(SVG
+// mask)로 흐려서, 비율 기반 그라데이션보다 더 자연스럽고 넉넉하게 풀리게 한다.
+function startColorHintSpotlight() {
+  clearHintSpotlightTimers();
+  const r = paletteViewButton.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  // 가우시안 블러는 선명한 중심부를 블러 반경만큼 안쪽으로도 깎아먹으므로,
+  // 아이콘 바로 앞은 여전히 선명하게 남도록 기준 반경을 블러만큼 더 키운다.
+  const radius = HINT_SPOTLIGHT_RADIUS + 60;
   hintDimOverlay.style.transition = 'none';
   hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
-  const maskUrl = hintSpotlightMaskUrl(x, y, w, h, h / 2, 34);
+  const maskUrl = hintSpotlightMaskUrl(cx - radius, cy - radius, radius * 2, radius * 2, radius, 40);
   hintDimOverlay.style.webkitMaskImage = maskUrl;
   hintDimOverlay.style.maskImage = maskUrl;
   hintDimOverlay.style.webkitMaskSize = '100% 100%';
@@ -3607,16 +3652,6 @@ function startPaletteHintSpotlight() {
   hintDimOverlay.style.webkitMaskRepeat = 'no-repeat';
   hintDimOverlay.style.maskRepeat = 'no-repeat';
   void hintDimOverlay.offsetWidth;
-  hintDimOverlay.style.transition = 'opacity 0.3s ease';
-}
-
-// 세 번째 힌트("팔레트에서 확인하세요"): 실제 팔레트 아이콘(paletteViewButton)
-// 위치에, 움직이지 않고 고정된 구멍을 뚫는다.
-function startColorHintSpotlight() {
-  clearHintSpotlightTimers();
-  clearHintSpotlightMask();
-  const r = paletteViewButton.getBoundingClientRect();
-  placeHintSpotlight((r.left + r.width / 2) + 'px', (r.top + r.height / 2) + 'px');
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
 }
 
@@ -3737,6 +3772,7 @@ function hidePaletteDragHint() {
   paletteCenterGlow.style.opacity = '0';
   setHintsActive(false);
   endHintSpotlight();
+  resetPaletteSelectDemo();
 }
 
 function advancePaletteDragHint() {
