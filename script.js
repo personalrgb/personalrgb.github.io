@@ -4380,8 +4380,21 @@ function applyLayout() {
         }
       }
 
-      card.style.filter = `blur(${blur.toFixed(2)}px) saturate(${saturation.toFixed(3)}) brightness(${brightness.toFixed(3)})`;
-      card.style.opacity = opacity.toFixed(3);
+      // 회전 중엔 100개 전부의 값이 매 프레임 "아주 조금씩" 바뀌는데, 소수점을
+      // 그대로 쓰면 눈에 보이지도 않는 차이로도 매번 filter를 새로 써서 리페인트를
+      // 강제하게 된다. 한 단계 거칠게 반올림해 같은 값이 나오면(특히 등속 회전
+      // 구간에서 자주 그렇다) 아예 쓰기 자체를 건너뛴다 — 브라우저가 동일한
+      // 문자열 대입은 스타일 재계산을 하지 않기 때문에 실질적인 절약이 된다.
+      const filterStr = `blur(${blur.toFixed(1)}px) saturate(${saturation.toFixed(2)}) brightness(${brightness.toFixed(2)})`;
+      if (card._lastFilter !== filterStr) {
+        card._lastFilter = filterStr;
+        card.style.filter = filterStr;
+      }
+      const opacityStr = opacity.toFixed(2);
+      if (card._lastOpacity !== opacityStr) {
+        card._lastOpacity = opacityStr;
+        card.style.opacity = opacityStr;
+      }
 
       const normalizedAngle = ((angle % 360) + 360) % 360;
       let diff = Math.abs(normalizedAngle - TARGET_THETA_DEG);
