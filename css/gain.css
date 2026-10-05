@@ -1293,6 +1293,10 @@ body {
   padding: 8px 16px;
   border-radius: 999px;
   font-size: 12px;
+  /* line-height: normal은 글자마다(특히 ←/→ 화살표처럼 폰트에 없어
+     대체 글꼴로 넘어가는 글자) 줄 높이가 미세하게 달라질 수 있다.
+     고정값으로 둬서 Back/Next 버튼 높이가 항상 똑같게 한다. */
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -1307,6 +1311,7 @@ body {
   padding: 8px 16px;
   border-radius: 999px;
   font-size: 12px;
+  line-height: 1;
   cursor: pointer;
 }
 
