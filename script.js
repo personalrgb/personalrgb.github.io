@@ -3729,20 +3729,31 @@ colorHintGlow.className = 'palette-icon-hint-glow';
 document.body.appendChild(colorHintGlow);
 
 // 첫 번째・두 번째 힌트가 떠 있는 동안은 아직 설명할 차례가 안 된 뒤쪽
-// UI(← Back, 팔레트 아이콘, 하단 팔레트 바, 팔레트 펼침 화살표, Warm/Cool
-// 탭)가 먼저 눈에 띄지 않도록 잠시 숨긴다. 세 번째 힌트는 바로 그 팔레트
-// 아이콘/팔레트를 가리키는 내용이라 다시 보여준다.
-function hidePracticeChromeForHint() {
+// UI(← Back, 팔레트 아이콘, 팔레트 펼침 화살표, Warm/Cool 탭)가 먼저 눈에
+// 띄지 않도록 잠시 숨긴다. 하단 팔레트 바(+그 그림자)는 두 번째 힌트("팔레트에
+// 담아보세요") 자체가 그 위에서 벌어지는 시연이라 keepPalette로 계속 보이게
+// 둘 수 있다. 세 번째 힌트는 바로 그 팔레트 아이콘/팔레트를 가리키는
+// 내용이라 전부 다시 보여준다.
+function hidePracticeChromeForHint(keepPalette) {
   backButton.style.opacity = '0';
   backButton.style.pointerEvents = 'none';
   paletteViewButton.style.opacity = '0';
   paletteViewButton.style.pointerEvents = 'none';
-  paletteBar.style.opacity = '0';
-  paletteBar.style.pointerEvents = 'none';
   paletteExpandArrow.style.opacity = '0';
   paletteExpandArrow.style.pointerEvents = 'none';
   paletteToneTabs.style.opacity = '0';
   paletteToneTabs.style.pointerEvents = 'none';
+  if (keepPalette) {
+    // 첫 번째 힌트에서 이미 숨겨놨을 수 있으니, 그냥 건드리지 않는 게
+    // 아니라 명시적으로 다시 보이게 켠다.
+    paletteBar.style.opacity = '1';
+    paletteBar.style.pointerEvents = 'auto';
+    paletteCenterShadow.style.opacity = '1';
+  } else {
+    paletteBar.style.opacity = '0';
+    paletteBar.style.pointerEvents = 'none';
+    paletteCenterShadow.style.opacity = '0';
+  }
 }
 
 function showPracticeChromeForHint() {
@@ -3758,6 +3769,7 @@ function showPracticeChromeForHint() {
   paletteExpandArrow.style.pointerEvents = 'auto';
   paletteBar.style.opacity = '1';
   paletteBar.style.pointerEvents = 'auto';
+  paletteCenterShadow.style.opacity = '1';
 }
 
 function hideColorHint() {
@@ -3810,7 +3822,7 @@ function showPaletteDragHint(color) {
   paletteDragHint.style.opacity = '1';
   startPaletteHintSpotlight();
   setHintsActive(true);
-  setTimeout(hidePracticeChromeForHint, 0);
+  setTimeout(() => hidePracticeChromeForHint(true), 0);
   clearTimeout(paletteDragHintTimer);
   paletteDragHintTimer = setTimeout(advancePaletteDragHint, HINT_DISPLAY_MS);
   paletteCenterGlow.style.transitionDuration = '0.35s';
