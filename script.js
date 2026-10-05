@@ -3545,41 +3545,21 @@ function startHintSpotlight() {
 // 보여준다. 어디까지나 시연일 뿐 사용자가 실제로 고른 게 아니므로, 힌트가
 // 끝나면(스킵하든 4초가 다 지나든) hidePaletteDragHint에서 원래 색·인덱스로
 // 되돌린다.
+// 실제 드래그처럼 매 프레임 직접 좌표를 보간하지 않는다 — 스와치 하나하나가
+// 이미 자기 transform에 CSS transition(PALETTE_SWATCH_TRANSITION)을 갖고
+// 있으므로, 목표 인덱스만 한 번 바꿔주면 브라우저가 알아서 부드럽게 넘긴다.
+// (rAF로 매 프레임 50개 스와치의 transform을 직접 갱신하던 예전 방식은, 각
+// 스와치의 backdrop-filter 블러까지 매 프레임 다시 계산하게 만들어 눈에 띄는
+// 렉을 유발했다.)
 let paletteDemoActive = false;
 let paletteDemoOriginal = null;
-
-function playPaletteSelectDemo() {
-  if (!paletteDemoActive) return;
-  const duration = 650;
-  const start = performance.now();
-  const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
-  paletteDragActive = true;
-  setPaletteSwatchTransitionsEnabled(false);
-
-  function step(now) {
-    if (!paletteDemoActive) return;
-    const t = Math.min(1, (now - start) / duration);
-    const eased = easeOutCubic(t);
-    paletteDragOffsetX = -PALETTE_SLOT_WIDTH * eased;
-    applyPaletteLayout();
-    if (t < 1) {
-      requestAnimationFrame(step);
-      return;
-    }
-    paletteDragOffsetX = 0;
-    paletteDragActive = false;
-    currentPaletteIndex = (currentPaletteIndex + 1) % currentPalette.length;
-    changeOverlayColor(currentPalette[currentPaletteIndex]);
-    setPaletteSwatchTransitionsEnabled(true);
-    applyPaletteLayout();
-  }
-  requestAnimationFrame(step);
-}
 
 function startPaletteSelectDemo() {
   paletteDemoOriginal = { index: currentPaletteIndex, color: currentColor };
   paletteDemoActive = true;
-  playPaletteSelectDemo();
+  currentPaletteIndex = (currentPaletteIndex + 1) % currentPalette.length;
+  changeOverlayColor(currentPalette[currentPaletteIndex]);
+  applyPaletteLayout();
 }
 
 // 시연으로 바뀐 색·인덱스·스와치 위치를 전부 원래대로 되돌린다. 전환 없이
