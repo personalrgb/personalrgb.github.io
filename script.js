@@ -3624,7 +3624,11 @@ function endHintSpotlight() {
   clearHintSpotlightTimers();
   cornerDragDemoActive = false;
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
-  hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
+  // background는 여기서 손대지 않는다 — opacity만 트랜지션이 걸려 있어서,
+  // 여기서 background를 어두운 값으로 즉시 바꿔버리면(이전엔 그랬다) 바로
+  // 이어지는 opacity 0 페이드아웃 동안 잠깐 화면이 번쩍 어두워졌다 사라지는
+  // 것처럼 보였다. 각 힌트는 자기가 시작될 때 startXxxSpotlight에서 스스로
+  // 원하는 background를 지정하므로 여기서 기본값으로 되돌릴 필요가 없다.
   // 첫 번째 힌트의 모서리 드래그 시연이 중간에 끊겼을 수 있으니, 반쯤 말린
   // 모양이 다음 힌트까지 남아있지 않도록 캔버스를 비워둔다.
   curlCtx.clearRect(0, 0, curlCanvas.width, curlCanvas.height);
