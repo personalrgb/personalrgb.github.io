@@ -3471,7 +3471,7 @@ const hintDimOverlay = document.createElement('div');
 hintDimOverlay.style.position = 'fixed';
 hintDimOverlay.style.inset = '0';
 hintDimOverlay.style.zIndex = '1002';
-hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.45)';
+hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.75)';
 hintDimOverlay.style.opacity = '0';
 hintDimOverlay.style.pointerEvents = 'none';
 hintDimOverlay.style.transition = 'opacity 0.3s ease';
@@ -3571,8 +3571,7 @@ function hideColorHint() {
 
 function showColorHint(color) {
   if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) return;
-  const { l } = hexToHSL(color);
-  colorHint.style.color = l < 50 ? '#ffffff' : '#111111';
+  colorHint.style.color = '#ffffff';
   colorHint.style.opacity = '1';
   setHintsActive(true);
   clearTimeout(colorHintTimer);
@@ -3603,8 +3602,7 @@ document.body.appendChild(paletteCenterGlow);
 
 function showPaletteDragHint(color) {
   if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) return;
-  const { l } = hexToHSL(color);
-  paletteDragHint.style.color = l < 50 ? '#ffffff' : '#111111';
+  paletteDragHint.style.color = '#ffffff';
   paletteDragHint.style.opacity = '1';
   setHintsActive(true);
   clearTimeout(paletteDragHintTimer);
@@ -3649,8 +3647,7 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   }
   hasShownCornerDragHint = true;
   hintChainFromTutorial = fromTutorial;
-  const { l } = hexToHSL(color);
-  cornerDragHint.style.color = l < 50 ? '#ffffff' : '#111111';
+  cornerDragHint.style.color = '#ffffff';
   cornerDragHint.style.opacity = '1';
   setHintsActive(true);
   clearTimeout(cornerDragHintTimer);
