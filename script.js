@@ -3531,13 +3531,22 @@ function playCornerDragDemo(repeatsLeft) {
   }, 0, 0, 1100, C, currentColor, isCancelled);
 }
 
-function startHintSpotlight() {
+// delayMs: showColorOverlayFade로 처음 들어올 때는 colorOverlay 자체가 아직
+// 1초짜리 opacity 페이드인 중이다. curlCanvas는 colorOverlay의 자식이라 그
+// 투명도를 그대로 물려받으므로, 그 사이에 시연을 재생하면 캔버스가 반투명해져
+// 뒤에 있는 홈 화면 모빌이 비쳐 보인다(배경이 팔레트 색과 다르게 보이는 원인).
+// 페이드가 끝난 뒤에 시작하도록 지연을 줄 수 있게 한다.
+function startHintSpotlight(delayMs = 0) {
   clearHintSpotlightTimers();
   // 평평한 어둠/구멍 없이, 클릭만 받아 다음 힌트로 넘기는 투명한 레이어로 둔다.
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
   hintDimOverlay.style.background = 'transparent';
   cornerDragDemoActive = true;
-  playCornerDragDemo(2);
+  if (delayMs > 0) {
+    hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(2), delayMs));
+  } else {
+    playCornerDragDemo(2);
+  }
 }
 
 // 두 번째 힌트("팔레트에 담아보세요")는 배경을 어둡게 누르지 않고, 가운데로
@@ -3779,7 +3788,9 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   hintChainFromTutorial = fromTutorial;
   cornerDragHint.style.color = '#ffffff';
   cornerDragHint.style.opacity = '1';
-  startHintSpotlight();
+  // showColorOverlayFade(튜토리얼 직후 첫 진입)는 colorOverlay가 1초간 페이드인
+  // 하므로, 그 자식인 curlCanvas가 반투명해지지 않도록 시연 시작을 그만큼 늦춘다.
+  startHintSpotlight(fromTutorial ? 1050 : 0);
   setHintsActive(true);
   clearTimeout(cornerDragHintTimer);
   cornerDragHintTimer = setTimeout(advanceCornerDragHint, 4000);
