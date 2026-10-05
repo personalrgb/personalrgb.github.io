@@ -3483,6 +3483,44 @@ function setHintsActive(active) {
   hintDimOverlay.style.pointerEvents = active ? 'auto' : 'none';
 }
 
+// 첫 번째 힌트("모서리를 잡아 가운데로")가 떠 있는 동안에는 화면 전체를 평평하게
+// 어둡히는 대신, 우측 상단 모서리에서 중앙으로 움직이는 동그란 구멍(스포트라이트)을
+// 뚫어 문구가 설명하는 동작을 그대로 보여준다. hintDimOverlay 자체를 아주 작은
+// 원으로 줄이고 box-shadow로 "원 바깥"을 거대하게 어둡게 칠하는 방식이라, top/left만
+// 옮겨도 구멍이 화면 위를 매끄럽게 이동한다.
+const HINT_SPOTLIGHT_SIZE = 140;
+function startHintSpotlight() {
+  // 전환 없이 우측 상단에 즉시 배치
+  hintDimOverlay.style.transition = 'none';
+  hintDimOverlay.style.inset = 'auto';
+  hintDimOverlay.style.top = '12%';
+  hintDimOverlay.style.left = '88%';
+  hintDimOverlay.style.width = HINT_SPOTLIGHT_SIZE + 'px';
+  hintDimOverlay.style.height = HINT_SPOTLIGHT_SIZE + 'px';
+  hintDimOverlay.style.transform = 'translate(-50%, -50%)';
+  hintDimOverlay.style.borderRadius = '50%';
+  hintDimOverlay.style.background = 'transparent';
+  hintDimOverlay.style.boxShadow = '0 0 0 9999px rgba(0, 0, 0, 0.75)';
+  void hintDimOverlay.offsetWidth; // 강제 리플로우로 위 위치를 먼저 확정
+  // 전환을 켜고 중앙으로 이동시켜 애니메이션이 재생되게 한다.
+  hintDimOverlay.style.transition = 'opacity 0.3s ease, top 1.8s ease-in-out, left 1.8s ease-in-out';
+  hintDimOverlay.style.top = '50%';
+  hintDimOverlay.style.left = '50%';
+}
+
+function endHintSpotlight() {
+  hintDimOverlay.style.transition = 'opacity 0.3s ease';
+  hintDimOverlay.style.top = '';
+  hintDimOverlay.style.left = '';
+  hintDimOverlay.style.width = '';
+  hintDimOverlay.style.height = '';
+  hintDimOverlay.style.transform = 'none';
+  hintDimOverlay.style.borderRadius = '0';
+  hintDimOverlay.style.boxShadow = 'none';
+  hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.75)';
+  hintDimOverlay.style.inset = '0';
+}
+
 // 현재 떠 있는 힌트를 바로 다음 단계로 넘긴다(타이머를 기다리지 않음). 마지막
 // 힌트(colorHint)를 넘기면 hideColorHint가 hintsActive를 꺼서 원래 화면으로 돌아간다.
 function skipCurrentHint() {
@@ -3615,6 +3653,7 @@ function hideCornerDragHint() {
   clearTimeout(cornerDragHintTimer);
   cornerDragHint.style.opacity = '0';
   setHintsActive(false);
+  endHintSpotlight();
 }
 
 // 페이지(색 카드)를 넘기는 순간에도 힌트 체인이 끊기지 않고 이어지도록, 자연스러운
@@ -3649,6 +3688,7 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   hintChainFromTutorial = fromTutorial;
   cornerDragHint.style.color = '#ffffff';
   cornerDragHint.style.opacity = '1';
+  startHintSpotlight();
   setHintsActive(true);
   clearTimeout(cornerDragHintTimer);
   cornerDragHintTimer = setTimeout(advanceCornerDragHint, 4000);
