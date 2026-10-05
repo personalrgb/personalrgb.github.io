@@ -1780,6 +1780,9 @@ function showStageColorScreen(stage) {
     hidePaletteDragHint();
     hideColorHint();
     hintChainFromTutorial = false;
+    // 힌트1·2 도중(← Back/팔레트 아이콘/팔레트 바를 숨긴 채) 다음 단계로
+    // 넘어갔을 수 있으니, 그 단계에서는 정상적으로 다시 보이게 되돌린다.
+    showPracticeChromeForHint();
   }
 
   if (stage === 'synthesis') {
@@ -2511,6 +2514,9 @@ stageIntroVeil.appendChild(stageIntroVeilHeading);
 stageIntroVeil.appendChild(stageIntroVeilBody);
 stageHintOverlay.appendChild(stageIntroVeil);
 
+// 서류를 완전히 숨기는 대신 흐리고 어둡게 눌러서, 막 뒤로 비쳐 보이게 한다.
+const STAGE_HINT_CARDS_VEILED_FILTER = 'blur(9px) brightness(0.55)';
+
 let stageIntroVeilTimer = null;
 function showStageIntroVeil(heading, body) {
   clearTimeout(stageIntroVeilTimer);
@@ -2520,10 +2526,12 @@ function showStageIntroVeil(heading, body) {
   stageIntroVeil.style.display = 'flex';
   stageIntroVeil.style.transition = 'none';
   stageIntroVeil.style.opacity = '1';
-  // 막이 떠 있는 동안엔 뒤에 있는 서류가 비쳐 보이며 문구와 겹치지 않도록,
-  // 서류도 함께 숨겨둔다.
+  // 서류를 완전히 숨기지 않고, 블러+암전을 걸어 막 뒤로 흐릿하게 비쳐 보이게
+  // 레이어처럼 겹쳐 보여준다.
   stageHintCards.style.transition = 'none';
-  stageHintCards.style.opacity = '0';
+  stageHintCards.style.opacity = '1';
+  stageHintCards.style.filter = STAGE_HINT_CARDS_VEILED_FILTER;
+  stageHintCards.style.pointerEvents = 'none';
 }
 
 // 인트로 막이 떠 있는 동안 화면을 클릭하면, 다음 단계(색 선택 화면)로 바로
@@ -2535,8 +2543,10 @@ function skipStageIntroVeil() {
   clearTimeout(stageIntroVeilTimer);
   stageIntroVeil.style.transition = 'opacity 0.4s ease';
   stageIntroVeil.style.opacity = '0';
-  stageHintCards.style.transition = 'opacity 0.4s ease';
+  stageHintCards.style.transition = 'opacity 0.4s ease, filter 0.4s ease';
   stageHintCards.style.opacity = '1';
+  stageHintCards.style.filter = 'none';
+  stageHintCards.style.pointerEvents = '';
   stageIntroVeilTimer = setTimeout(() => {
     stageIntroVeil.style.display = 'none';
   }, 400);
@@ -2550,6 +2560,8 @@ function hideStageIntroVeil() {
   stageIntroVeil.style.display = 'none';
   stageHintCards.style.transition = 'none';
   stageHintCards.style.opacity = '1';
+  stageHintCards.style.filter = 'none';
+  stageHintCards.style.pointerEvents = '';
 }
 
 // 서류(.hint-doc)는 최소 폭이 680px라서 터치 기기가 아니어도 창 폭이 좁으면
@@ -3716,6 +3728,30 @@ const colorHintGlow = document.createElement('div');
 colorHintGlow.className = 'palette-icon-hint-glow';
 document.body.appendChild(colorHintGlow);
 
+// 첫 번째・두 번째 힌트가 떠 있는 동안은 아직 설명할 차례가 안 된 뒤쪽
+// UI(← Back, 팔레트 아이콘, 하단 팔레트 바)가 먼저 눈에 띄지 않도록 잠시
+// 숨긴다. 세 번째 힌트는 바로 그 팔레트 아이콘/팔레트를 가리키는 내용이라
+// 다시 보여준다.
+function hidePracticeChromeForHint() {
+  backButton.style.opacity = '0';
+  backButton.style.pointerEvents = 'none';
+  paletteViewButton.style.opacity = '0';
+  paletteViewButton.style.pointerEvents = 'none';
+  paletteBar.style.opacity = '0';
+  paletteBar.style.pointerEvents = 'none';
+}
+
+function showPracticeChromeForHint() {
+  backButton.style.opacity = '1';
+  backButton.style.pointerEvents = 'auto';
+  if (isPracticeMode) {
+    paletteViewButton.style.opacity = '1';
+    paletteViewButton.style.pointerEvents = 'auto';
+  }
+  paletteBar.style.opacity = '1';
+  paletteBar.style.pointerEvents = 'auto';
+}
+
 function hideColorHint() {
   clearTimeout(colorHintTimer);
   colorHint.style.opacity = '0';
@@ -3731,6 +3767,7 @@ function showColorHint(color) {
   colorHint.style.opacity = '1';
   startColorHintSpotlight();
   setHintsActive(true);
+  showPracticeChromeForHint();
   clearTimeout(colorHintTimer);
   colorHintTimer = setTimeout(hideColorHint, HINT_DISPLAY_MS);
   colorHintGlow.style.transitionDuration = '0.35s';
@@ -3765,6 +3802,7 @@ function showPaletteDragHint(color) {
   paletteDragHint.style.opacity = '1';
   startPaletteHintSpotlight();
   setHintsActive(true);
+  setTimeout(hidePracticeChromeForHint, 0);
   clearTimeout(paletteDragHintTimer);
   paletteDragHintTimer = setTimeout(advancePaletteDragHint, HINT_DISPLAY_MS);
   paletteCenterGlow.style.transitionDuration = '0.35s';
@@ -3817,6 +3855,10 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   const demoDelay = fromTutorial ? COLOR_FADE_DELAY_MS : 0;
   startHintSpotlight(demoDelay);
   setHintsActive(true);
+  // showColorOverlayFade -> showStageColorScreen 순으로 이어지는데, 뒤쪽이
+  // paletteViewButton 등을 다시 보이게 설정해버려서 여기서 바로 숨기면
+  // 곧바로 덮어써진다 — 이번 동기 실행이 다 끝난 뒤(다음 틱)에 적용한다.
+  setTimeout(hidePracticeChromeForHint, 0);
   clearTimeout(cornerDragHintTimer);
   const displayMs = demoDelay + CORNER_DRAG_REPEATS * CORNER_DRAG_CYCLE_MS + CORNER_DRAG_READ_BUFFER_MS;
   cornerDragHintTimer = setTimeout(advanceCornerDragHint, displayMs);
