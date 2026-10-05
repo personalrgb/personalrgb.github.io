@@ -3471,7 +3471,7 @@ const hintDimOverlay = document.createElement('div');
 hintDimOverlay.style.position = 'fixed';
 hintDimOverlay.style.inset = '0';
 hintDimOverlay.style.zIndex = '1002';
-hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.75)';
+hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
 hintDimOverlay.style.opacity = '0';
 hintDimOverlay.style.pointerEvents = 'none';
 hintDimOverlay.style.transition = 'opacity 0.3s ease';
@@ -3508,7 +3508,7 @@ function clearHintSpotlightTimers() {
 }
 
 function hintSpotlightGradient(shape) {
-  return `radial-gradient(${shape} at var(--spot-x) var(--spot-y), transparent 0%, transparent ${HINT_SPOTLIGHT_CLEAR_PCT}%, rgba(0, 0, 0, 0.75) 100%)`;
+  return `radial-gradient(${shape} at var(--spot-x) var(--spot-y), transparent 0%, transparent ${HINT_SPOTLIGHT_CLEAR_PCT}%, rgba(0, 0, 0, 0.6) 100%)`;
 }
 
 // 원형 구멍을 즉시(전환 없이) 지정한 좌표에 배치한다.
@@ -3520,20 +3520,44 @@ function placeHintSpotlight(x, y) {
   void hintDimOverlay.offsetWidth; // 강제 리플로우로 위 위치를 먼저 확정
 }
 
-// 첫 번째 힌트("모서리를 잡아 가운데로"): 우측 상단에서 중앙으로 오는 동작만
-// 반복해서 보여준다(중앙→모서리로 되돌아가는 역방향 모션은 보여주지 않고,
-// 매번 모서리로 순간 이동한 뒤 다시 중앙으로 애니메이션한다).
-function playSpotlightCornerToCenter(onDone) {
-  placeHintSpotlight(HINT_SPOTLIGHT_CORNER.x, HINT_SPOTLIGHT_CORNER.y);
-  hintDimOverlay.style.transition = `opacity 0.3s ease, --spot-x ${HINT_SPOTLIGHT_MOVE_MS}ms ease-in-out, --spot-y ${HINT_SPOTLIGHT_MOVE_MS}ms ease-in-out`;
-  hintDimOverlay.style.setProperty('--spot-x', '50%');
-  hintDimOverlay.style.setProperty('--spot-y', '50%');
-  if (onDone) hintSpotlightTimers.push(setTimeout(onDone, HINT_SPOTLIGHT_MOVE_MS));
+// 첫 번째 힌트("모서리를 잡아 가운데로")는 배경을 어둡게 누르는 대신, 실제
+// 모서리 드래그 동작(종이가 말려 올라가며 다음 색으로 넘어가는 효과)을
+// 자동으로 재생해서 그 동작 자체를 보여준다. startPageDrag를 그대로 쓰면
+// "실제로 드래그가 시작됐다"고 보고 힌트를 바로 꺼버리므로, 그 함수는 거치지
+// 않고 endPageDrag의 커밋 분기와 똑같은 연출만 가져와 재생한다.
+function playCornerDragDemo(repeatsLeft) {
+  if (repeatsLeft <= 0) return;
+  const w = window.innerWidth, h = window.innerHeight;
+  const C = { x: w, y: 0 };
+  const { e1, e2 } = edgeVectorsForCorner('tr');
+  const fromP = { x: w - 40, y: 40 };
+  const toP = { x: w / 2, y: h / 2 };
+  const oppositeCorner = { x: 0, y: h };
+  const { color: nextColor } = getNextColor();
+
+  animateCurl(C, e1, e2, fromP, toP, currentColor, () => {
+    animateCurl(C, e1, e2, oppositeCorner, oppositeCorner, currentColor, () => {
+      currentColor = nextColor;
+      colorOverlay.style.background = currentColor;
+      updateBackButtonContrast(currentColor);
+      updatePaletteShadowColor(currentColor);
+      updateToneTabsContrast(currentColor);
+      updatePaletteViewButtonContrast(currentColor);
+      curlCtx.clearRect(0, 0, curlCanvas.width, curlCanvas.height);
+      refreshPaletteForCurrentColor(currentColor);
+      const idx = currentPalette.findIndex(c => c.toLowerCase() === nextColor.toLowerCase());
+      currentPaletteIndex = idx >= 0 ? idx : 0;
+      hintSpotlightTimers.push(setTimeout(() => playCornerDragDemo(repeatsLeft - 1), 300));
+    }, 0, 1, 340, oppositeCorner, nextColor);
+  }, 0, 0, 1100, C, currentColor);
 }
 
 function startHintSpotlight() {
   clearHintSpotlightTimers();
-  playSpotlightCornerToCenter(() => playSpotlightCornerToCenter(null));
+  // 평평한 어둠/구멍 없이, 클릭만 받아 다음 힌트로 넘기는 투명한 레이어로 둔다.
+  hintDimOverlay.style.transition = 'opacity 0.3s ease';
+  hintDimOverlay.style.background = 'transparent';
+  playCornerDragDemo(2);
 }
 
 // 두 번째 힌트("팔레트에 담아보세요"): 하단 팔레트 바가 실제로 보이는
@@ -3561,7 +3585,10 @@ function startColorHintSpotlight() {
 function endHintSpotlight() {
   clearHintSpotlightTimers();
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
-  hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.75)';
+  hintDimOverlay.style.background = 'rgba(0, 0, 0, 0.6)';
+  // 첫 번째 힌트의 모서리 드래그 시연이 중간에 끊겼을 수 있으니, 반쯤 말린
+  // 모양이 다음 힌트까지 남아있지 않도록 캔버스를 비워둔다.
+  curlCtx.clearRect(0, 0, curlCanvas.width, curlCanvas.height);
 }
 
 // 현재 떠 있는 힌트를 바로 다음 단계로 넘긴다(타이머를 기다리지 않음). 마지막
