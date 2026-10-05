@@ -3483,15 +3483,15 @@ function setHintsActive(active) {
   hintDimOverlay.style.pointerEvents = active ? 'auto' : 'none';
 }
 
-// 첫 번째 힌트("모서리를 잡아 가운데로")가 떠 있는 동안에는 화면 전체를 평평하게
-// 어둡히는 대신, 우측 상단 모서리에서 중앙으로 움직이는 동그란 구멍(스포트라이트)을
-// 뚫어 문구가 설명하는 동작을 그대로 보여준다. hintDimOverlay 자체를 아주 작은
-// 원으로 줄이고 box-shadow로 "원 바깥"을 거대하게 어둡게 칠하는 방식이라, top/left만
-// 옮겨도 구멍이 화면 위를 매끄럽게 이동한다.
+// 힌트 문구가 떠 있는 동안 화면 전체를 평평하게 어둡히는 대신, 그 문구와
+// 관련된 자리에만 구멍(스포트라이트)을 뚫어 보여준다. hintDimOverlay 자체를
+// 작은 원/타원으로 줄이고 box-shadow로 "그 바깥"을 거대하게 어둡게 칠하는
+// 방식이라, box-shadow의 blur 반경이 구멍 가장자리를 가우시안으로 흐려주고
+// top/left만 옮기면 구멍이 매끄럽게 이동한다.
+const HINT_SPOTLIGHT_BLUR = 50;
 const HINT_SPOTLIGHT_SIZE = 140;
-const HINT_SPOTLIGHT_CORNER = { top: '12%', left: '88%' };
-const HINT_SPOTLIGHT_CENTER = { top: '50%', left: '50%' };
-const HINT_SPOTLIGHT_LEG_MS = 800;
+const HINT_SPOTLIGHT_CORNER = { top: '12%', left: '88%', width: HINT_SPOTLIGHT_SIZE + 'px', height: HINT_SPOTLIGHT_SIZE + 'px' };
+const HINT_SPOTLIGHT_MOVE_MS = 1000;
 let hintSpotlightTimers = [];
 
 function clearHintSpotlightTimers() {
@@ -3499,33 +3499,59 @@ function clearHintSpotlightTimers() {
   hintSpotlightTimers = [];
 }
 
-function moveHintSpotlightTo(pos) {
-  hintDimOverlay.style.top = pos.top;
-  hintDimOverlay.style.left = pos.left;
+// 구멍을 즉시(전환 없이) 지정한 자리에 배치한다. top/left/width/height는
+// px든 %든 그대로 쓰고, 중심을 그 지점에 맞추려고 항상 translate(-50%,-50%)를 쓴다.
+function placeHintSpotlight(box) {
+  hintDimOverlay.style.transition = 'none';
+  hintDimOverlay.style.inset = 'auto';
+  hintDimOverlay.style.top = box.top;
+  hintDimOverlay.style.left = box.left;
+  hintDimOverlay.style.width = box.width;
+  hintDimOverlay.style.height = box.height;
+  hintDimOverlay.style.transform = 'translate(-50%, -50%)';
+  hintDimOverlay.style.borderRadius = '50%';
+  hintDimOverlay.style.background = 'transparent';
+  hintDimOverlay.style.boxShadow = `0 0 ${HINT_SPOTLIGHT_BLUR}px 9999px rgba(0, 0, 0, 0.75)`;
+  void hintDimOverlay.offsetWidth; // 강제 리플로우로 위 위치를 먼저 확정
+}
+
+// 첫 번째 힌트("모서리를 잡아 가운데로"): 우측 상단에서 중앙으로 오는 동작만
+// 반복해서 보여준다(중앙→모서리로 되돌아가는 역방향 모션은 보여주지 않고,
+// 매번 모서리로 순간 이동한 뒤 다시 중앙으로 애니메이션한다).
+function playSpotlightCornerToCenter(onDone) {
+  placeHintSpotlight(HINT_SPOTLIGHT_CORNER);
+  hintDimOverlay.style.transition = `opacity 0.3s ease, top ${HINT_SPOTLIGHT_MOVE_MS}ms ease-in-out, left ${HINT_SPOTLIGHT_MOVE_MS}ms ease-in-out`;
+  hintDimOverlay.style.top = '50%';
+  hintDimOverlay.style.left = '50%';
+  if (onDone) hintSpotlightTimers.push(setTimeout(onDone, HINT_SPOTLIGHT_MOVE_MS));
 }
 
 function startHintSpotlight() {
   clearHintSpotlightTimers();
-  // 전환 없이 우측 상단에 즉시 배치
-  hintDimOverlay.style.transition = 'none';
-  hintDimOverlay.style.inset = 'auto';
-  moveHintSpotlightTo(HINT_SPOTLIGHT_CORNER);
-  hintDimOverlay.style.width = HINT_SPOTLIGHT_SIZE + 'px';
-  hintDimOverlay.style.height = HINT_SPOTLIGHT_SIZE + 'px';
-  hintDimOverlay.style.transform = 'translate(-50%, -50%)';
-  hintDimOverlay.style.borderRadius = '50%';
-  hintDimOverlay.style.background = 'transparent';
-  // blur 반경(두 번째 값)을 줘서 구멍 가장자리가 또렷한 선 대신 부드럽게 흐려지게 한다.
-  hintDimOverlay.style.boxShadow = '0 0 50px 9999px rgba(0, 0, 0, 0.75)';
-  void hintDimOverlay.offsetWidth; // 강제 리플로우로 위 위치를 먼저 확정
-  hintDimOverlay.style.transition = `opacity 0.3s ease, top ${HINT_SPOTLIGHT_LEG_MS}ms ease-in-out, left ${HINT_SPOTLIGHT_LEG_MS}ms ease-in-out`;
+  playSpotlightCornerToCenter(() => playSpotlightCornerToCenter(null));
+}
 
-  // 힌트가 떠 있는 약 4초 동안 모서리→중앙 이동을 두 번 보여준다
-  // (중앙 도착: 0ms, 두 번째 중앙 도착: leg*2ms), 마지막엔 모서리로 되돌아가 멈춘다.
-  moveHintSpotlightTo(HINT_SPOTLIGHT_CENTER);
-  hintSpotlightTimers.push(setTimeout(() => moveHintSpotlightTo(HINT_SPOTLIGHT_CORNER), HINT_SPOTLIGHT_LEG_MS));
-  hintSpotlightTimers.push(setTimeout(() => moveHintSpotlightTo(HINT_SPOTLIGHT_CENTER), HINT_SPOTLIGHT_LEG_MS * 2));
-  hintSpotlightTimers.push(setTimeout(() => moveHintSpotlightTo(HINT_SPOTLIGHT_CORNER), HINT_SPOTLIGHT_LEG_MS * 3));
+// 두 번째 힌트("팔레트에 담아보세요"): 하단 팔레트 바가 실제로 보이는
+// 자리에 맞춰(여유 40px) 타원 구멍을 뚫는다. 움직이지 않고 그 자리에 고정.
+function startPaletteHintSpotlight() {
+  clearHintSpotlightTimers();
+  const r = paletteBar.getBoundingClientRect();
+  const padX = 40, padY = 40;
+  placeHintSpotlight({
+    top: (r.top + r.height / 2) + 'px',
+    left: (r.left + r.width / 2) + 'px',
+    width: (r.width + padX * 2) + 'px',
+    height: (r.height + padY * 2) + 'px',
+  });
+  hintDimOverlay.style.transition = 'opacity 0.3s ease';
+}
+
+// 세 번째 힌트("팔레트에서 확인하세요"): 첫 번째 힌트와 똑같은 우측 상단
+// 자리에, 움직이지 않고 고정된 구멍을 뚫는다.
+function startColorHintSpotlight() {
+  clearHintSpotlightTimers();
+  placeHintSpotlight(HINT_SPOTLIGHT_CORNER);
+  hintDimOverlay.style.transition = 'opacity 0.3s ease';
 }
 
 function endHintSpotlight() {
@@ -3626,12 +3652,14 @@ function hideColorHint() {
   colorHintGlow.style.transitionDuration = '1.8s';
   colorHintGlow.style.opacity = '0';
   setHintsActive(false);
+  endHintSpotlight();
 }
 
 function showColorHint(color) {
   if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) return;
   colorHint.style.color = '#ffffff';
   colorHint.style.opacity = '1';
+  startColorHintSpotlight();
   setHintsActive(true);
   clearTimeout(colorHintTimer);
   colorHintTimer = setTimeout(hideColorHint, 4000);
@@ -3645,6 +3673,7 @@ function hidePaletteDragHint() {
   paletteCenterGlow.style.transitionDuration = '1.8s';
   paletteCenterGlow.style.opacity = '0';
   setHintsActive(false);
+  endHintSpotlight();
 }
 
 function advancePaletteDragHint() {
@@ -3663,6 +3692,7 @@ function showPaletteDragHint(color) {
   if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) return;
   paletteDragHint.style.color = '#ffffff';
   paletteDragHint.style.opacity = '1';
+  startPaletteHintSpotlight();
   setHintsActive(true);
   clearTimeout(paletteDragHintTimer);
   paletteDragHintTimer = setTimeout(advancePaletteDragHint, 4000);
