@@ -3619,7 +3619,7 @@ function startColorHintSpotlight() {
   const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
   hintDimOverlay.style.transition = 'none';
   hintDimOverlay.style.background =
-    `radial-gradient(circle ${HINT_SPOTLIGHT_RADIUS}px at ${cx}px ${cy}px, transparent 0%, transparent 10%, rgba(0, 0, 0, 0.6) 100%)`;
+    `radial-gradient(circle ${HINT_SPOTLIGHT_RADIUS}px at ${cx}px ${cy}px, transparent 0%, transparent 4%, rgba(0, 0, 0, 0.6) 100%)`;
   void hintDimOverlay.offsetWidth;
   hintDimOverlay.style.transition = 'opacity 0.3s ease';
 }
@@ -3693,7 +3693,7 @@ let colorHintTimer = null;
 const colorHint = document.createElement('p');
 colorHint.textContent = '선택한 색을 팔레트에서 확인하여 다음 단계로 넘어가세요';
 colorHint.style.position = 'fixed';
-colorHint.style.top = 'calc(70px + env(safe-area-inset-top))';
+colorHint.style.top = 'calc(95px + env(safe-area-inset-top))';
 colorHint.style.right = 'calc(20px + env(safe-area-inset-right))';
 colorHint.style.margin = '0';
 colorHint.style.maxWidth = '130px';
