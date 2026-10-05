@@ -4469,7 +4469,13 @@ function applyLayout() {
         const pivotSection = parseInt(pivot.dataset.section, 10);
         if (pivotSection !== nearestSection) {
           saturation = 0;
-          const originalLightness = hexToHSL(card.dataset.color).l; // 0~100
+          // card.dataset.color는 바뀌지 않으므로 명도는 카드당 한 번만 계산해 캐싱한다.
+          // 잠김 상태에서는 매 프레임 이 분기를 타는 카드가 최대 수십 개라, 매번
+          // hexToHSL(문자열 파싱+연산)을 다시 하는 비용이 누적되어 체감 렉으로 이어졌다.
+          if (card._origLightness === undefined) {
+            card._origLightness = hexToHSL(card.dataset.color).l; // 0~100
+          }
+          const originalLightness = card._origLightness;
           const grayLightness = originalLightness * brightness;
           if (grayLightness < 90) {
             brightness *= 90 / Math.max(1, originalLightness);
