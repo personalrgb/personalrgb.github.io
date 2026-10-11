@@ -27,7 +27,12 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&family=Geist+Pixel&family=IBM+Plex+Sans+KR&family=Noto+Sans+KR:wght@100..900&family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&family=Jost:ital,wght@0,100..900;1,100..900&family=Bitcount+Grid+Double:wght@100..900&family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap" rel="stylesheet">
+  <!-- 실제로 font-family에서 쓰는 글꼴만 요청한다. 예전엔 IBM Plex Sans KR·
+       Noto Sans KR·Noto Sans·Roboto까지 전체 굵기+이탤릭으로 받아왔는데,
+       CSS 어디서도 그 글꼴들을 쓰지 않아 순수 낭비였다(한글은 폴백으로 시스템
+       기본 글꼴을 쓴다). 쓰는 글꼴도 실제 쓰는 굵기(300/400/500/700)만, 이탤릭은
+       전혀 안 쓰므로 뺐다. -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Geist+Pixel&family=Jost:wght@300;400;500;700&family=Bitcount+Grid+Double:wght@300;400;500;700&family=EB+Garamond:wght@400;700&display=swap" rel="stylesheet">
 
 
 </head>
