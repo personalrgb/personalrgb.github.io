@@ -47,13 +47,18 @@
     margin: 0 0 12px; letter-spacing: 0.02em;
   }
 
+  .products { display: flex; flex-direction: column; gap: 8px; }
   .product {
-    display: flex; align-items: center; gap: 12px;
-    padding: 12px; border: 1px solid var(--accent);
-    border-radius: 10px; background: #fafafa;
+    display: block; padding: 12px; border: 1px solid var(--line);
+    border-radius: 10px; cursor: pointer;
+    transition: border-color .15s, background .15s;
   }
+  .product.selected { border-color: var(--accent); background: #fafafa; }
+  .product input { display: none; }
+  .product .row { display: flex; align-items: center; gap: 12px; }
   .product .name { flex: 1; font-size: 15px; font-weight: 500; }
   .product .price { font-size: 15px; font-weight: 600; }
+  .product .desc { margin-top: 4px; font-size: 12px; color: var(--muted); }
 
   label.field { display: block; margin-bottom: 12px; }
   label.field:last-child { margin-bottom: 0; }
@@ -122,10 +127,31 @@
   <!-- 상품 -->
   <div class="card">
     <h2>상품</h2>
-    <div class="product">
-      <input type="radio" name="product" value="basic" data-name="퍼스널 컬러 진단 결과지" data-amount="1000" checked style="display:none">
-      <span class="name">퍼스널 컬러 진단 결과지</span>
-      <span class="price">1,000원</span>
+    <div class="products">
+      <label class="product selected">
+        <input type="radio" name="product" value="basic" data-name="퍼스널 컬러 진단 결과지" data-amount="1000" checked>
+        <div class="row">
+          <span class="name">기본 · 퍼스널 컬러 진단 결과지</span>
+          <span class="price">1,000원</span>
+        </div>
+        <div class="desc">웜톤/쿨톤부터 16타입까지, 나의 퍼스널 컬러 진단 결과지</div>
+      </label>
+      <label class="product">
+        <input type="radio" name="product" value="styling" data-name="퍼스널 컬러 진단 결과지 + 스타일링 가이드" data-amount="2000">
+        <div class="row">
+          <span class="name">스타일링 · 진단 결과지 + 의상·헤어 가이드</span>
+          <span class="price">2,000원</span>
+        </div>
+        <div class="desc">진단 결과지에 어울리는 의상·헤어 스타일링 가이드를 더합니다</div>
+      </label>
+      <label class="product">
+        <input type="radio" name="product" value="full" data-name="퍼스널 컬러 진단 결과지 + 전체 스타일링 가이드" data-amount="3000">
+        <div class="row">
+          <span class="name">풀 패키지 · 진단 결과지 + 전체 스타일링 가이드</span>
+          <span class="price">3,000원</span>
+        </div>
+        <div class="desc">의상·메이크업·헤어·주얼리·네일까지, 전체 스타일링 가이드를 모두 담았습니다</div>
+      </label>
     </div>
   </div>
 
@@ -228,6 +254,7 @@ function syncSelected(groupSelector, itemSelector) {
   });
 }
 syncSelected('input[name="method"]', ".method");
+syncSelected('input[name="product"]', ".product");
 
 function selectedProduct() {
   const el = $('input[name="product"]:checked');

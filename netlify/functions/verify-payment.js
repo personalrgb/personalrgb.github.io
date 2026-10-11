@@ -3,7 +3,9 @@
 // 상태가 실제로 PAID인지, 금액이 우리가 받아야 할 금액과 일치하는지 재확인한다.
 // PORTONE_API_SECRET은 Netlify 대시보드(Site settings > Environment variables)에
 // 등록해야 한다 — 절대 코드/저장소에 직접 적지 않는다.
-const PAYMENT_AMOUNT = 1000;
+// 상품이 기본/스타일링/풀 패키지 세 가지라 가격도 세 가지(payment.html의
+// data-amount와 맞춤)다 — 그중 하나와 일치하면 된다.
+const VALID_AMOUNTS = [1000, 2000, 3000];
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -33,7 +35,7 @@ exports.handler = async (event) => {
       return { statusCode: 200, body: JSON.stringify({ ok: false, message: 'Payment lookup failed' }) };
     }
     const data = await res.json();
-    const isPaid = data.status === 'PAID' && data.amount && data.amount.total === PAYMENT_AMOUNT;
+    const isPaid = data.status === 'PAID' && data.amount && VALID_AMOUNTS.includes(data.amount.total);
     return { statusCode: 200, body: JSON.stringify({ ok: isPaid, status: data.status }) };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ ok: false, message: 'Server error' }) };

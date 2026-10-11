@@ -2932,8 +2932,8 @@ document.body.appendChild(letterRevealFlash);
 
 // ---- 결제 화면 ----
 // 봉투를 누르면 이 안내 카드를 먼저 보여주고, "결제하기"를 누르면 실제 결제
-// 연동이 되어 있는 독립 페이지(payment.html)로 이동한다.
-const PAYMENT_AMOUNT = 1000;
+// 연동이 되어 있는 독립 페이지(payment.html)로 이동한다. 상품(기본/스타일링/
+// 풀 패키지)과 가격은 거기서 고르므로, 여기서는 특정 금액을 못 박지 않는다.
 const PAYMENT_ORDER_NAME = '퍼스널 RGB 진단 결과지';
 
 const paymentOverlay = document.createElement('div');
@@ -2950,12 +2950,12 @@ paymentTitle.textContent = PAYMENT_ORDER_NAME;
 // 만드는 카테고리와 동일) 결제 전에 미리 보여준다.
 const paymentDescription = document.createElement('p');
 paymentDescription.className = 'payment-description';
-paymentDescription.textContent = '의상 · 메이크업 · 헤어 · 주얼리 · 네일, 5가지 카테고리로 완성되는 나만의 컬러 가이드를 편지로 받아보세요.';
+paymentDescription.textContent = '기본 진단 결과지부터 의상·메이크업·헤어·주얼리·네일까지 담은 풀 패키지까지, 원하는 구성으로 골라 받아보세요.';
 
 const paymentPayButton = document.createElement('button');
 paymentPayButton.type = 'button';
 paymentPayButton.className = 'payment-pay-button';
-paymentPayButton.textContent = `${PAYMENT_AMOUNT.toLocaleString()}원 결제하기`;
+paymentPayButton.textContent = '상품 선택하고 결제하기';
 
 const paymentError = document.createElement('p');
 paymentError.className = 'payment-error';
@@ -3020,7 +3020,7 @@ document.body.appendChild(paymentOverlay);
 function showPaymentScreen() {
   paymentError.style.display = 'none';
   paymentPayButton.disabled = false;
-  paymentPayButton.textContent = `${PAYMENT_AMOUNT.toLocaleString()}원 결제하기`;
+  paymentPayButton.textContent = '상품 선택하고 결제하기';
   paymentOverlay.style.opacity = '1';
   paymentOverlay.style.pointerEvents = 'auto';
 }
