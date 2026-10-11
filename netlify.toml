@@ -4,3 +4,32 @@
 
 [functions]
   directory = "netlify/functions"
+
+# Lighthouse가 지적한 "짧은 캐시 수명" 보완. script.js/gain.css는 내용이 바뀔 때마다
+# index.html의 ?v= 쿼리도 같이 올리는 방식이라(이 저장소의 커밋 규칙), 경로 자체를
+# 1년 캐시해도 안전하다 — 버전이 바뀌면 URL(쿼리)도 바뀌어 새로 받아온다.
+# 이미지는 같은 파일명을 덮어쓰는 경우가 있어 하루 정도로만 캐시한다.
+[[headers]]
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/script.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.png"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+[[headers]]
+  for = "/*.jpg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
