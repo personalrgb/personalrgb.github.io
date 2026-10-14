@@ -3785,7 +3785,14 @@ function hideColorHint() {
 }
 
 function showColorHint(color) {
-  if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) return;
+  // 힌트1·2가 숨겨둔 ← Back/팔레트 아이콘/팔레트 바는 원래 세 번째 힌트가
+  // 뜰 때 다시 보여주는데, 이 함수가 아래 조건으로 조기 종료하면(=체인이
+  // 여기서 끊기면) 아무도 복구를 안 해줘서 그 UI가 영영 숨겨진 채로 남는다.
+  // 먼저 복구부터 해두고 조기 종료한다.
+  if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) {
+    showPracticeChromeForHint();
+    return;
+  }
   colorHint.style.color = '#ffffff';
   colorHint.style.opacity = '1';
   startColorHintSpotlight();
@@ -3820,7 +3827,12 @@ paletteCenterGlow.className = 'palette-center-glow';
 document.body.appendChild(paletteCenterGlow);
 
 function showPaletteDragHint(color) {
-  if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) return;
+  // showColorHint와 같은 이유로, 여기서 조기 종료하면 힌트1이 숨겨둔 UI가
+  // 다음 힌트(3번) 없이는 복구될 길이 없어 영영 숨겨진 채로 남는다.
+  if (isPaletteGridOpen || currentPaletteMode.startsWith('confirmed')) {
+    showPracticeChromeForHint();
+    return;
+  }
   paletteDragHint.style.color = '#ffffff';
   paletteDragHint.style.opacity = '1';
   startPaletteHintSpotlight();
@@ -3846,7 +3858,15 @@ function hideCornerDragHint() {
 let hintChainFromTutorial = false;
 function advanceCornerDragHint() {
   hideCornerDragHint();
-  if (hintChainFromTutorial) startPaletteChain(currentColor);
+  if (hintChainFromTutorial) {
+    startPaletteChain(currentColor);
+  } else {
+    // 카드를 바로 클릭해 들어온 경우 힌트1 하나만 보여주고 체인이 여기서
+    // 끝난다 — 힌트1이 숨겨둔 ← Back/팔레트 아이콘/팔레트 바를 여기서 바로
+    // 복구하지 않으면, 다음 힌트가 없으니 영영 숨겨진 채로 남는다(실제로
+    // 겪은 버그: 화면이 "멈춘" 것처럼 보임).
+    showPracticeChromeForHint();
+  }
 }
 
 // 팔레트 담기→다음 단계 안내(2·3번째 문구)는 평생 한 번만 보여준다. 모서리
