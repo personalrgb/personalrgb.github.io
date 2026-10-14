@@ -227,8 +227,11 @@ function createCard(color, w, h, borderRadius, hoverTwistDeg) {
 
   // 뒤에 같은 모양·같은 색으로 거리 0인 그림자(글로우)를 깔아 은은하게 번지게 한다.
   // (깊이에 따른 opacity/blur가 이미 뒤쪽 개체는 흐리게 만들어주므로, 화면 앞쪽 개체일수록 더 진하게 보인다.)
-  // box-shadow 블러는 비용이 커서, 200개가 계속 움직이는 모바일/태블릿에서는 반경을 크게 줄인다.
-  const glowSize = Math.max(w, h) * (isLikelyMobile ? 0.22 : 0.7);
+  // box-shadow 블러는 비용이 커서, 100개가 계속 움직이는 상태에서는 특히
+  // 부담이 크다. 모바일/태블릿은 이미 줄여뒀었는데, 데스크탑은 화면이 넓으니
+  // 괜찮을 거라 보고 0.7 그대로 뒀던 게 실제로는 계속 렉의 원인이 되고
+  // 있었다 — 데스크탑도 절반 수준으로 줄인다.
+  const glowSize = Math.max(w, h) * (isLikelyMobile ? 0.22 : 0.35);
   card.style.boxShadow = `0 0 ${glowSize.toFixed(1)}px ${hexToRgba(color, 0.8)}`;
 
   card.innerHTML = `
