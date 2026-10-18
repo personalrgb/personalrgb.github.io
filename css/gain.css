@@ -1559,6 +1559,49 @@ body {
   cursor: default;
 }
 
+.payment-products {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-product {
+  display: block;
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid rgba(23, 20, 18, 0.15);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.payment-product:hover {
+  border-color: #171412;
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.payment-product-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.payment-product-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #171412;
+}
+
+.payment-product-price {
+  font-size: 15px;
+  font-weight: 600;
+  color: #171412;
+  white-space: nowrap;
+}
+
 .payment-error {
   display: none;
   margin: 14px 0 0;

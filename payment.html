@@ -345,6 +345,17 @@ $("#payBtn").addEventListener("click", async () => {
   }
 });
 
+// 홈 화면 결제 카드에서 특정 상품을 눌러 들어온 경우(payment.html?tier=styling)
+// 그 상품이 미리 선택된 채로 열리게 한다.
+const tierParam = new URLSearchParams(location.search).get("tier");
+if (tierParam) {
+  const el = document.querySelector(`input[name="product"][value="${tierParam}"]`);
+  if (el) {
+    el.checked = true;
+    el.dispatchEvent(new Event("change"));
+  }
+}
+
 updateTotal();
 </script>
 </body>

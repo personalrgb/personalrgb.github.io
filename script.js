@@ -2934,10 +2934,17 @@ letterRevealFlash.style.pointerEvents = 'none';
 document.body.appendChild(letterRevealFlash);
 
 // ---- 결제 화면 ----
-// 봉투를 누르면 이 안내 카드를 먼저 보여주고, "결제하기"를 누르면 실제 결제
-// 연동이 되어 있는 독립 페이지(payment.html)로 이동한다. 상품(기본/스타일링/
-// 풀 패키지)과 가격은 거기서 고르므로, 여기서는 특정 금액을 못 박지 않는다.
+// 봉투를 누르면 이 안내 카드를 먼저 보여주고, 상품(기본/스타일링/풀 패키지)
+// 중 하나를 바로 고르면 실제 결제 연동이 되어 있는 독립 페이지(payment.html)
+// 로 그 상품이 미리 선택된 채로 이동한다. 가격·상품명이 이 카드에서부터
+// 바로 보여야(PG 심사 요건) 해서, 여기서도 payment.html과 같은 3개 상품을
+// 똑같이 나열한다.
 const PAYMENT_ORDER_NAME = '퍼스널 RGB 진단 결과지';
+const PAYMENT_PRODUCTS = [
+  { tier: 'basic', name: '기본', desc: '진단 결과지', price: 1000 },
+  { tier: 'styling', name: '스타일링', desc: '진단 결과지 + 의상·헤어 가이드', price: 2000 },
+  { tier: 'full', name: '풀 패키지', desc: '진단 결과지 + 전체 스타일링 가이드', price: 3000 },
+];
 
 const paymentOverlay = document.createElement('div');
 paymentOverlay.className = 'payment-overlay';
@@ -2955,10 +2962,24 @@ const paymentDescription = document.createElement('p');
 paymentDescription.className = 'payment-description';
 paymentDescription.textContent = '기본 진단 결과지부터 의상·메이크업·헤어·주얼리·네일까지 담은 풀 패키지까지, 원하는 구성으로 골라 받아보세요.';
 
-const paymentPayButton = document.createElement('button');
-paymentPayButton.type = 'button';
-paymentPayButton.className = 'payment-pay-button';
-paymentPayButton.textContent = '상품 선택하고 결제하기';
+const paymentProductsEl = document.createElement('div');
+paymentProductsEl.className = 'payment-products';
+PAYMENT_PRODUCTS.forEach((product) => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'payment-product';
+  btn.innerHTML = `
+    <span class="payment-product-row">
+      <span class="payment-product-name">${product.name} · ${product.desc}</span>
+      <span class="payment-product-price">${product.price.toLocaleString()}원</span>
+    </span>
+  `;
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    location.href = `payment.html?tier=${product.tier}`;
+  });
+  paymentProductsEl.appendChild(btn);
+});
 
 const paymentError = document.createElement('p');
 paymentError.className = 'payment-error';
@@ -3015,15 +3036,13 @@ paymentCard.appendChild(paymentBackButton);
 paymentCard.appendChild(paymentSecretTapZone);
 paymentCard.appendChild(paymentTitle);
 paymentCard.appendChild(paymentDescription);
-paymentCard.appendChild(paymentPayButton);
+paymentCard.appendChild(paymentProductsEl);
 paymentCard.appendChild(paymentError);
 paymentOverlay.appendChild(paymentCard);
 document.body.appendChild(paymentOverlay);
 
 function showPaymentScreen() {
   paymentError.style.display = 'none';
-  paymentPayButton.disabled = false;
-  paymentPayButton.textContent = '상품 선택하고 결제하기';
   paymentOverlay.style.opacity = '1';
   paymentOverlay.style.pointerEvents = 'auto';
 }
@@ -3052,13 +3071,6 @@ paymentBackButton.addEventListener('click', (e) => {
 // 카드 바깥(어두운 배경)을 눌러도 닫히게 한다.
 paymentOverlay.addEventListener('click', (e) => {
   if (e.target === paymentOverlay) closePaymentWithoutPaying();
-});
-
-// 앱 안에서 직접 PortOne.requestPayment()를 호출하던 것 대신, 실제 결제
-// 연동이 되어 있는 독립 결제 페이지(payment.html)로 이동시킨다.
-paymentPayButton.addEventListener('click', (e) => {
-  e.stopPropagation();
-  location.href = 'payment.html';
 });
 
 stageHintEnvelope.addEventListener('click', (e) => {
