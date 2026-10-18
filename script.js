@@ -547,6 +547,21 @@ if (siteFooterToggle && siteFooterDetails) {
   });
 }
 
+// "결제 테스트 페이지" 링크: payment.html로 바로 보내는 대신, 실제 사용자가
+// 밟는 경로와 똑같이 상품 3개가 보이는 결제 카드부터 보여준다(showPaymentScreen
+// 은 아래에서 정의되지만 function 선언이라 호이스팅되어 여기서도 호출 가능).
+// pendingFinalSeason은 진짜 진단 결과가 아니라 미리보기용으로 잠깐 빌려 쓰고,
+// paymentOpenedFromHome=true라 결제 없이 닫으면 다시 null로 되돌아간다.
+const paymentTestLink = document.getElementById('paymentTestLink');
+if (paymentTestLink) {
+  paymentTestLink.addEventListener('click', (e) => {
+    e.preventDefault();
+    pendingFinalSeason = 0;
+    paymentOpenedFromHome = true;
+    showPaymentScreen();
+  });
+}
+
 // updateBg()가 매 프레임 body 배경색을 바꾸므로, 그 배경의 밝기를 계산해
 // 어두우면 흰색, 밝으면 검정색 글씨가 되도록 실시간으로 맞춘다.
 function updateSiteFooterContrast(bgColor) {
