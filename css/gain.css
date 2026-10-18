@@ -1428,6 +1428,25 @@ body {
   animation: paletteTransitionBurst 0.75s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
 }
 
+/* 팔레트 아이콘 바로 아래 뜨는 짧은 안내("색을 선택해주세요"). 배경이 어떤
+   색이든 항상 읽히도록 스스로 어두운 배경 + 흰 글씨를 쓴다. */
+.palette-empty-toast {
+  position: fixed;
+  top: calc(68px + env(safe-area-inset-top));
+  right: calc(28px + env(safe-area-inset-right));
+  margin: 0;
+  padding: 7px 14px;
+  background: rgba(23, 20, 18, 0.85);
+  color: #ffffff;
+  font-size: 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+  z-index: 1600;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
 .site-footer {
   position: fixed;
   left: calc(14px + env(safe-area-inset-left));

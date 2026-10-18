@@ -1758,6 +1758,18 @@ function applyBackgroundTone(color) {
 // 색 구름 뒤에 깔린 화면 배경도 지금 고른 16타입 그룹의 톤(연한 평균색)으로 맞춘다.
 function setSynthesisBackgroundColor(seasonIndex) {
   applyBackgroundTone(paleFamilyColor(SEASON16_GROUPS[seasonIndex].colors));
+  // applyBackgroundTone은 항상 "연하게" 깔리는 colorOverlay 색(paleFamilyColor)
+  // 기준으로 글씨색을 정하는데, 실제로 눈에 보이는 배경은 그 위에 겹쳐진 색
+  // 구름(synthesisBackdrop)이다. Deep/Dark 계열은 그 구름 자체가 어두워서,
+  // 항상 밝은 paleFamilyColor 기준으로는 글씨가 계속 어둡게 나와 안 보였다 —
+  // 이 계열일 때는 화면의 모든 글씨를 흰색으로 강제한다.
+  if (/Deep|Dark/.test(SEASON16_TAB_LABELS[seasonIndex])) {
+    const white = '#ffffff';
+    backButton.style.color = white;
+    paletteViewButton.style.color = white;
+    stageAdvanceButton.style.color = white;
+    toneTabButtons.forEach((tab) => { tab.style.color = white; });
+  }
 }
 
 // 종합 단계로 들어오면 팔레트 관련 UI를 모두 걷어내고 색 구름 배경만 보여준다.
@@ -3335,12 +3347,35 @@ function burstPaletteTransitionGlow(x, y) {
   paletteTransitionGlow.classList.add('burst');
 }
 
+// 확정한 색이 하나도 없는 상태에서 팔레트 아이콘을 누르면, 아무 반응 없이
+// 조용히 무시하는 대신 짧게 안내 문구를 띄운다.
+const paletteEmptyToast = document.createElement('p');
+paletteEmptyToast.className = 'palette-empty-toast';
+paletteEmptyToast.textContent = '색을 선택해주세요';
+document.body.appendChild(paletteEmptyToast);
+let paletteEmptyToastTimer = null;
+function showPaletteEmptyToast() {
+  paletteEmptyToast.style.transition = 'none';
+  paletteEmptyToast.style.opacity = '0';
+  void paletteEmptyToast.offsetWidth;
+  paletteEmptyToast.style.transition = 'opacity 0.25s ease';
+  paletteEmptyToast.style.opacity = '1';
+  clearTimeout(paletteEmptyToastTimer);
+  paletteEmptyToastTimer = setTimeout(() => {
+    paletteEmptyToast.style.opacity = '0';
+  }, 1600);
+}
+
 // 팔레트(확정 색) 아이콘을 누르면 작은 목록 대신, 지금과 같은 전체화면 방식으로
 // 확정해둔 색들만 코브플로우에 띄워 그대로 둘러볼 수 있게 한다. 들어가기 직전
 // 상태를 기억해뒀다가 뒤로가기를 누르면 화면을 나가지 않고 그 상태로 돌아간다.
 paletteViewButton.addEventListener('click', (e) => {
   e.stopPropagation();
-  if (confirmedColors.length === 0 || currentPaletteMode.startsWith('confirmed')) return;
+  if (confirmedColors.length === 0) {
+    showPaletteEmptyToast();
+    return;
+  }
+  if (currentPaletteMode.startsWith('confirmed')) return;
 
   // 팔레트 아이콘을 눌러 확정한 색 화면으로 들어가니, 진행 중이던 안내 힌트
   // 체인은 여기서도 멈춘다.
