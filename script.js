@@ -2970,7 +2970,7 @@ const PAYMENT_ORDER_NAME = '퍼스널 RGB 진단 결과지';
 const PAYMENT_PRODUCTS = [
   { tier: 'basic', name: '기본', desc: '진단 결과지', price: 1000 },
   { tier: 'styling', name: '스타일링', desc: '진단 결과지 + 의상·헤어 가이드', price: 2000 },
-  { tier: 'full', name: '풀 패키지', desc: '진단 결과지 + 전체 스타일링 가이드', price: 3000 },
+  { tier: 'full', name: '풀 패키지', desc: '진단 결과지 + 전체 스타일링 가이드', price: 2500 },
 ];
 
 const paymentOverlay = document.createElement('div');

@@ -5,7 +5,7 @@
 // 등록해야 한다 — 절대 코드/저장소에 직접 적지 않는다.
 // 상품이 기본/스타일링/풀 패키지 세 가지라 가격도 세 가지(payment.html의
 // data-amount와 맞춤)다 — 그중 하나와 일치하면 된다.
-const VALID_AMOUNTS = [1000, 2000, 3000];
+const VALID_AMOUNTS = [1000, 2000, 2500];
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
