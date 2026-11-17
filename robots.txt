@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://personalrgb.github.io/sitemap.xml
+Sitemap: https://personalrgb.com/sitemap.xml
