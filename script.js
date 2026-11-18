@@ -1402,6 +1402,10 @@ let pendingFinalSeason = null;
 // 잠깐 빌려 쓴다. 결제 없이(Back/배경 클릭) 닫으면 원래대로 null로 되돌려서,
 // 이후 실제 진단 플로우(Select 버튼 등)를 막지 않게 한다.
 let paymentOpenedFromHome = false;
+// 실제로 결제가 검증된 상품 등급(basic/styling/full) — 서버(verify-payment)가
+// 결제 금액을 보고 알려준 값만 믿는다(URL 파라미터로 조작 가능한 값은 쓰지 않음).
+// null이면(결제 테스트 페이지 등 등급을 알 수 없는 경로) 전체 공개로 취급한다.
+let paidTier = null;
 
 // 단계 안내 카드 ↔ 색 화면을 오간 순서를 그대로 쌓아뒀다가, Back을 누르면 하나씩
 // 꺼내서 정확히 바로 이전 화면으로 돌아가게 한다. 항목은 { type: 'hint'|'color', stage }.
@@ -2773,7 +2777,17 @@ letterRevealOverlay.addEventListener('wheel', (e) => {
   }
 }, { passive: false });
 
-function renderLetterCardText(seasonIndex) {
+// 상품 등급별로 공개되는 섹션. PAYMENT_PRODUCTS의 설명(기본=진단 결과지만,
+// 스타일링=+의상·헤어, 풀 패키지=+전체)과 정확히 맞춘다. tier가 null/미지정이면
+// (결제 테스트 페이지 등 등급을 알 수 없는 경로) 전체 공개로 취급한다.
+const TIER_SECTIONS = {
+  basic: [],
+  styling: ['outfit', 'hair'],
+  full: ['outfit', 'makeup', 'hair', 'jewelry', 'nail'],
+};
+
+function renderLetterCardText(seasonIndex, tier) {
+  const sections = TIER_SECTIONS[tier] || TIER_SECTIONS.full;
   letterCardText.innerHTML = '';
   const title = document.createElement('p');
   title.className = 'lr-text-title';
@@ -2795,25 +2809,27 @@ function renderLetterCardText(seasonIndex) {
     letterCardText.appendChild(sec);
   };
 
-  addSection('의상', tip.outfit);
+  if (sections.includes('outfit')) addSection('의상', tip.outfit);
 
-  const makeupSec = document.createElement('div');
-  makeupSec.className = 'lr-text-section';
-  const makeupLabel = document.createElement('p');
-  makeupLabel.className = 'lr-text-label';
-  makeupLabel.textContent = '메이크업';
-  makeupSec.appendChild(makeupLabel);
-  tip.makeup.forEach(([subLabel, text]) => {
-    const item = document.createElement('p');
-    item.className = 'lr-text-body';
-    item.textContent = `${subLabel} — ${text}`;
-    makeupSec.appendChild(item);
-  });
-  letterCardText.appendChild(makeupSec);
+  if (sections.includes('makeup')) {
+    const makeupSec = document.createElement('div');
+    makeupSec.className = 'lr-text-section';
+    const makeupLabel = document.createElement('p');
+    makeupLabel.className = 'lr-text-label';
+    makeupLabel.textContent = '메이크업';
+    makeupSec.appendChild(makeupLabel);
+    tip.makeup.forEach(([subLabel, text]) => {
+      const item = document.createElement('p');
+      item.className = 'lr-text-body';
+      item.textContent = `${subLabel} — ${text}`;
+      makeupSec.appendChild(item);
+    });
+    letterCardText.appendChild(makeupSec);
+  }
 
-  addSection('헤어', tip.hair);
-  addSection('주얼리', tip.jewelry);
-  addSection('네일', tip.nail);
+  if (sections.includes('hair')) addSection('헤어', tip.hair);
+  if (sections.includes('jewelry')) addSection('주얼리', tip.jewelry);
+  if (sections.includes('nail')) addSection('네일', tip.nail);
   currentLetterSeasonIndex = seasonIndex;
 }
 
@@ -3003,7 +3019,9 @@ PAYMENT_PRODUCTS.forEach((product) => {
   `;
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    location.href = `payment.html?tier=${product.tier}`;
+    // season을 같이 넘겨야 결제 완료 후 payment.html이 이 페이지로 돌아왔을 때
+    // 어떤 결과지를 열어야 하는지 알 수 있다(아래 handlePaymentReturn 참고).
+    location.href = `payment.html?tier=${product.tier}&season=${pendingFinalSeason}`;
   });
   paymentProductsEl.appendChild(btn);
 });
@@ -3104,7 +3122,7 @@ function openLetterAfterPayment() {
   // 어두운 글자색으로는 우측 상단 End 버튼이 배경에 묻힌다 — 그런 타입만
   // 흰색으로 바꿔 대비를 준다.
   letterEndButton.style.color = /Deep|Dark/.test(SEASON16_TAB_LABELS[pendingFinalSeason]) ? '#ffffff' : '#111111';
-  renderLetterCardText(pendingFinalSeason);
+  renderLetterCardText(pendingFinalSeason, paidTier);
   if (letterPaperRafId !== null) {
     cancelAnimationFrame(letterPaperRafId);
     letterPaperRafId = null;
@@ -3150,6 +3168,33 @@ function openLetterAfterPayment() {
     letterRevealFlash.style.opacity = '0';
   });
 }
+
+// payment.html에서 결제를 마치고 돌아온 경우(?season=...&paymentId=...) 처리한다.
+// URL 값은 누구나 조작할 수 있으므로 그대로 믿지 않고, 서버(verify-payment)에
+// paymentId로 다시 조회해서 실제로 PAID 상태인지 확인된 뒤에만 결과지를 연다.
+(function handlePaymentReturn() {
+  const params = new URLSearchParams(location.search);
+  const paymentId = params.get('paymentId');
+  const seasonParam = params.get('season');
+  if (!paymentId || seasonParam === null) return;
+  history.replaceState(null, '', location.pathname);
+  fetch('/.netlify/functions/verify-payment', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paymentId }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (!data.ok) return;
+      pendingFinalSeason = Number(seasonParam);
+      // 등급(basic/styling/full)은 URL이 아니라 서버가 실제 결제 금액을 보고
+      // 돌려준 값만 믿는다 — URL의 tier를 썼다면 결제 후 주소만 바꿔서 더
+      // 비싼 등급 내용을 공짜로 볼 수 있었을 것이다.
+      paidTier = data.tier || null;
+      openLetterAfterPayment();
+    })
+    .catch(() => {});
+})();
 
 stageHintContent.appendChild(stageHintHeading);
 stageHintContent.appendChild(stageHintBody);

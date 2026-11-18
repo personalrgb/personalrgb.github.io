@@ -220,14 +220,25 @@
    포트원 설정 — 관리자 콘솔 > 연동 정보에서 복사
    https://admin.portone.io/integration-v2/manage/channel
    ───────────────────────────────────────────── */
+// season은 결과지를 어떤 타입으로 열어야 하는지 나타낸다(index.html의
+// pendingFinalSeason) — 상품 선택 전 결제 카드에서 "?season=..."으로 넘어온다.
+const URL_PARAMS = new URLSearchParams(location.search);
+const TIER_PARAM = URL_PARAMS.get("tier");
+const SEASON_PARAM = URL_PARAMS.get("season");
+const RETURN_BASE = location.origin + location.pathname.replace(/payment\.html$/, "");
+
 const PORTONE_CONFIG = {
   storeId: "store-42b98514-2507-4ed6-b090-fed3d2c9a149",
   channelKey: {
     card:     "channel-key-ccf6537a-ca27-4b7f-b7b0-95c361cc6c49",
     kakaopay: "channel-key-96043aa3-67dd-4993-ac05-202d1de8bb87",
   },
-  // 모바일 결제 후 돌아올 주소
-  redirectUrl: location.origin + location.pathname.replace(/payment\.html$/, "") + "payment-complete.html",
+  // 모바일 결제는 이 주소로 돌아온다. season이 있으면(실제 진단을 마치고 온
+  // 경우) 바로 index.html로 돌려보내 결과지를 열게 하고, 없으면(결제 테스트
+  // 페이지를 직접 열어 들어온 경우) payment-complete.html로 보낸다.
+  redirectUrl: SEASON_PARAM !== null
+    ? RETURN_BASE + "index.html?season=" + encodeURIComponent(SEASON_PARAM)
+    : RETURN_BASE + "payment-complete.html",
 };
 
 /* ── UI 동작 ────────────────────────────────── */
@@ -333,9 +344,30 @@ $("#payBtn").addEventListener("click", async () => {
     if (response.code !== undefined) {
       showMsg("결제에 실패했습니다.\n" + response.message, "error");
     } else {
-      // 실제 서비스에서는 반드시 서버(netlify/functions/verify-payment.js 등)에서
-      // 결제 금액·상태를 재검증해야 한다. 이 페이지는 프론트엔드 호출까지만 담당한다.
-      showMsg("결제가 완료되었습니다.\n주문번호: " + response.paymentId, "ok");
+      showMsg("결제를 확인하는 중…", "ok");
+      // 프론트엔드가 "성공했다"고 보내는 응답만 믿으면 조작 가능하므로, 서버
+      // (netlify/functions/verify-payment.js)에 paymentId로 다시 조회해서
+      // 실제로 결제된 금액이 맞는지 확인한 뒤에만 결과지로 돌려보낸다.
+      let verifyOk = false;
+      try {
+        const verifyRes = await fetch("/.netlify/functions/verify-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ paymentId: response.paymentId }),
+        });
+        verifyOk = (await verifyRes.json()).ok === true;
+      } catch (err) {
+        verifyOk = false;
+      }
+      if (verifyOk && SEASON_PARAM !== null) {
+        location.href = RETURN_BASE + "index.html?season=" + encodeURIComponent(SEASON_PARAM) +
+          "&paymentId=" + encodeURIComponent(response.paymentId);
+        return;
+      } else if (verifyOk) {
+        showMsg("결제가 완료되었습니다.\n주문번호: " + response.paymentId, "ok");
+      } else {
+        showMsg("결제 확인에 실패했습니다. 고객센터(moyah1128@gmail.com)로 문의해 주세요.\n주문번호: " + response.paymentId, "error");
+      }
     }
   } catch (e) {
     showMsg("결제 중 오류가 발생했습니다.\n" + (e.message || e), "error");
@@ -347,9 +379,8 @@ $("#payBtn").addEventListener("click", async () => {
 
 // 홈 화면 결제 카드에서 특정 상품을 눌러 들어온 경우(payment.html?tier=styling)
 // 그 상품이 미리 선택된 채로 열리게 한다.
-const tierParam = new URLSearchParams(location.search).get("tier");
-if (tierParam) {
-  const el = document.querySelector(`input[name="product"][value="${tierParam}"]`);
+if (TIER_PARAM) {
+  const el = document.querySelector(`input[name="product"][value="${TIER_PARAM}"]`);
   if (el) {
     el.checked = true;
     el.dispatchEvent(new Event("change"));

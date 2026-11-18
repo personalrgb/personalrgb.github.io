@@ -6,6 +6,10 @@
 // 상품이 기본/스타일링/풀 패키지 세 가지라 가격도 세 가지(payment.html의
 // data-amount와 맞춤)다 — 그중 하나와 일치하면 된다.
 const VALID_AMOUNTS = [1000, 2000, 2500];
+// 금액으로 상품 등급을 판정한다 — 프론트가 "이 등급이다"라고 보내는 값은 절대
+// 믿으면 안 되므로(URL만 바꿔서 더 비싼 등급을 공짜로 볼 수 있음), 여기서 실제
+// 결제 금액 기준으로만 등급을 돌려준다.
+const TIER_BY_AMOUNT = { 1000: 'basic', 2000: 'styling', 2500: 'full' };
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -36,7 +40,8 @@ exports.handler = async (event) => {
     }
     const data = await res.json();
     const isPaid = data.status === 'PAID' && data.amount && VALID_AMOUNTS.includes(data.amount.total);
-    return { statusCode: 200, body: JSON.stringify({ ok: isPaid, status: data.status }) };
+    const tier = isPaid ? TIER_BY_AMOUNT[data.amount.total] : null;
+    return { statusCode: 200, body: JSON.stringify({ ok: isPaid, status: data.status, tier }) };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ ok: false, message: 'Server error' }) };
   }
