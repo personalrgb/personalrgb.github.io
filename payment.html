@@ -173,14 +173,18 @@
   </div>
 
   <!-- 결제수단 -->
+  <!-- 임시: 카드(이니시스) 심사 완료 전까지 카카오페이만 노출한다.
+       이니시스 승인되면 아래 신용카드 label 주석을 풀어서 되돌릴 것. -->
   <div class="card">
     <h2>결제수단</h2>
     <div class="methods">
-      <label class="method selected">
-        <input type="radio" name="method" value="card" checked>신용카드
-      </label>
+      <!--
       <label class="method">
-        <input type="radio" name="method" value="kakaopay">카카오페이
+        <input type="radio" name="method" value="card">신용카드
+      </label>
+      -->
+      <label class="method selected">
+        <input type="radio" name="method" value="kakaopay" checked>카카오페이
       </label>
     </div>
   </div>
