@@ -1,3 +1,25 @@
+// 결제(payment.html) 완료 후 ?season=...&paymentId=...로 돌아온 경우를 아주 먼저
+// 감지해둔다. 서버 검증(handlePaymentReturn, 파일 뒤쪽)이 비동기라 끝날 때까지
+// 홈 화면(배경 파티클 등)이 그대로 보여서 "결과지 열리기 전에 홈이 번쩍 보이는"
+// 문제가 있었다 — 아래에서 즉시 전체 화면을 흰색으로 가려 그 깜빡임을 없앤다.
+const PAYMENT_RETURN_PARAMS = new URLSearchParams(location.search);
+const isPaymentReturn = PAYMENT_RETURN_PARAMS.has('paymentId') && PAYMENT_RETURN_PARAMS.has('season');
+let paymentReturnCover = null;
+if (isPaymentReturn) {
+  paymentReturnCover = document.createElement('div');
+  paymentReturnCover.style.position = 'fixed';
+  paymentReturnCover.style.inset = '0';
+  paymentReturnCover.style.zIndex = '9999';
+  paymentReturnCover.style.background = '#fff';
+  document.body.appendChild(paymentReturnCover);
+}
+function removePaymentReturnCover() {
+  if (paymentReturnCover) {
+    paymentReturnCover.remove();
+    paymentReturnCover = null;
+  }
+}
+
 const scene = document.querySelector('.scene');
 
 // 900px 기준으로 설계된 모빌을 화면 크기에 맞춰 축소/확대한다(반응형 대응).
@@ -138,11 +160,17 @@ setTimeout(() => {
   introSpeed = false;
   introActive = false;
   braking = true;
-  if (toneButtonsEl) toneButtonsEl.style.opacity = '1';
-  if (tutorialButtonEl) setHomeIconsOpacity('1');
-  if (siteFooterEl) {
-    siteFooterEl.style.opacity = '1';
-    siteFooterEl.style.pointerEvents = 'auto';
+  // 결제 완료 후 돌아온 경우에는 이 타이머가 handlePaymentReturn의 비동기 검증과
+  // 경쟁해서, 검증이 먼저 끝나 결과지가 열려도 1.5초 뒤 이 타이머가 홈 UI(특히
+  // 튜토리얼 "Test" 버튼)를 다시 보이게 만들어 End 버튼과 겹쳐 보이는 문제가
+  // 있었다 — 그 경로에서는 아예 건너뛴다.
+  if (!isPaymentReturn) {
+    if (toneButtonsEl) toneButtonsEl.style.opacity = '1';
+    if (tutorialButtonEl) setHomeIconsOpacity('1');
+    if (siteFooterEl) {
+      siteFooterEl.style.opacity = '1';
+      siteFooterEl.style.pointerEvents = 'auto';
+    }
   }
 }, 1500);
 
@@ -3185,15 +3213,23 @@ function openLetterAfterPayment() {
   })
     .then((res) => res.json())
     .then((data) => {
-      if (!data.ok) return;
+      if (!data.ok) {
+        removePaymentReturnCover();
+        return;
+      }
       pendingFinalSeason = Number(seasonParam);
       // 등급(basic/styling/full)은 URL이 아니라 서버가 실제 결제 금액을 보고
       // 돌려준 값만 믿는다 — URL의 tier를 썼다면 결제 후 주소만 바꿔서 더
       // 비싼 등급 내용을 공짜로 볼 수 있었을 것이다.
       paidTier = data.tier || null;
       openLetterAfterPayment();
+      // letterRevealFlash(흰색, 결과지 등장 연출)가 이미 opacity 1로 덮고 있는
+      // 상태라 바로 걷어내도 끊겨 보이지 않는다.
+      removePaymentReturnCover();
     })
-    .catch(() => {});
+    .catch(() => {
+      removePaymentReturnCover();
+    });
 })();
 
 stageHintContent.appendChild(stageHintHeading);
