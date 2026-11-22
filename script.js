@@ -603,6 +603,28 @@ function updateSiteFooterContrast(bgColor) {
   siteFooterEl.style.color = luminance < 128 ? '#ffffff' : '#111111';
 }
 
+// 튜토리얼 첫 화면의 안내 문구("눌러서 브라우저 탭과...", 단축키)는 흰색 고정이라,
+// 뒤로 비치는 배경이 밝은 구간일 때는 .tutorial-overlay의 반투명 검정(45%)만으로는
+// 충분히 어두워지지 않아 글씨가 잘 안 보였다 — 배경 밝기에 맞춰 실시간으로 바꾼다.
+const tutorialHintEl = document.getElementById('tutorialHint');
+// 단축키 글자(tutorialShortcutEl)는 이 파일 뒤쪽(튜토리얼 슬라이드 로직)에서
+// const로 선언된다 — updateBg()가 그보다 먼저(초기 설정 중) 한 번 호출되므로,
+// 그 변수를 여기서 직접 참조하면 TDZ(선언 전 접근) 에러가 난다. DOM에서 매번
+// 새로 조회해 그 문제를 피한다(비용은 getElementById 한 번뿐이라 무시할 만하다).
+function updateTutorialHintContrast(bgColor) {
+  const m = bgColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/);
+  if (!m) return;
+  const r = parseFloat(m[1]);
+  const g = parseFloat(m[2]);
+  const b = parseFloat(m[3]);
+  const luminance = (r * 299 + g * 587 + b * 114) / 1000;
+  const color = luminance < 128 ? '#ffffff' : '#111111';
+  const dimColor = luminance < 128 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(17, 17, 17, 0.8)';
+  if (tutorialHintEl) tutorialHintEl.style.color = dimColor;
+  const shortcutEl = document.getElementById('tutorialShortcut');
+  if (shortcutEl) shortcutEl.style.color = color;
+}
+
 // 실전 모드에서 체크 표시로 "확정"한 색들의 목록. 세션 동안 계속 쌓인다.
 const confirmedColors = [];
 
@@ -4542,6 +4564,7 @@ function updateBg() {
   }
   document.body.style.background = bgColor;
   updateSiteFooterContrast(bgColor);
+  updateTutorialHintContrast(bgColor);
 
   // 톤 버튼은 goToTone()이 각 구간의 "가운데 카드"를 정면으로 가져오므로,
   // 그 가운데 카드 인덱스를 기준으로 삼아야 frontValue가 정수(=완전 중앙)로 떨어진다.
