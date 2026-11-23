@@ -2571,7 +2571,16 @@ function buildMobileCardStack(cards) {
     const card = hit ? hit.closest('.hint-stack-card') : null;
     if (!card) return;
     const idx = cardEls.indexOf(card);
-    if (idx === -1 || idx === activeIndex) return;
+    if (idx === -1) return;
+    if (idx === activeIndex) {
+      // 이미 중앙(활성)에 있는 카드의 사진을 다시 탭하면, 데스크탑의 라이트박스와
+      // 똑같이 전체화면으로 크게 본다. setPointerCapture 때문에 e.target이 항상
+      // stack 자신으로 잡혀 img에 직접 리스너를 달 수 없어, 여기서 좌표로 확인한다.
+      if (hit && hit.closest('.hint-card-illustration')) {
+        openHintImageLightbox(faces[idx].image);
+      }
+      return;
+    }
     activeIndex = idx;
     layout();
   });
