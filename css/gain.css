@@ -1385,8 +1385,8 @@ body {
   position: fixed;
   top: calc(44px + env(safe-area-inset-top));
   right: calc(36px + env(safe-area-inset-right));
-  width: 420px;
-  height: 420px;
+  width: 840px;
+  height: 840px;
   transform: translate(50%, -50%);
   /* 단색+blur(20px) 조합은 크기를 키우면 경계가 또렷한 원형 테두리처럼 보인다 —
      중심에서 바깥으로 투명해지는 방사형 그라데이션을 써서 경계 없이 번지게 한다.
