@@ -605,20 +605,12 @@ function updateSiteFooterContrast(bgColor) {
 
 // 색 화면(실전 모드) 위에 뜨는 안내 문구 3개(모서리 드래그→팔레트 담기→다음 단계)는
 // 색 화면 배경에 바로 올라가는 흰색 고정 글씨라, 배경이 밝은 구간(예: 노란색)일
-// 때는 거의 안 보였다 — 배경 밝기에 맞춰 실시간으로 바꾼다. 세 엘리먼트 모두 이
-// 함수보다 뒤에서 선언되므로(TDZ 회피), 매번 DOM에서 새로 조회한다.
-function updatePracticeHintContrast(bgColor) {
-  const m = bgColor.match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)/);
-  if (!m) return;
-  const r = parseFloat(m[1]);
-  const g = parseFloat(m[2]);
-  const b = parseFloat(m[3]);
-  const luminance = (r * 299 + g * 587 + b * 114) / 1000;
-  const color = luminance < 128 ? '#ffffff' : '#111111';
-  ['#cornerDragHint', '.palette-drag-hint', '#colorHint'].forEach((selector) => {
-    const el = document.querySelector(selector);
-    if (el) el.style.color = color;
-  });
+// 때는 거의 안 보였다. 이 배경은 홈 화면 회전 캐러셀(updateBg)이 아니라
+// colorOverlay에 사용자가 고른 색 하나로 고정되므로, updateBackButtonContrast와
+// 같은 방식(hexToHSL)으로 그 색 기준 명도를 계산해 각 힌트가 뜨는 시점에 맞춘다.
+function hintTextColorFor(hexColor) {
+  const { l } = hexToHSL(hexColor);
+  return l < 50 ? '#ffffff' : '#111111';
 }
 
 // 실전 모드에서 체크 표시로 "확정"한 색들의 목록. 세션 동안 계속 쌓인다.
@@ -3936,7 +3928,7 @@ function showColorHint(color) {
     showPracticeChromeForHint();
     return;
   }
-  colorHint.style.color = '#ffffff';
+  colorHint.style.color = hintTextColorFor(color);
   colorHint.style.opacity = '1';
   startColorHintSpotlight();
   setHintsActive(true);
@@ -3976,7 +3968,7 @@ function showPaletteDragHint(color) {
     showPracticeChromeForHint();
     return;
   }
-  paletteDragHint.style.color = '#ffffff';
+  paletteDragHint.style.color = hintTextColorFor(color);
   paletteDragHint.style.opacity = '1';
   startPaletteHintSpotlight();
   setHintsActive(true);
@@ -4032,7 +4024,7 @@ function maybeShowCornerDragHint(color, fromTutorial) {
   }
   hasShownCornerDragHint = true;
   hintChainFromTutorial = fromTutorial;
-  cornerDragHint.style.color = '#ffffff';
+  cornerDragHint.style.color = hintTextColorFor(color);
   cornerDragHint.style.opacity = '1';
   // showColorOverlayFade(튜토리얼 직후 첫 진입)는 colorOverlay가 1초간 페이드인
   // 하므로, 그 자식인 curlCanvas가 반투명해지지 않도록 시연 시작을 그만큼 늦춘다.
@@ -4571,7 +4563,6 @@ function updateBg() {
   }
   document.body.style.background = bgColor;
   updateSiteFooterContrast(bgColor);
-  updatePracticeHintContrast(bgColor);
 
   // 톤 버튼은 goToTone()이 각 구간의 "가운데 카드"를 정면으로 가져오므로,
   // 그 가운데 카드 인덱스를 기준으로 삼아야 frontValue가 정수(=완전 중앙)로 떨어진다.
