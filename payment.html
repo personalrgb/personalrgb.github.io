@@ -138,12 +138,12 @@
         <div class="desc">웜톤·쿨톤부터 16타입까지, 퍼스널컬러 진단 결과지</div>
       </label>
       <label class="product">
-        <input type="radio" name="product" value="styling" data-name="퍼스널 컬러 진단 결과지 + 스타일링 가이드" data-amount="2000">
+        <input type="radio" name="product" value="styling" data-name="퍼스널 컬러 진단 결과지 + 스타일링 가이드" data-amount="2000" id="stylingInput">
         <div class="row">
           <span class="name">스타일링</span>
-          <span class="price">2,000원</span>
+          <span class="price" id="stylingPrice">2,000원</span>
         </div>
-        <div class="desc">결과지에 어울리는 의상·헤어 스타일링 가이드를 더한다</div>
+        <div class="desc" id="stylingDesc">결과지에 어울리는 의상·헤어 스타일링 가이드를 더한다</div>
       </label>
       <label class="product" id="fullProduct">
         <input type="radio" name="product" value="full" data-name="퍼스널 컬러 진단 결과지 + 전체 스타일링 가이드" data-amount="2500" id="fullInput">
@@ -272,11 +272,17 @@ function syncSelected(groupSelector, itemSelector) {
 syncSelected('input[name="method"]', ".method");
 syncSelected('input[name="product"]', ".product");
 
-// 프로모션: 2026-11-27 ~ 2026-12-27 한 달간 풀 패키지도 1,000원으로 할인한다.
-// 기간이 지나면 이 블록이 안 걸려 위 HTML의 원래 가격(2,500원)이 그대로
-// 적용되므로, 프로모션이 끝난 뒤 되돌리는 코드를 따로 안 써도 된다.
-const PROMO_FULL_1000_ENDS = new Date("2026-12-27T00:00:00+09:00").getTime();
-if (Date.now() < PROMO_FULL_1000_ENDS) {
+// 프로모션: 2026-11-27 ~ 2026-12-27 한 달간 스타일링·풀 패키지를 전부
+// 1,000원으로 할인한다. 기간이 지나면 이 블록이 안 걸려 위 HTML의 원래
+// 가격이 그대로 적용되므로, 프로모션이 끝난 뒤 되돌리는 코드를 따로 안
+// 써도 된다.
+const PROMO_1000_ENDS = new Date("2026-12-27T00:00:00+09:00").getTime();
+if (Date.now() < PROMO_1000_ENDS) {
+  $("#stylingInput").dataset.amount = "1000";
+  $("#stylingPrice").innerHTML = '<span class="was">2,000원</span>1,000원';
+  $("#stylingDesc").textContent =
+    "결과지에 어울리는 의상·헤어 스타일링 가이드를 더한다 (11/27~12/27 한정 특가)";
+
   $("#fullInput").dataset.amount = "1000";
   $("#fullPrice").innerHTML = '<span class="was">2,500원</span>1,000원';
   $("#fullDesc").textContent =

@@ -3036,6 +3036,19 @@ const PAYMENT_PRODUCTS = [
   { tier: 'full', name: '풀 패키지', desc: '진단 결과지 + 전체 스타일링 가이드', price: 2500 },
 ];
 
+// 프로모션: 2026-11-27 ~ 2026-12-27 한 달간 스타일링·풀 패키지를 전부
+// 1,000원으로 보여준다(실제 결제 금액·등급 판정은 payment.html과
+// verify-payment.js가 각자 같은 날짜로 게이트해서 처리 — 여기는 안내 카드
+// 표시 전용). 기간이 지나면 이 함수가 원래 가격을 그대로 돌려줘 되돌리는
+// 코드가 따로 필요 없다.
+const PROMO_1000_ENDS = new Date('2026-12-27T00:00:00+09:00').getTime();
+function promoPriceHtml(price) {
+  if (Date.now() < PROMO_1000_ENDS && price > 1000) {
+    return `<span class="payment-product-price-was">${price.toLocaleString()}원</span>1,000원`;
+  }
+  return `${price.toLocaleString()}원`;
+}
+
 const paymentOverlay = document.createElement('div');
 paymentOverlay.className = 'payment-overlay';
 
@@ -3061,7 +3074,7 @@ PAYMENT_PRODUCTS.forEach((product) => {
   btn.innerHTML = `
     <span class="payment-product-row">
       <span class="payment-product-name">${product.name} · ${product.desc}</span>
-      <span class="payment-product-price">${product.price.toLocaleString()}원</span>
+      <span class="payment-product-price">${promoPriceHtml(product.price)}</span>
     </span>
   `;
   btn.addEventListener('click', (e) => {

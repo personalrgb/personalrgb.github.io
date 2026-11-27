@@ -1626,6 +1626,14 @@ body {
   white-space: nowrap;
 }
 
+.payment-product-price-was {
+  margin-right: 5px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(23, 20, 18, 0.45);
+  text-decoration: line-through;
+}
+
 .payment-error {
   display: none;
   margin: 14px 0 0;
