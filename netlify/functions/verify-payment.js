@@ -11,6 +11,15 @@ const VALID_AMOUNTS = [1000, 2000, 2500];
 // 결제 금액 기준으로만 등급을 돌려준다.
 const TIER_BY_AMOUNT = { 1000: 'basic', 2000: 'styling', 2500: 'full' };
 
+// 프로모션: 2026-11-27 ~ 2026-12-27 한 달간 풀 패키지도 1,000원이라 기본
+// (1,000원)과 금액이 겹친다. 금액만으론 둘을 구분할 수 없으니, 이 기간
+// 1,000원 결제에 한해 포트원에 저장된 실제 주문명으로 풀 패키지인지 확인한다
+// (payment.html이 보내는 orderName 그대로 — 금액은 똑같아서 스푸핑해도
+// 할인가로 풀 패키지를 받는 것 이상의 손해는 없어 안전하다). 기간이 지나면
+// 이 분기가 안 걸려 원래 금액 기준 매핑으로 자동 복귀한다.
+const PROMO_FULL_1000_ENDS = new Date('2026-12-27T00:00:00+09:00').getTime();
+const PROMO_FULL_ORDER_NAME = '퍼스널 컬러 진단 결과지 + 전체 스타일링 가이드';
+
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: JSON.stringify({ ok: false, message: 'Method Not Allowed' }) };
@@ -40,7 +49,15 @@ exports.handler = async (event) => {
     }
     const data = await res.json();
     const isPaid = data.status === 'PAID' && data.amount && VALID_AMOUNTS.includes(data.amount.total);
-    const tier = isPaid ? TIER_BY_AMOUNT[data.amount.total] : null;
+    let tier = isPaid ? TIER_BY_AMOUNT[data.amount.total] : null;
+    if (
+      isPaid &&
+      data.amount.total === 1000 &&
+      Date.now() < PROMO_FULL_1000_ENDS &&
+      data.orderName === PROMO_FULL_ORDER_NAME
+    ) {
+      tier = 'full';
+    }
     return { statusCode: 200, body: JSON.stringify({ ok: isPaid, status: data.status, tier }) };
   } catch (err) {
     return { statusCode: 500, body: JSON.stringify({ ok: false, message: 'Server error' }) };

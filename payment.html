@@ -58,6 +58,7 @@
   .product .row { display: flex; align-items: center; gap: 12px; }
   .product .name { flex: 1; font-size: 15px; font-weight: 500; }
   .product .price { font-size: 15px; font-weight: 600; }
+  .product .price .was { color: var(--muted); font-weight: 400; text-decoration: line-through; margin-right: 4px; }
   .product .desc { margin-top: 4px; font-size: 12px; color: var(--muted); }
 
   label.field { display: block; margin-bottom: 12px; }
@@ -144,13 +145,13 @@
         </div>
         <div class="desc">결과지에 어울리는 의상·헤어 스타일링 가이드를 더한다</div>
       </label>
-      <label class="product">
-        <input type="radio" name="product" value="full" data-name="퍼스널 컬러 진단 결과지 + 전체 스타일링 가이드" data-amount="2500">
+      <label class="product" id="fullProduct">
+        <input type="radio" name="product" value="full" data-name="퍼스널 컬러 진단 결과지 + 전체 스타일링 가이드" data-amount="2500" id="fullInput">
         <div class="row">
           <span class="name">풀 패키지</span>
-          <span class="price">2,500원</span>
+          <span class="price" id="fullPrice">2,500원</span>
         </div>
-        <div class="desc">의상·메이크업·헤어·주얼리·네일까지 전체 스타일링 가이드를 모두 담는다</div>
+        <div class="desc" id="fullDesc">의상·메이크업·헤어·주얼리·네일까지 전체 스타일링 가이드를 모두 담는다</div>
       </label>
     </div>
   </div>
@@ -270,6 +271,17 @@ function syncSelected(groupSelector, itemSelector) {
 }
 syncSelected('input[name="method"]', ".method");
 syncSelected('input[name="product"]', ".product");
+
+// 프로모션: 2026-11-27 ~ 2026-12-27 한 달간 풀 패키지도 1,000원으로 할인한다.
+// 기간이 지나면 이 블록이 안 걸려 위 HTML의 원래 가격(2,500원)이 그대로
+// 적용되므로, 프로모션이 끝난 뒤 되돌리는 코드를 따로 안 써도 된다.
+const PROMO_FULL_1000_ENDS = new Date("2026-12-27T00:00:00+09:00").getTime();
+if (Date.now() < PROMO_FULL_1000_ENDS) {
+  $("#fullInput").dataset.amount = "1000";
+  $("#fullPrice").innerHTML = '<span class="was">2,500원</span>1,000원';
+  $("#fullDesc").textContent =
+    "의상·메이크업·헤어·주얼리·네일까지 전체 스타일링 가이드를 모두 담는다 (11/27~12/27 한정 특가)";
+}
 
 function selectedProduct() {
   const el = $('input[name="product"]:checked');
