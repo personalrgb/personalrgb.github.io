@@ -4861,9 +4861,16 @@ function getFullscreenShortcut() {
     return '주소창을 아래로 스크롤해서 숨겨보세요';
   }
 
+  // 크롬북은 단축키 조합이 아니라 키보드 맨 윗줄의 전용 전체화면 키를 쓴다.
+  if (/CrOS/.test(ua)) {
+    return '키보드 맨 윗줄의 전체화면 키(□, 보통 숫자 4 위쪽)';
+  }
+
   if (!isMac) {
-    // 윈도우/리눅스/크롬OS는 대부분 브라우저가 F11로 동일하게 동작한다.
-    return 'F11';
+    // 윈도우/리눅스는 크롬·엣지·웨일·파이어폭스·오페라 등 거의 모든 브라우저가
+    // F11로 동일하게 동작한다. 노트북은 F11이 밝기·음량 같은 기능 키로 설정돼
+    // 있는 경우가 많아 Fn + F11을 눌러야 할 수 있다는 안내를 같이 보여준다.
+    return 'F11 (안 되면 Fn + F11)';
   }
 
   const isEdge = /Edg\//.test(ua);
@@ -4872,7 +4879,7 @@ function getFullscreenShortcut() {
   // 크롬(맥)만 탭·주소창을 숨기는 별도 단축키(Shift+Cmd+F)를 갖고, 그 외
   // 사파리/엣지/파이어폭스는 macOS 기본 전체화면 단축키(Ctrl+Cmd+F)를 쓴다.
   if (isChrome) return '⇧ Shift + ⌘ Command + F';
-  return '⌃ Control + ⌘ Command + F';
+  return '⌃ Control + ⌘ Command + F (최신 맥북은 🌐 + F도 가능)';
 }
 
 tutorialShortcutEl.textContent = getFullscreenShortcut();
