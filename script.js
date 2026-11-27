@@ -40,7 +40,7 @@ function updateResponsiveScale() {
   // 모바일(세로 화면)에서는 상단 톤 버튼 아래부터 하단 튜토리얼 버튼 위까지의
   // 정중앙에 오도록 해서, 위/아래 여백이 똑같아 보이게 한다.
   // (toneButtonsEl/tutorialButtonEl은 이 함수보다 뒤에서 선언되므로 직접 조회한다.)
-  const MOBILE_VERTICAL_NUDGE = 30;
+  const MOBILE_VERTICAL_NUDGE = 15;
   if (w < h) {
     const toneEl = document.querySelector('.tone-buttons');
     const tutEl = document.getElementById('tutorialButton');
