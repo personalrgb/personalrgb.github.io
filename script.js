@@ -4873,16 +4873,34 @@ function getFullscreenShortcut() {
     return 'F11 (안 되면 Fn + F11)';
   }
 
-  const isEdge = /Edg\//.test(ua);
-  const isChrome = /Chrome\//.test(ua) && !isEdge;
+  // 맥에서 Control+Command+F로 들어가는 기본 "전체 화면"은 메뉴바·독만 가릴 뿐
+  // 탭바는 그대로 남겨둔다. 크롬/엣지(크로미움 계열)만 탭바까지 한 번에 숨기는
+  // 별도 단축키(Shift+Cmd+F)가 있고, 사파리·파이어폭스는 그런 단축키가 없어
+  // 매번 메뉴 조작을 한 번 더 해줘야 한다.
+  const isChromium = /Chrome\//.test(ua);
+  if (isChromium) return '⇧ Shift + ⌘ Command + F';
 
-  // 크롬(맥)만 탭·주소창을 숨기는 별도 단축키(Shift+Cmd+F)를 갖고, 그 외
-  // 사파리/엣지/파이어폭스는 macOS 기본 전체화면 단축키(Ctrl+Cmd+F)를 쓴다.
-  if (isChrome) return '⇧ Shift + ⌘ Command + F';
-  return '⌃ Control + ⌘ Command + F (최신 맥북은 🌐 + F도 가능)';
+  const baseCombo = '⌃ Control + ⌘ Command + F (최신 맥북은 🌐 + F도 가능)';
+  if (/Safari\//.test(ua)) {
+    return shortcutWithNote(
+      baseCombo,
+      '탭바까지 숨기려면: 보기 메뉴 → "전체 화면에서 항상 도구 막대 보기" 체크 해제'
+    );
+  }
+  if (/Firefox\//.test(ua)) {
+    return shortcutWithNote(
+      baseCombo,
+      '탭바까지 숨기려면: 전체화면 상태에서 위쪽 막대 우클릭 → "도구 모음 숨기기"'
+    );
+  }
+  return baseCombo;
 }
 
-tutorialShortcutEl.textContent = getFullscreenShortcut();
+function shortcutWithNote(primary, note) {
+  return `${primary}<br><span class="tutorial-shortcut-note">${note}</span>`;
+}
+
+tutorialShortcutEl.innerHTML = getFullscreenShortcut();
 
 const tutorialSlides = Array.from(tutorialOverlay.querySelectorAll('.tutorial-slide'));
 let tutorialIndex = 0;

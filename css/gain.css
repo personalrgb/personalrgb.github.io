@@ -424,6 +424,15 @@ body {
   letter-spacing: 0.02em;
 }
 
+.tutorial-shortcut-note {
+  display: block;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.75);
+}
+
 .tutorial-hint {
   margin: 0;
   font-size: 15px;
